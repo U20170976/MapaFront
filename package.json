@@ -1,0 +1,54 @@
+{
+  "name": "vue-black-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A sample admin dashboard based on black dashboard UI template",
+  "author": "cristian.jora <joracristi@gmail.com>",
+  "scripts": {
+    "serve": "vue-cli-service serve --open",
+    "build": "vue-cli-service build",
+    "e2e": "node test/e2e/runner.js",
+    "lint": "vue-cli-service lint",
+    "dev": "vue-cli-service serve --open",
+    "lint-fix": "vue-cli-service lint --fix"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bootstrap": "^4.5.0",
+    "bootstrap-vue": "^2.15.0",
+    "chart.js": "^2.7.3",
+    "element-ui": "^2.13.2",
+    "emailjs-com": "^2.4.1",
+    "filepond": "^4.18.0",
+    "mapbox-gl": "^0.53.1",
+    "register-service-worker": "^1.5.2",
+    "vue": "^2.6.11",
+    "vue-axios": "^2.1.5",
+    "vue-chartjs": "^3.4.0",
+    "vue-confirm-dialog": "^1.0.2",
+    "vue-filepond": "^6.0.2",
+    "vue-i18n": "^8.8.1",
+    "vue-mapbox": "^0.4.1",
+    "vue-router": "^3.0.2",
+    "vue-router-prefetch": "^1.4.0",
+    "vue-upload-component": "^2.8.20",
+    "vue2-transitions": "^0.2.3",
+    "vuejs-dialog": "^1.4.1",
+    "vuex": "^3.5.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.4.0",
+    "@vue/cli-plugin-eslint": "^3.4.0",
+    "@vue/cli-plugin-pwa": "^3.4.0",
+    "@vue/cli-service": "^3.4.0",
+    "sass": "^1.75.0",
+    "sass-loader": "^7.1.0",
+    "vue-cli-plugin-i18n": "^0.5.1",
+    "vue-template-compiler": "^2.6.6"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 11"
+  ]
+}
