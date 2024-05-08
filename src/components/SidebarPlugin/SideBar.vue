@@ -135,3 +135,8 @@
     }
   };
 </script>
+<style scoped>
+.nav-link {
+  color: #d0ff00; /* Este es un ejemplo de color naranja, cámbialo al que necesites */
+}
+</style>

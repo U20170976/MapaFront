@@ -6,7 +6,7 @@
     :color-on-scroll="colorOnScroll"
     menu-classes="ml-auto"
   >
-    <template>
+    <!--template>
       <router-link v-popover:popover1 class="navbar-brand" to="/">
         REDEX
       </router-link>
@@ -21,7 +21,7 @@
           Llevamos tus paquetes a tiempo ;)
         </div>
       </el-popover>
-    </template>
+    </template-->
     <template slot="navbar-menu">
 
       <!--li class="nav-item">
@@ -115,7 +115,7 @@
         </a>
       </li-->
 
-      <li class="nav-item" >
+      <!-- li class="nav-item" >
         <router-link
           to="/login"
           class="nav-link btn btn-neutral"
@@ -135,7 +135,7 @@
           <i class="now-ui-icons users_circle-08"></i>
           <p>Registrarse</p>
         </router-link>
-      </li>
+      </li-->
 
 
     </template>

@@ -32,6 +32,9 @@
   </div>
 </template>
 <style lang="scss">
+.sidebar-link {
+  color: #1310b4; /* Cambia a cualquier color que desees */
+}
 </style>
 <script>
   import TopNavbar from "./TopNavbar.vue";
@@ -49,6 +52,7 @@
 
 
   export default {
+    
     data(){
       return{
         toggle:{
@@ -80,6 +84,23 @@
         }
       }
     },
+       
+    mounted(){
+      let vue = this;
+
+          vue.toggle.dashboard = true;
+          vue.toggle.simulacion = true;
+          vue.toggle.perfil = true;
+          vue.toggle.gestionRutas = true;
+          vue.toggle.gestionSedes = true;
+          vue.toggle.gestionUsuarios = true;
+          vue.toggle.gestionPaquetes = true;
+          vue.toggle.listaPaquetes = true;
+          vue.toggle.tracking = true;
+          vue.toggle.gestionUsuariosGerente = true;
+
+    }
+    /*
     mounted(){
       let vue = this;
       switch(Authentication.getProfile().tipoUsuario){
@@ -128,6 +149,6 @@
           vue.toggle.gestionUsuariosGerente = true;
           break;
       }
-    }
+    }*/
   };
 </script>

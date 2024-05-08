@@ -1,20 +1,35 @@
-<template>
+<template> 
   <nav class="navbar navbar-expand-lg navbar-absolute"
        :class="{'bg-white': showMenu, 'navbar-transparent': !showMenu}">
+
+
     <div class="container-fluid">
+      <header class="map-header">
+      <h1 class="brand">
+        <span class="brand-title">Redex</span><span class="brand-title-point">.</span>
+      </h1>
+      <p class="brand-tagline">Always on Time</p>
+   
+    </header>
+
       <div class="navbar-wrapper">
         <div class="navbar-toggle d-inline" :class="{toggled: $sidebar.showSidebar}">
+     
           <button type="button"
                   class="navbar-toggler"
                   aria-label="Navbar toggle button"
                   @click="toggleSidebar">
+                  
             <span class="navbar-toggler-bar bar1"></span>
             <span class="navbar-toggler-bar bar2"></span>
             <span class="navbar-toggler-bar bar3"></span>
           </button>
         </div>
+        
         <p class="navbar-brand">{{routeName}}</p>
       </div>
+
+
       <button class="navbar-toggler" type="button"
               @click="toggleMenu"
               data-toggle="collapse"
@@ -29,47 +44,7 @@
       <collapse-transition>
         <div class="collapse navbar-collapse show" v-show="showMenu">
           <ul class="navbar-nav" :class="$rtl.isRTL ? 'mr-auto' : 'ml-auto'">
-            <!-- <div class="search-bar input-group" @click="searchModalVisible = true"> -->
-              <!-- <input type="text" class="form-control" placeholder="Search...">
-              <div class="input-group-addon"><i class="tim-icons icon-zoom-split"></i></div> -->
-              <!-- <button class="btn btn-link" id="search-button" data-toggle="modal" data-target="#searchModal">
-                <i class="tim-icons icon-zoom-split"></i>
-              </button> -->
-              <!-- You can choose types of search input -->
-            <!-- </div> -->
-            <!-- <modal :show.sync="searchModalVisible"
-                   class="modal-search"
-                   id="searchModal"
-                   :centered="false"
-                   :show-close="true">
-              <input slot="header" v-model="searchQuery" type="text" class="form-control" id="inlineFormInputGroup" placeholder="SEARCH">
-            </modal> -->
-            <!-- <base-dropdown tag="li"
-                           :menu-on-right="!$rtl.isRTL"
-                           title-tag="a" class="nav-item">
-              <a slot="title" href="#" class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="true">
-                <div class="notification d-none d-lg-block d-xl-block"></div>
-                <i class="tim-icons icon-sound-wave"></i>
-                <p class="d-lg-none">
-                  New Notifications
-                </p>
-              </a>
-              <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">Mike John responded to your email</a>
-              </li>
-              <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">You have 5 more tasks</a>
-              </li>
-              <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">Your friend Michael is in town</a>
-              </li>
-              <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">Another notification</a>
-              </li>
-              <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">Another one</a>
-              </li>
-            </base-dropdown> -->
+          
             <base-dropdown tag="li"
                            :menu-on-right="!$rtl.isRTL"
                            title-tag="a"
@@ -81,18 +56,16 @@
                 </div>
                 <b class="caret d-none d-lg-block d-xl-block"></b>
                 <p class="d-lg-none">
-                  Log out
+                  Salir
                 </p>
               </a>
               <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item" @click="goProfile()">Profile</a>
+                <a href="#" class="nav-item dropdown-item" @click="goProfile()">Perfil</a>
               </li>
-              <!--li class="nav-link">
-                <a href="#" class="nav-item dropdown-item">Settings</a>
-              </li-->
+
               <div class="dropdown-divider"></div>
               <li class="nav-link">
-                <a href="#" class="nav-item dropdown-item" @click="logoutProfile()">Log out</a>
+                <a href="#" class="nav-item dropdown-item" @click="logoutProfile()">Salir</a>
               </li>
             </base-dropdown>
           </ul>
@@ -163,4 +136,76 @@
   };
 </script>
 <style>
+.brand-title {
+  font-size: 1em; /* Ajusta el tamaño como desees */
+  color: #fff; /* Color para 'Redex' */
+  font-weight: bold;
+}
+
+.brand-title-point {
+  font-size: 1em; /* Asegúrate de que sea del mismo tamaño que .brand-title para alineación adecuada */
+  color: #00B074; /* Color para el punto */
+  font-weight: bold;
+}
+
+.brand-tagline {
+  font-size: 1em; /* Ajusta el tamaño del tagline */
+  color: #363636; /* Color para 'Always on Time' */
+  font-weight: bold;
+
+  display: flex;
+  align-items: baseline; /* Alinea correctamente el texto y el punto */
+  gap: 0.2em; /* Ajusta el espacio entre 'Redex' y el punto */
+  margin-top: -15px;
+}
+
+/* Si deseas que 'Redex.' esté en una sola línea, puedes usar display: flex en el contenedor */
+.brand {
+  display: flex;
+  align-items: baseline; /* Alinea correctamente el texto y el punto */
+  gap: 0.2em; /* Ajusta el espacio entre 'Redex' y el punto */
+  
+  margin-bottom: 15px; /* Ajusta esto para aumentar el espacio entre el título y el subtítulo */
+
+}
+.navbar-brand {
+  margin-right: 20px; 
+  font-weight: bold;
+}
+.container-fluid {
+  display: flex;
+  align-items: center; /* Asegura que todo esté alineado verticalmente */
+  justify-content: space-between; /* Distribuye el espacio entre los elementos */
+}
+.navbar-header, .navbar-profile {
+  display: flex;
+  align-items: center;
+}
+.map-header, .navbar-profile {
+  flex: 1; /* Ambos toman igual cantidad de espacio */
+  justify-content: center; /* Centra los elementos dentro de cada contenedor */
+  text-align: center; /* Centra el texto dentro de los elementos */
+}
+.navbar-header {
+  display: flex;
+  align-items: center; /* Asegura que todo esté alineado verticalmente */
+  margin-top: 200px;
+}
+
+.map-header {
+  margin-right: 20px; /* Ajusta el margen según sea necesario */
+}
+.dropdown-toggle.nav-link {
+  display: flex;
+  align-items: center; /* Asegura que la imagen y el texto estén alineados verticalmente */
+  margin-bottom: 20%;
+}
+
+.photo img {
+  width: 40px; /* Ajusta el tamaño de la imagen según sea necesario */
+  height: 40px;
+  border-radius: 50%; /* Hace la imagen circular */
+  margin-right: 10px; /* Añade margen a la derecha de la imagen */
+
+}
 </style>

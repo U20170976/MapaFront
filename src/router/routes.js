@@ -188,13 +188,13 @@ export default ([
       },
       {
         path:"admin/usuarios",
-        name: "Gestión de usuarios",
+        name: "Gestión de usuarios admin",
         component: UsuariosAdmin,
         props: {id: "usuarios"}
       },
       {
         path:"gerente/usuarios",
-        name: "Gestión de usuarios",
+        name: "Gestión de usuarios gerente",
         component: UsuariosAdmin,
         props: {id: "usuarios-gerente"}
       },
