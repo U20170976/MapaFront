@@ -1,3 +1,4 @@
+<!-- AQUI UTILIZAMOS LO QUE GESTIONAMOS EN EL CODIGO INTERNO  -->
 <template>
   <card>
     <h5 slot="header" class="title">{{title}}</h5>
@@ -21,17 +22,18 @@
     <div v-if="isLoading"><loader-spinner></loader-spinner></div>
     <div class="row" v-else>
         <div class="col-md-12"  v-if="!showMessage">
-            <base-table :data="operarioTable.paquetes"
-                :columns="operarioTable.columns"
-                thead-classes="text-primary"
-                :searchWord="searchWord"
-                :setAcciones="listaBoolean"
-                :combo="true"
-                :actions="false"
-                :select="false"
-                @signalState="actualizarPaquete"
-                >
-            </base-table>
+          <base-table-envios 
+            :columns="operarioTable.columns" 
+            :data= "testPaquete"
+            :type="'striped'" 
+            :theadClasses="'thead-light'"
+            :tbodyClasses="''"
+            :searchWord="searchWord"
+            :filterCriteria="filterCriteria"
+            :actions="true"
+            :combo="true"
+            :setAcciones="listaBoolean"
+          />
         </div>
         <div v-else class="col-md-12"><no-data-found></no-data-found></div>
 
@@ -40,9 +42,10 @@
   </card>
 </template>
 
+<!-- LO DE ABAJO ES EL COMPORTAMIENDO O CODIGO INTERNO  -->
 
 <script>
-  import {BaseTable,LoaderSpinner, NoDataFound} from "@/components";
+  import {BaseTableEnvios,LoaderSpinner, NoDataFound} from "@/components";
   import RegisterPackage from "@/pages/Operario"
   import axios from 'axios';
   import Authentication from '@/store/authentication.js';
@@ -54,7 +57,7 @@
   //const tableColumns = ["Codigo tracking", "Nombre", "Fecha Registro", "Estado"];
   export default {
     components: {
-      BaseTable,
+      BaseTableEnvios,
       LoaderSpinner,
       NoDataFound,
       RegisterPackage
@@ -70,7 +73,7 @@
         },        
         title: "",
         searchWord: "",
-        isLoading: true,
+        isLoading: false,
         showMessage: true,
         listaBoolean: {detalle:false,eliminar:false,modificar:false},
         idSede: "",
@@ -81,12 +84,35 @@
         type: ["", "info", "success", "warning", "danger"],
         notifications: {
           topCenter: false
-        }
+        },
+        testPaquete:[
+          {
+            id: 1,
+            codigo: "FAS44ASS",
+            estado: "En camino",
+            tiempoTranscurrido: "20 horas",
+            origen: "Lima,Perú",
+            destino: "Washington, EEUU",
+            fechaHoraEnvio: "20/05/2024 - 08:04:10",
+            fechaHoraLlegada: "21/05/2024 - 13:05:10"
+          },
+          {
+            id: 2,
+            codigo: "FAS44ASE",
+            estado: "En camino",
+            tiempoTranscurrido: "20 horas",
+            origen: "Lima,Perú",
+            destino: "Washington, EEUU",
+            fechaHoraEnvio: "15/05/2024 - 08:04:10",
+            fechaHoraLlegada: "18/05/2024 - 13:05:10"
+          }
+        ]
       };
     },
     mounted(){
       let vue = this;
       var idUsuario = Authentication.getProfile().id;
+      return;
       //vue.tableData = vue.adminTable.paquetes;
       axios.get(this.$store.state.appUri+'/usuarios/obtenerDatosSede/'+idUsuario)
       .then(function(response){
