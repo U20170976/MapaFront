@@ -25,6 +25,7 @@
 
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
+import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
 
 
 export default {
@@ -36,6 +37,7 @@ export default {
   data() {
     return {
       searchword: '',
+      
       tableColumns: [
         { text: 'Código de envío', value: 'codigoEnvio' },
         { text: 'Estado', value: 'estado' },
@@ -51,8 +53,8 @@ export default {
           tiempoTranscurrido: '20 horas', 
           origen: 'Lima, Perú', 
           destino: 'Washington, EEUU', 
-          fechaEnvio: '27/03/2024 - 11:30:40', 
-          fechaLlegada: '28/03/2024 - 11:30:40' 
+          fechaEnvio: '27/03/2024 - 11:30:40'
+          //fechaLlegada: '28/03/2024 - 11:30:40' 
         },
         {
           codigoEnvio: "FAS44ASE",
@@ -60,11 +62,40 @@ export default {
           tiempoTranscurrido: "20 horas",
           origen: "Lima,Perú",
           destino: "Washington, EEUU",
-          fechaEnvio: "15/05/2024 - 08:04:10",
-          fechaLlegada: "18/05/2024 - 13:05:10"
+          fechaEnvio: "15/05/2024 - 08:04:10"
+          //fechaLlegada: "18/05/2024 - 13:05:10"
         }
         // más datos aquí...
-      ],         
+      ],   
+
+/*
+      --> JSON
+      {
+        "id": 1,
+        "idEnvio": "EN123456",
+        "ciudadOrigen": "Ciudad de Origen",
+        "ciudadDestino": "Ciudad de Destino",
+        "ciudadActual": "Ciudad Actual",
+        "fechaEnvio": "2024-05-22",
+        "horaEnvio": "14:30:00",
+        "cantidadPaquetes": 5,
+        "estadoEnvio": "En camino",
+        "coordinates": null,
+        "ruta": null
+      }
+      */
+     /*
+      tableColumns: [
+        { text: 'Código de envío', value: 'idEnvio' },
+        { text: 'Estado', value: 'estadoEnvio' },
+        { text: 'Tiempo transcurrido', value: 'tiempoTranscurrido' },
+        { text: 'Origen', value: 'ciudadOrigen' },
+        { text: 'Destino', value: 'ciudadDestino' },
+        { text: 'Fecha y hora envío', value: 'fechaEnvio' + ' - ' + 'horaEnvio' },
+        { text: 'Fecha y hora llegada', value: 'fechaLlegada' }
+      ],
+      tableData: [], // Ahora los datos se cargarán desde la API   
+*/
       filteredData: [],
       currentPage: 1,
       totalPages: 10
@@ -83,12 +114,27 @@ export default {
       this.currentPage = page;
       // implementar lógica de cambio de página
       console.log('Página actual:', page);
+    },
+    fetchDataListaEnvios() {
+      // Realiza la solicitud HTTP para obtener los datos de la API
+      axios.get('http://localhost/api/paquete/')
+        .then(response => {
+          // Asigna los datos de la respuesta a tableData
+          this.tableData = response.data;
+          // Actualiza los datos filtrados
+          this.filteredData = response.data;
+        })
+        .catch(error => {
+          console.error('Error al obtener los datos:', error);
+        });
     }
   },
   mounted() {
     // inicializar los datos filtrados
     console.log('Página actual:', this.data);
     this.filteredData = this.tableData;
+    // Llama a fetchData() cuando el componente se monta para cargar los datos
+    //this.fetchDataListaEnvios();
   }
 };
 </script>
