@@ -1,134 +1,106 @@
 <template>
   <card>
-    <h5 slot="header" class="title">Registrar paquete</h5>
-
-    <div class="row">
-      <div class="col-md-5 pr-md-1">
-        <base-input label="Código tracking (disabled)"
-                  placeholder="Company"
-                  disabled>
-        </base-input>
+    <h2 slot="header" class="title">Registrar Envío</h2>
+   
+    <div class="card mt-4">
+      <div class="card-header">
+        <h4 class="card-title">Datos del Envío</h4>
       </div>
-    </div>
-
-
-
-    <div class="row">
-
-      
-
-      <div class="col-md-4">
-        <div class="col-md-10 pr-md-1">
-          <base-input label="País origen"
-                    :placeholder="data_usuario.pais"
-                    disabled>                    
-          </base-input>
-        </div>
-        <div class="col-md-10 pr-md-1">
-          <base-input label="DNI / RUC"
-                    placeholder="DNI o RUC" v-model="dniinput"
-                    @keypress.enter="filterClient(dniinput)">
-          </base-input>
-        </div>
-        <div class="col-md-10 pr-md-1">
-          <base-input label="Nombres y Apellidos"
-                    placeholder="Nombres y Apellidos"
-                    v-model="cliente.nombreRazonSocial"  style="color:white" >
-          </base-input>
-        </div>
-        <div class="col-md-10 pr-md-1" >
-          <base-input label="Email"
-                    type="email"
-                    placeholder="email@email.com"
-                    v-model="cliente.correo">
-          </base-input>
-        </div>
-
-        
-      </div>
-      
-
-
-      <div class="col-md-4">
-        
-        <div class="col-md-10 pr-md-1 form-group">
-          <slot name="label">
-            <label class="control-label">
-              País
-            </label>
-          </slot>
-          <select class="input-group-prepend form-control" v-model="sede" @change="obtenerCiudad(sede)">
-              <option style="color:black" v-for="sede in sedes" :key="sede.id" :value="sede">
-                {{sede.pais.nombre}}
-              </option>
-          </select>
-        </div>
-        <div class="col-md-10 pr-md-1" v-bind:class="[isEmailValid()]">
-          <base-input label="Email"
-                    type="email"
-                    placeholder="email@email.com"
-                    v-model="email">
-          </base-input>
-        </div>
-        <div class="col-md-10 pr-md-1">
-          <base-input label="Dirección"
-                    placeholder="Dirección">
-          </base-input>
-        </div>
-        <div class="col-md-10 pr-md-1">
-          <base-input label="Ciudad"
-              placeholder="Ciudad"
-              v-model="ciudad">
-          </base-input>
-        </div>
-      </div>
-
-
-
-
-
-      <div class="col-md-4">
-        
-        <base-button slot="footer" type="primary" fill v-on:click="addItem">Añadir Paquete</base-button>
-
-        <div class="col-md-6 pr-md-1 form-group">
-          <slot name="label">
-            <label class="control-label">
-              Categoria
-            </label>
-          </slot>
-          <select class="input-group-prepend form-control" v-model="categoria">
-              <option style="color:black" v-for="categoria in categorias" :key="categoria.id" :value="categoria">
-                {{categoria.descripcion}}
-              </option>
-          </select>
-        </div>
-        <div class="col-md-8">
-          <base-input>
-          <label>Descripción del paquete</label>
-            <textarea rows="4" cols="80"
-                class="form-control"
-                placeholder="Colocar alguna descripción del paquete" v-model="paquete.descripcion">
-            </textarea>
-          </base-input>
-        </div>
-        <card title="Lista de paquetes">
-          <div>
-            <base-table :data="table1.data"
-                  :columns="table1.columns"
-                  thead-classes="text-primary">
-            </base-table>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Ciudad, País - Origen</label>
+              <input type="text" class="form-control" :value="`${ciudadOrigen} - ${paisOrigen}`" disabled>
+            </div>
+            <div class="form-group">
+              <label>Cantidad de Paquetes</label>
+              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="cliente.ciudad">
+            </div>
           </div>
-        </card>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label>Ciudad, País - Destino</label>
+              <select class="form-control" v-model="selectedSede">
+                <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
+                <option v-for="sede in sedes" :key="sede.id" :value="sede">
+                  {{ sede.ciudad.nombre }}, {{ sede.pais.nombre }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Descripción(opcional)</label>
+              <input type="text" class="form-control" placeholder="Descripción" v-model="cliente.casa">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Columna 1: Datos del contacto que va a entregar el paquete -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Datos del Contacto que Envía</h4>
+          </div>
+          <div class="card-body">
+            
+            <div class="form-group">
+              <label>DNI / RUC</label>
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">
+            </div>
+            <div class="form-group">
+              <label>Nombres y Apellidos</label>
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="cliente.nombreRazonSocial">
+            </div>
+            <div class="form-group">
+              <label>Correo Electrónico</label>
+              <input type="email" class="form-control" placeholder="email@email.com" v-model="cliente.correo">
+            </div>
+            <div class="form-group">
+              <label>Número de Teléfono</label>
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="cliente.telefono">
+            </div>
+          </div>
+        </div>
       </div>
 
-      
-
+      <!-- Columna 2: Datos del contacto que va a recibir el paquete -->
+      <div class="col-md-6">
+        
+        <div class="card">
+          <div class="card-header">
+            <h4 class="card-title">Datos del Contacto que Recibe</h4>
+          </div>
+          <div class="card-body">
+            
+            <div class="form-group">
+              <label>DNI / RUC</label>
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">
+            </div>
+            <div class="form-group">
+              <label>Nombres y Apellidos</label>
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="nombre">
+            </div>
+            <div class="form-group">
+              <label>Correo Electrónico</label>
+              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="ciudad">
+            </div>
+            <div class="form-group">
+              <label>Número de Teléfono</label>
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="cliente.telefono">
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  
-    <base-button slot="footer" type="primary" fill @click="enviarPaquete()">Registrar Paquete</base-button>
-    <base-button slot="footer" fill @click="regresarAlListar()">Regresar</base-button>
 
+    <div class="row mt-4">
+      <base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>
+      <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
+    </div>
   </card>
 </template>
 
@@ -177,11 +149,18 @@
           confirmar_password:'',
           */
         },
-        paises:[],
-        pais:{},
-        sedes:[],
-        sede:{},
-        ciudad:"",
+        paisOrigen: '',
+        ciudadOrigen:"",
+        loading: true,
+        error: '',
+        selectedSede: "", // Inicializa como cadena vacía
+        sedes: [
+          { id: 1, pais: { nombre: 'Perú' }, ciudad: { nombre: 'Lima' } },
+          { id: 2, pais: { nombre: 'Argentina' }, ciudad: { nombre: 'Buenos Aires' } },
+          { id: 3, pais: { nombre: 'Chile' }, ciudad: { nombre: 'Santiago' } }
+          // Agrega más sedes según sea necesario
+        ],
+        
         clientes:[],
         categorias:[],
         categoria:{},
@@ -201,8 +180,18 @@
       };
     },
     mounted(){
-      let vue = this;
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(this.obtenerUbicacionActual, this.handleLocationError);
+      } 
+      else {
+        this.paisOrigen = "Peru";
+        this.ciudadOrigen = "Lima";
+        this.error = "La geolocalización no está disponible en este navegador.";
+        this.loading = false;
+      }
 
+      let vue = this;
+      
 
       var date = new Date();
       var day = date.getDate();
@@ -295,6 +284,41 @@
           vue.paquete.oaci_sede_destino = sede.codigoOaci;
           //console.log(this.ciudad);
       },
+      obtenerUbicacionActual(position){
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
+
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            this.paisOrigen = data.countryName;
+            this.ciudadOrigen = data.city;
+            this.loading = false;
+          })
+          .catch(error => {
+            console.error("Error al obtener la información del país:", error);
+            this.error = "Error al obtener la información del país.";
+            this.loading = false;
+          });
+      },
+      handleLocationError(error) {
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            this.error = "El usuario denegó la solicitud de geolocalización.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            this.error = "La información de ubicación no está disponible.";
+            break;
+          case error.TIMEOUT:
+            this.error = "Se agotó el tiempo de espera al intentar obtener la ubicación.";
+            break;
+          case error.UNKNOWN_ERROR:
+            this.error = "Se produjo un error desconocido al obtener la ubicación.";
+            break;
+        }
+        this.loading = false;
+      },
       isEmailValid: function() {
           return (this.email == " ")? "" : (this.reg.test(this.email)) ? 'has-success' : 'has-error';
       },
@@ -339,4 +363,13 @@
   }
 </script>
 <style>
+  /* Asegúrate de que el texto dentro de las opciones del select sea negro */
+  .form-control option {
+    color: black
+  }
+
+  /* Asegúrate de que el texto del select principal sea visible cuando se selecciona */
+  .form-control {
+    color: white;
+  }
 </style>
