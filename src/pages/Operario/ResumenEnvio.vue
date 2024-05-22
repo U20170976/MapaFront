@@ -1,10 +1,10 @@
 <template>
   <div class="container">
-    <h2 slot="header" class="title">Resumen del Envío</h2>
+    <h2 slot="header" class="title">Resumen de Envío - FAS44A5S</h2>
     
     <div class="summary-section">
       <div class="section">
-        <h2>Datos del Envío - FAS44A5S</h2>
+        <h2>Datos del Envío</h2>
         <!-- <p><strong>Código de envío:</strong> FAS44A5S</p>-->
         <p><span class="highlighted-code"> Código de Envío:</span> <span class="highlighted-code"> FAS44A5S</span></p>
         <p><strong>Ciudad, País - Origen:</strong> Lima - Perú</p>
@@ -29,9 +29,9 @@
     </div>
     
     <div class="button-container">
-      <base-button slot="footer" type="primary" fill @click="handleSubmit">Registrar Envío</base-button>
-      <base-button slot="footer" fill @click="handleCancel">Regresar</base-button>
-      
+      <div class="right-aligned">
+        <base-button slot="footer" type="primary" fill @click="handleSubmit">Enviar al Contacto</base-button>
+      </div>
     </div>
   </div>
 </template>
@@ -90,12 +90,24 @@ h1 {
   font-weight: bolder;
   color: #ffffff; /* Mantener el color blanco */
 }
-
+/*
 .button-container {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
 }
+*/
+
+/*Posiciona el botón a la derecha el button-container y el right-aligned*/
+.button-container {
+  margin-top: 20px;
+  width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+}
+.right-aligned {
+  display: flex;
+  justify-content: flex-end;
+}
+
 
 button {
   background-color: #e94560;
@@ -105,6 +117,7 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
+
 
 button:hover {
   background-color: #d83454;
