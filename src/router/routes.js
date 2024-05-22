@@ -151,7 +151,7 @@ export default ([
       },
       {
         path: "operario/RegisterPackage",
-        name: "Registrar Paquetes",
+        name: "Registrar Envío",
         component: Package
       },
       {

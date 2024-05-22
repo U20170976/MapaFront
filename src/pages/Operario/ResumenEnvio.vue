@@ -102,10 +102,14 @@ h1 {
 .button-container {
   margin-top: 20px;
   width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+  display: flex;
+  justify-content: flex-end; /* Alinea el contenido del contenedor a la derecha */
 }
+
 .right-aligned {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-end; /* Asegura que el botón dentro de este div también esté a la derecha */
+  width: 100%;
 }
 
 

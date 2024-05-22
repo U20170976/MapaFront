@@ -105,10 +105,15 @@
       </div>
     </div>
 
-    <div class="row mt-4">
-      <!--<base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>-->
+    <!--<div class="row mt-4">
+      <base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>
       <base-button slot="footer" type="primary" fill @click="registrarEnvio">Registrar Envío</base-button>
       <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
+    </div>-->
+  
+    <div class="button-container">
+      <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
+      <base-button slot="footer" type="primary" fill @click="registrarEnvio">Registrar Envío</base-button>
     </div>
   </card>
 </template>
@@ -378,6 +383,13 @@
   }
 </script>
 <style>
+/*Posiciona el botón a la derecha el button-container y el right-aligned*/
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
+    padding: 0 10px; /* Opcional: Añade un poco de padding si deseas espacio a los lados */
+  }
   /* Asegúrate de que el texto dentro de las opciones del select sea negro */
   .form-control option {
     color: black

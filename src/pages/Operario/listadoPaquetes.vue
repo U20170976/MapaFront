@@ -3,7 +3,7 @@
     <!-- <h1>GESTIÓN DE PAQUETES</h1> -->
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
-      <button @click="anadirPaquete">Añadir Nuevo Paquete</button>
+      <button @click="anadirPaquete">+ Registrar Envío</button>
       <button @click="updateStatus">Actualizar Estados</button>
     </div>
     <base-table-envios
