@@ -1,3 +1,21 @@
 
-node_modules/
+
 *.json
+
+# Ignorar el directorio node_modules
+node_modules/
+
+# Ignorar archivos de entorno
+.env
+
+# Ignorar archivos de logs
+logs/
+*.log
+
+# Ignorar directorios de producción
+dist/
+build/
+
+# Ignorar archivos de sistema
+.DS_Store
+Thumbs.db

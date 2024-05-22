@@ -15,23 +15,23 @@
             </div>
             <div class="form-group">
               <label>Cantidad de Paquetes</label>
-              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="cliente.ciudad">
+              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="cantidadPaquetes">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
               <label>Ciudad, País - Destino</label>
-              <select class="form-control" v-model="selectedSede">
+              <select class="form-control" v-model="clienteDestino.ciudadPais">
                 <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
-                <option v-for="sede in sedes" :key="sede.id" :value="sede">
-                  {{ sede.ciudad.nombre }}, {{ sede.pais.nombre }}
+                <option v-for="paisDestino in lpaisesDestino" :key="paisDestino.id" :value="paisDestino">
+                  {{ paisDestino.ciudad.nombre }}, {{ paisDestino.pais.nombre }}
                 </option>
               </select>
             </div>
 
             <div class="form-group">
               <label>Descripción(opcional)</label>
-              <input type="text" class="form-control" placeholder="Descripción" v-model="cliente.casa">
+              <input type="text" class="form-control" placeholder="Descripción" v-model="descripcionPaquete">
             </div>
           </div>
         </div>
@@ -49,19 +49,23 @@
             
             <div class="form-group">
               <label>DNI / RUC</label>
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">
+              <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc" @keypress.enter="filterClient(clienteOrigen.numDniRuc)">-->
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="cliente.nombreRazonSocial">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteOrigen.nombreCompleto">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="email" class="form-control" placeholder="email@email.com" v-model="cliente.correo">
+              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteOrigen.email">
+              <div v-if="email && !isEmailValid" class="invalid-feedback">
+                Por favor, ingrese un correo electrónico válido.
+              </div>
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="cliente.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteOrigen.telefono">
             </div>
           </div>
         </div>
@@ -78,19 +82,23 @@
             
             <div class="form-group">
               <label>DNI / RUC</label>
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">
+              <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">-->
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteDestino.numDniRuc">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="nombre">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteDestino.nombreCompleto">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="ciudad">
+              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteDestino.email">
+              <div v-if="email && !isEmailValid" class="invalid-feedback">
+                Por favor, ingrese un correo electrónico válido.
+              </div>
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="cliente.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteDestino.telefono">
             </div>
           </div>
         </div>
@@ -98,7 +106,8 @@
     </div>
 
     <div class="row mt-4">
-      <base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>
+      <!--<base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>-->
+      <base-button slot="footer" type="primary" fill @click="registrarEnvio">Registrar Envío</base-button>
       <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
     </div>
   </card>
@@ -113,63 +122,48 @@
   import NotificationTemplatePaqueteError from '../Notifications/NotificationTemplatePaqueteError';
   import { BaseAlert } from '@/components';
   import listadoPaquetes from "../Operario/listadoPaquetes";
+  import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
 
   import Authentication from '@/store/authentication.js';
 
-  const tableColumns =  ["Descripcion", "Categoria"];
 
   export default {
     components: {
       BaseTable,
-      listadoPaquetes
+      listadoPaquetes,
+      ResumenEnvio,
     },
     data() {
       return {
-        table1: {
-          title: "Registro paquetes",
-          columns: [...tableColumns],
-          data: []
-        },
-        data_usuario:{
+        clienteOrigen:{
           id:'',
-          sedeOrigen: '',
-          pais: ''
-          /*
-          numeroDocumento: '',
-          nombres:'',
+          ciudadPais: '', /*Aqui se guardaría el valor, pero en paisOrigen y ciudadOrigen ya se guarda los valores que se encuentran por defecto*/
+          nombreCompleto: '',
           email:'',
-          direccion:'',
-          fechaNacimiento:'',
-          tipoDocumento:'',
           telefono:'',
-          usuario:'',
-          idioma:'',
-          tipoUsuario:'',
-          password:'',
-          confirmar_password:'',
-          */
+          numDniRuc:''
         },
+        clienteDestino:{
+          id:'',
+          ciudadPais: '',
+          nombreCompleto: '',
+          email:'',
+          telefono:'',
+          numDniRuc:''
+        },
+        descripcionPaquete: '',
+        cantidadPaquetes: '',
         paisOrigen: '',
         ciudadOrigen:"",
         loading: true,
         error: '',
         selectedSede: "", // Inicializa como cadena vacía
-        sedes: [
+        lpaisesDestino: [
           { id: 1, pais: { nombre: 'Perú' }, ciudad: { nombre: 'Lima' } },
           { id: 2, pais: { nombre: 'Argentina' }, ciudad: { nombre: 'Buenos Aires' } },
           { id: 3, pais: { nombre: 'Chile' }, ciudad: { nombre: 'Santiago' } }
-          // Agrega más sedes según sea necesario
+          // Agrega más paises con ciudades según sea necesario
         ],
-        
-        clientes:[],
-        categorias:[],
-        categoria:{},
-        dniinput:"",
-        cliente:{},
-
-        paquete:[],
-
-        email: '',
         reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
 
         type: ["", "info", "success", "warning", "danger"],
@@ -189,7 +183,7 @@
         this.error = "La geolocalización no está disponible en este navegador.";
         this.loading = false;
       }
-
+      /*
       let vue = this;
       
 
@@ -222,8 +216,23 @@
       .then(function(response){
         vue.categorias = response.data;
       })
+      */
     },
+/*
+    computed: {
+      isEmailValid() {
+        return this.reg.test(this.email);
+      },
+      emailValidationClass() {
+        if (this.email === '') {
+          return '';
+        }
+        return this.isEmailValid ? 'has-success' : 'has-error';
+      }
+    },
+*/
     methods:{
+      /*
       filterClient:function(numeroDocumento){
         let vue = this;
         var lista = vue.clientes.filter(
@@ -284,6 +293,7 @@
           vue.paquete.oaci_sede_destino = sede.codigoOaci;
           //console.log(this.ciudad);
       },
+      */
       obtenerUbicacionActual(position){
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
@@ -319,12 +329,11 @@
         }
         this.loading = false;
       },
-      isEmailValid: function() {
-          return (this.email == " ")? "" : (this.reg.test(this.email)) ? 'has-success' : 'has-error';
-      },
+      /*
       isPackageEmpty: function() {
           return (this.table1.data.length == 0) ? this.notifyVue('top', 'center',4,NotificationTemplatePaqueteError) : 'has-error';
       },
+      
       notifyVue(verticalAlign, horizontalAlign,color,componente) {
         //const color = 4;
         //console.log(color);
@@ -353,7 +362,13 @@
             this.notifyVue('top', 'center',2,NotificationTemplatePaqueteSuccess)
         }
       },
+      */
+      registrarEnvio() {
+        console.log('registrarEnvio llamado');
+        this.$router.push('ResumenEnvio');
+      },
       regresarAlListar(){
+        console.log('listadoPaquetes llamado');
         this.$router.push('listadoPaquetes');
       }
     },
@@ -371,5 +386,15 @@
   /* Asegúrate de que el texto del select principal sea visible cuando se selecciona */
   .form-control {
     color: white;
+  }
+
+  .has-success .form-control {
+    border-color: #28a745;
+  }
+  .has-error .form-control {
+    border-color: #dc3545;
+  }
+  .invalid-feedback {
+    color: #dc3545;
   }
 </style>

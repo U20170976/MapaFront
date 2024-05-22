@@ -28,7 +28,7 @@ import Pagination from '@/components/Pagination.vue';
 
 
 export default {
-  name: 'GestionEnvios',
+  name: 'listadoPaquetes',
   components: {
     BaseTableEnvios,
     Pagination
