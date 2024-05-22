@@ -5,8 +5,7 @@
     <div class="summary-section">
       <div class="section">
         <h2>Datos del Envío</h2>
-        <!-- <p><strong>Código de envío:</strong> FAS44A5S</p>-->
-        <p><span class="highlighted-code"> Código de Envío:</span> <span class="highlighted-code"> FAS44A5S</span></p>
+        <p><span class="highlighted-code">Código de Envío:</span> <span class="highlighted-code"> FAS44A5S</span></p>
         <p><strong>Ciudad, País - Origen:</strong> Lima - Perú</p>
         <p><strong>Ciudad, País - Destino:</strong> Madrid - España</p>
         <p><strong>Cantidad de Paquetes:</strong> 10</p>
@@ -33,16 +32,35 @@
         <base-button slot="footer" type="primary" fill @click="handleSubmit">Enviar al Contacto</base-button>
       </div>
     </div>
+
+    <!-- Agrega el modal aquí -->
+    <PopupConfirmation :showModal="showModal" @close="showModal = false" />
   </div>
 </template>
 
 <script>
+import PopupConfirmation from "@/components/PopupConfirmation.vue"; // Asegúrate de tener la ruta correcta
+
 export default {
   name: 'ResumenEnvio',
+  components: {
+    PopupConfirmation
+  },
+  data() {
+    return {
+      showModal: false
+    }
+  },
   methods: {
     handleSubmit() {
       // Lógica para registrar el envío
       console.log('Envío registrado');
+      this.handleOpenModal();
+    },
+    handleOpenModal() {
+      console.log('abrir modal');
+      this.showModal = true;
+      console.log('despues de abrir modal');
     },
     handleCancel() {
       // Lógica para regresar
@@ -54,7 +72,7 @@ export default {
 
 <style scoped>
 .container {
-  background-color:  #2A2A40;
+  background-color: #2A2A40;
   color: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -86,19 +104,11 @@ h1 {
 }
 
 .highlighted-code {
-  font-size: 1.2 em;
+  font-size: 1.2em;
   font-weight: bolder;
   color: #ffffff; /* Mantener el color blanco */
 }
-/*
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-*/
 
-/*Posiciona el botón a la derecha el button-container y el right-aligned*/
 .button-container {
   margin-top: 20px;
   width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
@@ -112,7 +122,6 @@ h1 {
   width: 100%;
 }
 
-
 button {
   background-color: #e94560;
   color: white;
@@ -121,7 +130,6 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
-
 
 button:hover {
   background-color: #d83454;
