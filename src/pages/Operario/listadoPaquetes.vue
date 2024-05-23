@@ -1,195 +1,194 @@
 <template>
-  <card>
-    <h5 slot="header" class="title">{{title}}</h5>
-
-
-    <div class="row">
-        <div class="col-md-12 m-l-10 p-t-5">
-            <base-input placeholder="Buscar" v-model="searchWord">
-            </base-input>
-        </div>
-        <!-- <div class="col-md-2">    
-            <base-button :icon="true" type="primary" fill><i class="tim-icons icon-upload"></i></base-button>
-            <base-button :icon="true" fill><i class="tim-icons icon-trash-simple"></i></base-button>
-        </div> -->
-        <div class="col-md-12 text-right mb-3">
-            <base-button type="primary" style="margin-right:10px" fill @click="anadirPaquete()" >Añadir Nuevo Paquete</base-button>
-            <base-button type="primary" fill @click="enviarPaquetes()">Actualizar Estados</base-button>
-        </div>
-        
+  <div class="listado-paquetes">
+    <!-- <h1>GESTIÓN DE PAQUETES</h1> -->
+    <div class="search-and-actions">
+      <input type="text" placeholder="Buscar" v-model="searchword" />
+      <button @click="anadirPaquete">+ Registrar Envío</button>
+      <button @click="updateStatus">Actualizar Estados</button>
     </div>
-    <div v-if="isLoading"><loader-spinner></loader-spinner></div>
-    <div class="row" v-else>
-        <div class="col-md-12"  v-if="!showMessage">
-            <base-table :data="operarioTable.paquetes"
-                :columns="operarioTable.columns"
-                thead-classes="text-primary"
-                :searchWord="searchWord"
-                :setAcciones="listaBoolean"
-                :combo="true"
-                :actions="false"
-                :select="false"
-                @signalState="actualizarPaquete"
-                >
-            </base-table>
-        </div>
-        <div v-else class="col-md-12"><no-data-found></no-data-found></div>
-
-    </div >
-
-  </card>
+    <base-table-envios
+      :columns="tableColumns"
+      :data="filteredData"
+      :searchword="searchword"
+      thead-classes="thead-custom-class"
+      tbody-classes="tbody-custom-class"
+    />
+    <pagination
+      :current-page="currentPage"
+      :total-pages="totalPages"
+      @page-changed="handlePageChange"
+    />
+  </div>
 </template>
 
-
 <script>
-  import {BaseTable,LoaderSpinner, NoDataFound} from "@/components";
-  import RegisterPackage from "@/pages/Operario"
-  import axios from 'axios';
-  import Authentication from '@/store/authentication.js';
-  
-  import NotificationTemplateUpdatePackageSuccess from '../Notifications/NotificationTemplateUpdatePackageSuccess';
-  import NotificationTemplateUpdatePackageError from '../Notifications/NotificationTemplateUpdatePackageError';
-  
-  const tableColumns = ["Codigo tracking","Nombre Cliente", "Sede Destino","Categoria","Fecha Registro"];
-  //const tableColumns = ["Codigo tracking", "Nombre", "Fecha Registro", "Estado"];
-  export default {
-    components: {
-      BaseTable,
-      LoaderSpinner,
-      NoDataFound,
-      RegisterPackage
-    },
-    data() {
-      return {
-        operarioTable: {
-          title: "Admin Table",
-          columns: [...tableColumns],
-          paquetes:[],
-          //actions: "Acciones"
-          estados:[]
-        },        
-        title: "",
-        searchWord: "",
-        isLoading: true,
-        showMessage: true,
-        listaBoolean: {detalle:false,eliminar:false,modificar:false},
-        idSede: "",
-        tableData:[], 
-        actualizados:[],
-        errors:[],
-        paquetes:[],
-        type: ["", "info", "success", "warning", "danger"],
-        notifications: {
-          topCenter: false
-        }
-      };
-    },
-    mounted(){
-      let vue = this;
-      var idUsuario = Authentication.getProfile().id;
-      //vue.tableData = vue.adminTable.paquetes;
-      axios.get(this.$store.state.appUri+'/usuarios/obtenerDatosSede/'+idUsuario)
-      .then(function(response){
-        // console.log(response.data.sede.id);
-        vue.idSede = response.data.sede.id;
-        // console.log(vue.idSede);
-        //vue.idSede = 1;
-        axios.get(vue.$store.state.appUri+'/sedes/listarPaquetesEnAlmacen2/'+vue.idSede)//colocar el idSede del Operario
-        .then(function(response){
-        // console.log(response.data);
-        if(response.data.length != 0){
-            response.data.forEach(element => {
-            vue.operarioTable.paquetes.push({
-            "codigo tracking": element.codigoTracking,
-            "nombre cliente": element.cliente.nombreRazonSocial,
-            "sede destino": element.nombreSede.replace('_',' '),
-            "fecha registro": element.fecha_registro.substring(0,4)+"/"+element.fecha_registro.substring(5,7)+"/"+element.fecha_registro.substring(8,10),
-            "categoria": element.categoria.descripcion,
-            "idPaquete": element.id,
-            "estado": element.estado.replace('_',' ')
-            //"destino": element.activo ? "Activo": "Inactivo"
-          })
-          vue.paquetes.push({
-            "id": element.id,
-            "oaci_sede_destino": element.oaci_sede_destino,
-            "id_categoria": element.categoria.id,
-            "descripcion": element.descripcion,
-            "fecha registro": element.fecha_registro,
-            "estado": element.estado
-          })        
-          });
-          vue.showMessage = false;
-        }
-        vue.isLoading = false;
-        // console.log(vue.operarioTable.paquetes);
-        })
 
-      })
+import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
+import Pagination from '@/components/Pagination.vue';
+import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
+
+
+export default {
+  name: 'listadoPaquetes',
+  components: {
+    BaseTableEnvios,
+    Pagination
+  },
+  data() {
+    return {
+      searchword: '',
       
-
-    },
-    methods:{
-      notifyVue(verticalAlign, horizontalAlign,color,componente) {
-        //const color = 4;
-        //console.log(color);
-        this.$notify({
-          component: componente,
-          icon: "tim-icons icon-bell-55",
-          horizontalAlign: horizontalAlign,
-          verticalAlign: verticalAlign,
-          type: this.type[color],
-          timeout: 0
-        });
-      },
-      filterTable:function(searchWord){
-        let vue = this;
-        tableData = vue.tableData.filter(
-          function(row){
-            return (JSON.stringify(row)).includes(searchWord);
-          }
-        )
-        vue.adminTable.data = tableData;
-      },
-      actualizarPaquete:function(item, state){
-        let vue = this;
-        // console.log(state+item.idPaquete);
-        vue.paquetes.forEach(element => {
-          // console.log(element.estado);
-          // console.log(element.id);
-          if(element.id == item.idPaquete){
-            element.estado= state;
-          // console.log(element.estado);
-          }
-        })
-      },
-      enviarPaquetes(){
-        let vue = this;
-        // console.log(vue.paquetes);
-        axios.post(vue.$store.state.appUri+'/paquetes/actualizarLista', vue.paquetes)
-        .then(response => {
-          vue.notifyVue('top', 'center',2, NotificationTemplateUpdatePackageSuccess);
-          vue.$forceUpdate();
-        })
-        .catch(e => {
-          vue.errors.push(e)
-          vue.notifyVue('top', 'center',4, NotificationTemplateUpdatePackageError); 
-        });
-        vue.paquetes = [];
-      },
-      anadirPaquete(){
-        this.$router.push('RegisterPackage');
-      }
-    },
-    props: {
-      id: {
-        type: String,
-        default: () => {
-          return "";
+      tableColumns: [
+        { text: 'Código de envío', value: 'codigoEnvio' },
+        { text: 'Estado', value: 'estado' },
+        { text: 'Tiempo transcurrido', value: 'tiempoTranscurrido' },
+        { text: 'Origen', value: 'origen' },
+        { text: 'Destino', value: 'destino' },
+        { text: 'Fecha y hora envío', value: 'fechaEnvio' },
+        { text: 'Fecha y hora llegada', value: 'fechaLlegada' }
+      ],
+      tableData: [
+        { codigoEnvio: 'FAS4445S', 
+          estado: 'En camino', 
+          tiempoTranscurrido: '20 horas', 
+          origen: 'Lima, Perú', 
+          destino: 'Washington, EEUU', 
+          fechaEnvio: '27/03/2024 - 11:30:40',
+          fechaLlegada: '28/03/2024 - 11:30:40' 
+        },
+        {
+          codigoEnvio: "FAS44ASE",
+          estado: "En camino",
+          tiempoTranscurrido: "20 horas",
+          origen: "Lima,Perú",
+          destino: "Washington, EEUU",
+          fechaEnvio: "15/05/2024 - 08:04:10",
+          fechaLlegada: "18/05/2024 - 13:05:10"
         }
-      }
+        // más datos aquí...
+      ],   
 
+/*
+      --> JSON
+      {
+        "id": 1,
+        "idEnvio": "EN123456",
+        "ciudadOrigen": "Ciudad de Origen",
+        "ciudadDestino": "Ciudad de Destino",
+        "ciudadActual": "Ciudad Actual",
+        "fechaEnvio": "2024-05-22",
+        "horaEnvio": "14:30:00",
+        "cantidadPaquetes": 5,
+        "estadoEnvio": "En camino",
+        "coordinates": null,
+        "ruta": null
+      }
+      */
+     /*
+      tableColumns: [
+        { text: 'Código de envío', value: 'idEnvio' },
+        { text: 'Estado', value: 'estadoEnvio' },
+        { text: 'Tiempo transcurrido', value: 'tiempoTranscurrido' },
+        { text: 'Origen', value: 'ciudadOrigen' },
+        { text: 'Destino', value: 'ciudadDestino' },
+        { text: 'Fecha y hora envío', value: 'fechaEnvio' + ' - ' + 'horaEnvio' },
+        { text: 'Fecha y hora llegada', value: 'fechaLlegada' }
+      ],
+      tableData: [], // Ahora los datos se cargarán desde la API   
+*/
+      filteredData: [],
+      currentPage: 1,
+      totalPages: 10
+    };
+  },
+  methods: {
+    anadirPaquete() {
+      this.$router.push('RegisterPackage');
+      console.log('Añadir Nuevo Paquete');
+    },
+    updateStatus() {
+      // lógica para actualizar los estados
+      console.log('Actualizar Estados');
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
+      // implementar lógica de cambio de página
+      console.log('Página actual:', page);
+    },
+    fetchDataListaEnvios() {
+      // Realiza la solicitud HTTP para obtener los datos de la API
+      axios.get('http://localhost/api/paquete/')
+        .then(response => {
+          // Asigna los datos de la respuesta a tableData
+          this.tableData = response.data;
+          // Actualiza los datos filtrados
+          this.filteredData = response.data;
+        })
+        .catch(error => {
+          console.error('Error al obtener los datos:', error);
+        });
     }
+  },
+  mounted() {
+    // inicializar los datos filtrados
+    console.log('Página actual:', this.data);
+    this.filteredData = this.tableData;
+    // Llama a fetchData() cuando el componente se monta para cargar los datos
+    //this.fetchDataListaEnvios();
   }
+};
 </script>
-<style>
+<style scoped>
+.gestion-envios {
+  background-color: #2c2f48;
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 1.5em;
+  margin-bottom: 20px;
+}
+
+.search-and-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-and-actions input {
+  flex-grow: 1;
+  margin-right: 20px;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #3c3f58;
+  color: #ffffff;
+}
+
+.search-and-actions button {
+  background: linear-gradient(90deg, #6e42f4, #e05eb5);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.search-and-actions button:hover {
+  opacity: 0.8;
+}
+
+.thead-custom-class {
+  background-color: #3c3f58;
+}
+
+.tbody-custom-class {
+  background-color: #2c2f48;
+}
+
 </style>

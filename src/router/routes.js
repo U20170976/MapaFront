@@ -7,8 +7,6 @@ import NotFound from "@/pages/NotFoundPage.vue";
 
 // Admin pages
 import Dashboard from "@/pages/Dashboard.vue";
-
-
 import Profile from "@/pages/Profile.vue";
 import Notifications from"@/pages/Notifications.vue";
 import Icons from "@/pages/Icons.vue";
@@ -16,6 +14,7 @@ import Maps from "@/pages/Maps.vue";
 import Typography from "@/pages/Typography.vue";
 import TableList from "@/pages/TableList.vue";
 import listadoPaquetes from "@/pages/Operario/listadoPaquetes.vue";
+import ResumenEnvio from "@/pages/Operario/ResumenEnvio.vue";
 import Package from "@/pages/Package.vue";
 import RutasAdmin from "@/pages/Administrador/AdminForm.vue";
 import SedesAdmin from "@/pages/Administrador/AdminForm.vue";
@@ -59,7 +58,6 @@ import MainFooter from '@/layout/MainFooter.vue';
 Vue.use(Router);
 
 export default ([
-
   {
     path:"/",
     redirect:"/index",
@@ -153,14 +151,20 @@ export default ([
       },
       {
         path: "operario/RegisterPackage",
-        name: "Registrar Paquetes",
+        name: "Registrar Envío",
         component: Package
       },
       {
         path: "operario/listadoPaquetes",
-        name: "Gestión de Paquetes",
+        name: "Gestión de Envíos",
         component: listadoPaquetes,
         props: {id: "listadoPaquetes"}
+      },
+      {
+        path: "operario/ResumenEnvio",
+        name: "Resumen de Envío",
+        component: ResumenEnvio,
+        /*props: {id: "ResumenEnvio"}*/
       },
       {
         path: "admin/rutas",

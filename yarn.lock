@@ -8644,10 +8644,10 @@
   "resolved" "https://registry.npmjs.org/vue-router-prefetch/-/vue-router-prefetch-1.6.0.tgz"
   "version" "1.6.0"
 
-"vue-router@^3.0.2":
-  "integrity" "sha512-SdKRBeoXUjaZ9R/8AyxsdTqkOfMcI5tWxPZOUX5Ie1BTL5rPSZ0O++pbiZCeYeythiZIdLEfkDiQPKIaWk5hDg=="
-  "resolved" "https://registry.npmjs.org/vue-router/-/vue-router-3.3.4.tgz"
-  "version" "3.3.4"
+"vue-router@^3.6.5":
+  "integrity" "sha512-VYXZQLtjuvKxxcshuRAwjHnciqZVoXAjTjcqBTz4rKc8qih9g9pI3hbDjmqXaHdgL3v8pV6P8Z335XvHzESxLQ=="
+  "resolved" "https://registry.npmjs.org/vue-router/-/vue-router-3.6.5.tgz"
+  "version" "3.6.5"
 
 "vue-style-loader@^4.1.0":
   "integrity" "sha512-0ip8ge6Gzz/Bk0iHovU9XAUQaFt/G2B61bnWa2tCcqqdgfHs1lF9xXorFbE55Gmy92okFT+8bfmySuUOu13vxQ=="
