@@ -53,8 +53,8 @@ export default {
           tiempoTranscurrido: '20 horas', 
           origen: 'Lima, Perú', 
           destino: 'Washington, EEUU', 
-          fechaEnvio: '27/03/2024 - 11:30:40'
-          //fechaLlegada: '28/03/2024 - 11:30:40' 
+          fechaEnvio: '27/03/2024 - 11:30:40',
+          fechaLlegada: '28/03/2024 - 11:30:40' 
         },
         {
           codigoEnvio: "FAS44ASE",
@@ -62,8 +62,8 @@ export default {
           tiempoTranscurrido: "20 horas",
           origen: "Lima,Perú",
           destino: "Washington, EEUU",
-          fechaEnvio: "15/05/2024 - 08:04:10"
-          //fechaLlegada: "18/05/2024 - 13:05:10"
+          fechaEnvio: "15/05/2024 - 08:04:10",
+          fechaLlegada: "18/05/2024 - 13:05:10"
         }
         // más datos aquí...
       ],   
