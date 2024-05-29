@@ -1,32 +1,32 @@
 <template>
   <div class="container">
-    <h2 slot="header" class="title">Resumen de Envío - FAS44A5S</h2>
+    <h2 slot="header" class="title">Resumen de Envío - {{ envio.paquete.idEnvio }}</h2>
     
     <div class="summary-section">
       <div class="section">
         <h2>Datos del Envío</h2>
-        <p><span class="highlighted-code">Código de Envío:</span> <span class="highlighted-code"> {{ envio.id }}</span></p>
-        <p><strong>Ciudad, País - Origen:</strong> {{ envio.ciudadOrigen }}</p>
-        <p><strong>Ciudad, País - Destino:</strong> {{ envio.ciudadDestino }}</p>
+        <p><span class="highlighted-code">Código de Envío:</span> <span class="highlighted-code"> {{ envio.paquete.idEnvio }}</span></p>
+        <p><strong>Ciudad, País - Origen:</strong> {{ envio.paquete.ciudadOrigen }}</p>
+        <p><strong>Ciudad, País - Destino:</strong> {{ envio.paquete.ciudadDestino }}</p>
         <p><strong>Fecha de Envío:</strong> {{ formattedFechaEnvio }} </p>
-        <p><strong>Hora de Envío:</strong> {{ envio.horaEnvio }}</p>
-        <p><strong>Cantidad de Paquetes:</strong> {{ envio.cantidadPaquetes }} unidades</p>
-        <p><strong>Estado del Envío:</strong> {{ envio.estadoEnvio }}</p>
+        <p><strong>Hora de Envío:</strong> {{ envio.paquete.horaEnvio }}</p>
+        <p><strong>Cantidad de Paquetes:</strong> {{ envio.paquete.cantidadPaquetes }} unidades</p>
+        <p><strong>Estado del Envío:</strong> {{ envio.paquete.estadoEnvio }}</p>
         <!--<p><strong>Descripción:</strong> Documentos importantes</p>-->
       </div>
       <div class="section">
         <h2>Datos del Contacto que Envía</h2>
-        <p><strong>DNI/RUC:</strong> 12345678</p>
-        <p><strong>Nombres y Apellidos:</strong> Juan Pérez</p>
-        <p><strong>Correo Electrónico:</strong> juan.perez@example.com</p>
-        <p><strong>Número de Teléfono:</strong> 123456789</p>
+        <p><strong>DNI/RUC:</strong> {{ envio.clienteManda.documentoIdentidad }}</p>
+        <p><strong>Nombres y Apellidos:</strong> {{ envio.clienteManda.nombres }}</p>
+        <p><strong>Correo Electrónico:</strong> {{ envio.clienteManda.correo }}</p>
+        <p><strong>Número de Teléfono:</strong> {{ envio.clienteManda.telefono }}</p>
       </div>
       <div class="section">
         <h2>Datos del Contacto que Recibe</h2>
-        <p><strong>DNI/RUC:</strong> 87654321</p>
-        <p><strong>Nombres y Apellidos:</strong> María González</p>
-        <p><strong>Correo Electrónico:</strong> maria.gonzalez@example.com</p>
-        <p><strong>Número de Teléfono:</strong> 987654321</p>
+        <p><strong>DNI/RUC:</strong> {{ envio.clienteRecibe.documentoIdentidad }}</p>
+        <p><strong>Nombres y Apellidos:</strong> {{ envio.clienteRecibe.nombres }}</p>
+        <p><strong>Correo Electrónico:</strong> {{ envio.clienteRecibe.correo }}</p>
+        <p><strong>Número de Teléfono:</strong> {{ envio.clienteRecibe.telefono }}</p>
       </div>
     </div>
     
@@ -58,7 +58,7 @@ export default {
   computed: {
     formattedFechaEnvio: function() {
       // Descomponer la fecha en año, mes y día
-      const [year, month, day] = this.envio.fechaEnvio.split('-');
+      const [year, month, day] = this.envio.paquete.fechaEnvio.split('-');
       // Devolver la fecha en formato dd-mm-aaaa
       return `${day}-${month}-${year}`;
     }

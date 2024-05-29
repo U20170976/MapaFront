@@ -15,20 +15,20 @@
             </div>
             <div class="form-group">
               <label>Cantidad de Paquetes</label>
-              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="cantidadPaquetes">
+              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="paquete.cantidadPaquetes">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
               <label>Ciudad, País - Destino</label>
-              <select class="form-control" v-model="clienteDestino.codigoOACI" required>
+              <select class="form-control" v-model="paquete.ciudadDestino" required>
                 <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
                 <option v-for="paisDestino in filteredPaisesDestino" :key="paisDestino.id" :value="`${paisDestino.codigoOACI}`">
                   {{ paisDestino.nombreCiudad }} - {{ paisDestino.pais }}
                 </option>
               </select>
                <!-- Mensaje de error -->
-              <div v-if="!clienteDestino.codigoOACI && formSubmitted" class="invalid-feedback">
+              <div v-if="!paquete.ciudadDestino && formSubmitted" class="invalid-feedback">
                 Por favor, seleccione una ciudad y país.
               </div>
             </div>
@@ -55,15 +55,15 @@
             <div class="form-group">
               <label>DNI / RUC</label>
               <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc" @keypress.enter="filterClient(clienteOrigen.numDniRuc)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteManda.documentoIdentidad">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteOrigen.nombreCompleto">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteManda.nombres">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteOrigen.email">
+              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteManda.correo">
               <!--
               <div v-if="email && !isEmailValid" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
@@ -72,7 +72,7 @@
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteOrigen.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteManda.telefono">
             </div>
           </div>
         </div>
@@ -90,15 +90,15 @@
             <div class="form-group">
               <label>DNI / RUC</label>
               <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteDestino.numDniRuc">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteDestino.nombreCompleto">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteRecibe.nombres">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteDestino.email">
+              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteRecibe.correo">
               <!--
               <div v-if="email && !isEmailValid" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
@@ -107,7 +107,7 @@
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteDestino.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteRecibe.telefono">
             </div>
           </div>
         </div>
@@ -151,29 +151,32 @@
     data() {
       return {
         formSubmitted: false,
-        fechaEnvio: '',
-        horaEnvio: '',  
-        clienteOrigen:{
-          id:'',
-          ciudadPais: '', /*Aqui se guardaría el valor, pero en paisOrigen y ciudadOrigen ya se guarda los valores que se encuentran por defecto*/
-          codigoOACI: "",
-          nombreCompleto: '',
-          email:'',
-          telefono:'',
-          numDniRuc:''
+        paquete: {
+          ciudadOrigen: "SPIM",
+          ciudadDestino: "",
+          ciudadActual: "SPIM",
+          fechaEnvio: "",
+          horaEnvio: "",
+          cantidadPaquetes: '',
+          estadoEnvio: "En Almacén",
+          coordinates: null,
+          ruta: null
         },
-        clienteDestino:{
-          id:"",
-          ciudadPais: "",
-          codigoOACI: "",
-          nombreCompleto: "",
-          email:"",
+        clienteManda:{
+          documentoIdentidad: "",
+          nombres: "",
+          correo:"",
           telefono:"",
-          numDniRuc:""
+          tipo:"1"
         },
-        descripcionPaquete: "",
-        cantidadPaquetes: '',
-        estadoEnvio: 'En Almacén',
+        clienteRecibe:{
+          documentoIdentidad: "",
+          nombres: "",
+          correo:"",
+          telefono:"",
+          tipo:"2"
+        },
+        //descripcionPaquete: "",
         paisOrigen: "",
         ciudadOrigen:"",
         loading: true,
@@ -218,6 +221,80 @@
       }
     },
     methods:{
+      async registrarEnvio() {
+        const dateTime = this.obtenerFechaHoraActual();
+        this.paquete.fechaEnvio = dateTime.fechaEnvio;
+        this.paquete.horaEnvio = dateTime.horaEnvio;
+        this.formSubmitted = true;
+        try {
+          /*
+          const payload = {
+            ciudadOrigen: "SPIM", //this.clienteOrigen.ciudadPais, // "Lima-Peru",
+            ciudadDestino: this.clienteDestino.codigoOACI, // "Brasilia-Brasil",
+            ciudadActual: "SPIM",//this.clienteOrigen.ciudadPais, // "Lima-Peru",
+            fechaEnvio: this.fechaEnvio,
+            horaEnvio: this.horaEnvio,
+            idEnvio: "154",
+            cantidadPaquetes: this.cantidadPaquetes,
+            estadoEnvio: this.estadoEnvio
+          };
+          */
+          const payload = {
+            paquete: this.paquete,
+            clienteManda: this.clienteManda,
+            clienteRecibe: this.clienteRecibe
+          };
+          // Llamada a la API
+          const response = await axios.post('http://localhost/api/paquete/register/envio', payload);
+
+          // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
+          //if (response.data.success) {
+          if (response.data.id !== 0){
+            console.log('Envío registrado exitosamente:', response.data);
+            //this.$toast.success('El envío se ha registrado exitosamente.');
+            // Muestra una notificación de éxito
+            /*
+            this.$notify({
+              component: NotificationTemplatePaqueteSuccess,
+              horizontalAlign: 'center',
+              verticalAlign: 'top',
+            });
+            */
+            // Navega a la página de resumen del envío
+            //this.$router.push({ name: 'Resumen de Envío', params: { idEnvio: response.data } });
+            /*
+            this.$router.push({ 
+                name: 'Resumen de Envío', 
+                props: { envio: response.data }
+            });*/
+
+            this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
+
+          } else {
+            console.error('Error en la respuesta:', response.data);
+            // Muestra una notificación de error
+            //this.$toast.error('Hubo un error al registrar el envío.');
+            /*
+            this.$notify({
+              component: NotificationTemplatePaqueteError,
+              horizontalAlign: 'center',
+              verticalAlign: 'top',
+            });
+            */
+          }
+        } catch (error) {
+          console.error('Error al registrar el envío: ', error);
+          // Muestra una notificación de error
+          //this.$toast.error('Hubo un error al registrar el envío.');
+          /*
+          this.$notify({
+            component: NotificationTemplatePaqueteError,
+            horizontalAlign: 'center',
+            verticalAlign: 'top',
+          });
+          */
+        }
+      },
       async fetchPaisesDestino() {
         try {
           const response = await axios.get('http://localhost/api/aeropuertos/getall');
@@ -296,7 +373,7 @@
           fechaEnvio: formattedDate,
           horaEnvio: formattedTime
         };
-      },
+      }
       /*
       {
     "idEnvio": "15",
@@ -311,74 +388,7 @@
     "ruta": null
 }
 */
-      async registrarEnvio() {
-        const dateTime = this.obtenerFechaHoraActual();
-        this.fechaEnvio = dateTime.fechaEnvio;
-        this.horaEnvio = dateTime.horaEnvio;
-        this.formSubmitted = true;
-        try {
-          const payload = {
-            ciudadOrigen: "SPIM", //this.clienteOrigen.ciudadPais, // "Lima-Peru",
-            ciudadDestino: this.clienteDestino.codigoOACI, // "Brasilia-Brasil",
-            ciudadActual: "SPIM",//this.clienteOrigen.ciudadPais, // "Lima-Peru",
-            fechaEnvio: this.fechaEnvio,
-            horaEnvio: this.horaEnvio,
-            idEnvio: "154",
-            cantidadPaquetes: this.cantidadPaquetes,
-            estadoEnvio: this.estadoEnvio
-          };
-
-          // Llamada a la API
-          const response = await axios.post('http://localhost/api/paquete/register/showall', payload);
-
-          // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
-          //if (response.data.success) {
-          if (response.data.id !== 0){
-            console.log('Envío registrado exitosamente:', response.data);
-            //this.$toast.success('El envío se ha registrado exitosamente.');
-            // Muestra una notificación de éxito
-            /*
-            this.$notify({
-              component: NotificationTemplatePaqueteSuccess,
-              horizontalAlign: 'center',
-              verticalAlign: 'top',
-            });
-            */
-            // Navega a la página de resumen del envío
-            //this.$router.push({ name: 'Resumen de Envío', params: { idEnvio: response.data } });
-            /*
-            this.$router.push({ 
-                name: 'Resumen de Envío', 
-                props: { envio: response.data }
-            });*/
-
-            this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
-
-          } else {
-            console.error('Error en la respuesta:', response.data);
-            // Muestra una notificación de error
-            //this.$toast.error('Hubo un error al registrar el envío.');
-            /*
-            this.$notify({
-              component: NotificationTemplatePaqueteError,
-              horizontalAlign: 'center',
-              verticalAlign: 'top',
-            });
-            */
-          }
-        } catch (error) {
-          console.error('Error al registrar el envío: ', error);
-          // Muestra una notificación de error
-          //this.$toast.error('Hubo un error al registrar el envío.');
-          /*
-          this.$notify({
-            component: NotificationTemplatePaqueteError,
-            horizontalAlign: 'center',
-            verticalAlign: 'top',
-          });
-          */
-        }
-      }
+      
 
     }
   }
