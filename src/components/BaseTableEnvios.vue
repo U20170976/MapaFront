@@ -6,12 +6,31 @@
           <th v-for="column in columns" :key="column.value">{{ column.text }}</th>
         </tr>
       </thead>
+      <!--
       <tbody :class="tbodyClasses">
         <tr v-for="(row, index) in filteredData" :key="index">
           <td v-for="column in columns" :key="column.value">{{ row[column.value] }}</td>
         </tr>
         <tr v-if="filteredData.length === 0">
           <td :colspan="columns.length" class="no-data">No hay data disponible</td>
+        </tr>
+      </tbody>
+      -->
+      <tbody :class="tbodyClasses">
+        <tr v-for="(row, index) in filteredData" :key="index">
+          <td v-for="(column, columnIndex) in columns" :key="columnIndex">
+            <!-- Verificamos si la columna es 'Fecha y hora envío' -->
+            <template v-if="column.value === 'fechaEnvio'">
+              {{ formatFechaYHora(row.fechaEnvio, row.horaEnvio) }}
+            </template>
+            <!-- Si no, mostramos el valor normal -->
+            <template v-else>
+              {{ row[column.value] }}
+            </template>
+          </td>
+        </tr>
+        <tr v-if="filteredData.length === 0">
+          <td :colspan="columns.length" class="no-data">No hay datos disponibles</td>
         </tr>
       </tbody>
     </table>
@@ -59,6 +78,16 @@ export default{
           String(value).toLowerCase().includes(this.searchword.toLowerCase())
         );
       });
+    }
+  },
+  methods: {
+    formatFechaYHora(fecha, hora) {
+      // Descomponer la fecha en año, mes y día
+      const [year, month, day] = fecha.split('-');
+      // Devolver la fecha en formato dd-mm-aaaa
+      fecha = `${day}-${month}-${year}`;
+      // Concatenamos fecha y hora con un guion o como mejor prefieras
+      return `${fecha} / ${hora}`;
     }
   }
 };

@@ -1,9 +1,8 @@
 <template>
-  <div class="listado-paquetes">
-    <!-- <h1>GESTIÓN DE PAQUETES</h1> -->
+  <div class="listado-aeropuertos">
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
-      <button @click="anadirPaquete">+ Registrar Envío</button>
+      <!--<button @click="addAeropuerto">+ Agregar Aeropuerto</button>-->
       <!--<button @click="updateStatus">Actualizar Estados</button>-->
     </div>
     <base-table-envios
@@ -22,14 +21,12 @@
 </template>
 
 <script>
-
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
-import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
-
+import axios from 'axios';
 
 export default {
-  name: 'listadoPaquetes',
+  name: 'Aeropuertos',
   components: {
     BaseTableEnvios,
     Pagination
@@ -38,56 +35,68 @@ export default {
     return {
       searchword: '',
       tableColumns: [
-        { text: 'Código de envío', value: 'id' },
-        { text: 'Estado', value: 'estadoEnvio' },
-        { text: 'Origen', value: 'ciudadOrigen' },
-        { text: 'Destino', value: 'ciudadDestino' },
-        { text: 'Fecha y hora envío', value: 'fechaEnvio' }
+        { text: 'ID', value: 'id' },
+        { text: 'Código OACI', value: 'codigoOACI' },
+        { text: 'Nombre Ciudad', value: 'nombreCiudad' },
+        { text: 'País', value: 'pais' },
+        { text: 'Código IATA', value: 'codigoIATA' },
+        { text: 'Huso Horario', value: 'husoHorario' },
+        { text: 'Cap. Almacenamiento Máximo', value: 'capacidadAlmacenamientoMaximo' },
+        { text: 'Cap. Almacenamiento Usado', value: 'capacidadDeAlmacenamientoUsado' },
+        { text: 'Latitud', value: 'latitud' },
+        { text: 'Longitud', value: 'longitud' }
       ],
       tableData: [],
+      filteredData: [],
       currentPage: 1,
       totalPages: 10
     };
   },
-  computed: {
-    filteredData() {
-      if (this.searchword.trim() === '') {
-        return this.tableData;
-      }
-      const searchwordLower = this.searchword.toLowerCase();
-      return this.tableData.filter(item =>
-        item.ciudadOrigen.toLowerCase().includes(searchwordLower) ||
-        item.ciudadDestino.toLowerCase().includes(searchwordLower)
-      );
-    }
-  },
   methods: {
-    anadirPaquete() {
-      this.$router.push('RegisterPackage');
-      console.log('Añadir Nuevo Paquete');
+    addAeropuerto() {
+      this.$router.push('AddAeropuerto');
+      console.log('Agregar Nuevo Aeropuerto');
+    },
+    updateStatus() {
+      // lógica para actualizar los estados
+      console.log('Actualizar Estados');
     },
     handlePageChange(page) {
       this.currentPage = page;
+      // implementar lógica de cambio de página
       console.log('Página actual:', page);
     },
-    fetchDataListaEnvios() {
-      axios.get('http://localhost/api/paquete/')
+    fetchDataListaAeropuertos() {
+      // Realiza la solicitud HTTP para obtener los datos de la API
+      axios.get('http://localhost/api/aeropuertos/getall')
         .then(response => {
+          // Asigna los datos de la respuesta a tableData
           this.tableData = response.data;
+          // Actualiza los datos filtrados
+          this.filteredData = response.data;
         })
         .catch(error => {
           console.error('Error al obtener los datos:', error);
         });
     }
   },
-  mounted() {
-    this.fetchDataListaEnvios();
+  computed: {
+    filteredData() {
+      return this.tableData.filter(aeropuerto => {
+        return aeropuerto.nombreCiudad.toLowerCase().includes(this.searchword.toLowerCase()) ||
+               aeropuerto.codigoOACI.toLowerCase().includes(this.searchword.toLowerCase()) ||
+               aeropuerto.pais.toLowerCase().includes(this.searchword.toLowerCase());
+      });
+    }
   },
+  mounted() {
+    this.fetchDataListaAeropuertos();
+  }
 };
-
 </script>
+
 <style scoped>
-.listado-paquetes {
+.listado-aeropuertos {
   background-color: #2c2f48;
   color: #ffffff;
   padding: 20px;
@@ -132,5 +141,4 @@ export default {
 .tbody-custom-class {
   background-color: #2c2f48;
 }
-
 </style>
