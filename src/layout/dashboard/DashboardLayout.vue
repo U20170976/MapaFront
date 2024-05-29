@@ -10,7 +10,7 @@
         <!--sidebar-link to="/table-list" :name="$t('sidebar.tableList')" icon="tim-icons icon-puzzle-10"/-->
         <!--sidebar-link to="/typography" :name="$t('sidebar.typography')" icon="tim-icons icon-align-center"/-->
         <!--sidebar-link to="/dashboard?enableRTL=true" :name="$t('sidebar.rtlSupport')" icon="tim-icons icon-world"/-->
-        <sidebar-link v-if="toggle.gestionRutas" to="/admin/aviones" :name="$t('Aviones')" icon="tim-icons icon-send"/>
+        <!--<sidebar-link v-if="toggle.gestionRutas" to="/admin/aviones" :name="$t('Aviones')" icon="tim-icons icon-send"/>-->
         <sidebar-link v-if="toggle.gestionSedes" to="/admin/aeropuertos" :name="$t('Aeropuertos')" icon="tim-icons icon-send"/>
         <sidebar-link v-if="toggle.gestionPaquetes" to="/operario/listadoPaquetes" :name="$t('Gestión de Envíos')" icon="tim-icons icon-send"/>
         <!--<sidebar-link v-if="toggle.listaPaquetes" to="/cliente/paquetes" :name="$t('sidebar.listarpaquetes')" icon="tim-icons icon-single-copy-04"/>-->
