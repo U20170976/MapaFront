@@ -772,7 +772,7 @@
     },
     methods: {
      fetchAeropuertos() {
-       axios.get('http://localhost:8080/api/aeropuertos')
+       axios.get('https://inf226-982-3c.inf.pucp.edu.pe/tomcat/api/aeropuertos')
          .then(response => {
            this.aeropuertos = response.data;
            this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
