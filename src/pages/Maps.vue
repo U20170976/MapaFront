@@ -772,7 +772,7 @@
     },
     methods: {
      fetchAeropuertos() {
-       axios.get('http://localhost/api/aeropuertos')
+       axios.get('http://localhost:8080/api/aeropuertos')
          .then(response => {
            this.aeropuertos = response.data;
            this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
