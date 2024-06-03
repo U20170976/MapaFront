@@ -35,8 +35,9 @@ module.exports = {
     sourceMap: process.env.NODE_ENV !== 'production'
   },
   devServer: {
-    port: 443,
+    port: 3000,
     host: '0.0.0.0',
     https: false,
+    disableHostCheck: true,
   }
 };
