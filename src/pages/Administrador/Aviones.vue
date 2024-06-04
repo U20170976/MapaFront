@@ -24,6 +24,7 @@
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
 import axios from 'axios';
+import config from "../../config";
 
 export default {
   name: 'Aviones',
@@ -33,6 +34,7 @@ export default {
   },
   data() {
     return {
+      urlBase: config.urlBase,// aquí guardamos la base de la URL
       searchword: '',
       tableColumns: [
         { text: 'ID', value: 'id' },
@@ -68,7 +70,7 @@ export default {
     },
     fetchDataListaAeropuertos() {
       // Realiza la solicitud HTTP para obtener los datos de la API
-      axios.get('http://localhost/api/aeropuertos/getall')
+      axios.get(this.urlBase + '/api/aeropuertos/getall')
         .then(response => {
           // Asigna los datos de la respuesta a tableData
           this.tableData = response.data;

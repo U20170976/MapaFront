@@ -26,7 +26,7 @@
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
 import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
-
+import config from "../../config";
 
 export default {
   name: 'listadoPaquetes',
@@ -36,6 +36,7 @@ export default {
   },
   data() {
     return {
+      urlBase: config.urlBase,// aquí guardamos la base de la URL
       searchword: '',
       tableColumns: [
         { text: 'Código de envío', value: 'id' },
@@ -71,7 +72,7 @@ export default {
       console.log('Página actual:', page);
     },
     fetchDataListaEnvios() {
-      axios.get('http://localhost/api/paquete/')
+      axios.get(this.urlBase + '/api/paquete/')
         .then(response => {
           this.tableData = response.data;
         })

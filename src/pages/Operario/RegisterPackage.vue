@@ -138,9 +138,7 @@
   import { BaseAlert } from '@/components';
   import listadoPaquetes from "../Operario/listadoPaquetes";
   import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
-
-  import Authentication from '@/store/authentication.js';
-
+  import config from "../../config";
 
   export default {
     components: {
@@ -150,6 +148,7 @@
     },
     data() {
       return {
+        urlBase: config.urlBase,// aquí guardamos la base de la URL
         formSubmitted: false,
         paquete: {
           ciudadOrigen: "SPIM",
@@ -182,14 +181,7 @@
         loading: true,
         error: '',
         selectedSede: "", // Inicializa como cadena vacía
-        /*
-        lpaisesDestino: [
-          { id: 1, pais: { nombre: 'Perú' }, ciudad: { nombre: 'Lima' } },
-          { id: 2, pais: { nombre: 'Argentina' }, ciudad: { nombre: 'Buenos Aires' } },
-          { id: 3, pais: { nombre: 'Chile' }, ciudad: { nombre: 'Santiago' } }
-          // Agrega más paises con ciudades según sea necesario
-        ],
-        */
+    
         lpaisesDestino: [],
         reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
 
@@ -227,25 +219,13 @@
         this.paquete.horaEnvio = dateTime.horaEnvio;
         this.formSubmitted = true;
         try {
-          /*
-          const payload = {
-            ciudadOrigen: "SPIM", //this.clienteOrigen.ciudadPais, // "Lima-Peru",
-            ciudadDestino: this.clienteDestino.codigoOACI, // "Brasilia-Brasil",
-            ciudadActual: "SPIM",//this.clienteOrigen.ciudadPais, // "Lima-Peru",
-            fechaEnvio: this.fechaEnvio,
-            horaEnvio: this.horaEnvio,
-            idEnvio: "154",
-            cantidadPaquetes: this.cantidadPaquetes,
-            estadoEnvio: this.estadoEnvio
-          };
-          */
-          const payload = {
+             const payload = {
             paquete: this.paquete,
             clienteManda: this.clienteManda,
             clienteRecibe: this.clienteRecibe
           };
           // Llamada a la API
-          const response = await axios.post('http://localhost/api/paquete/register/envio', payload);
+          const response = await axios.post(this.urlBase + '/api/paquete/register/envio', payload);
 
           // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
           //if (response.data.success) {
@@ -297,7 +277,9 @@
       },
       async fetchPaisesDestino() {
         try {
-          const response = await axios.get('http://localhost/api/aeropuertos/getall');
+          //const response = await axios.get('http://localhost/api/aeropuertos/getall');
+          console.log(this.urlBase);
+          const response = await axios.get(this.urlBase + '/api/aeropuertos/getall');
       
           //this.lpaisesDestino = response.data;
           // Asumiendo que response.data es un arreglo de objetos con la estructura adecuada
@@ -325,7 +307,6 @@
           .then(data => {
             this.paisOrigen = data.countryName;
             this.ciudadOrigen = data.city;
-            this.clienteOrigen.ciudadPais = this.ciudadOrigen + " - " + this.paisOrigen;
             this.loading = false;
           })
           .catch(error => {
