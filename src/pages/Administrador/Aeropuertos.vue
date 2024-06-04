@@ -26,6 +26,9 @@ import Pagination from '@/components/Pagination.vue';
 import axios from 'axios';
 import config from "../../config";
 
+let urlBase = config.urlBase,// aquí guardamos la base de la URL
+    urlListarAeropuertos = '/api/aeropuertos/getall';
+     
 export default {
   name: 'Aeropuertos',
   components: {
@@ -34,7 +37,7 @@ export default {
   },
   data() {
     return {
-      urlBase: config.urlBase,// aquí guardamos la base de la URL
+  
       searchword: '',
       tableColumns: [
         { text: 'ID', value: 'id' },
@@ -70,7 +73,7 @@ export default {
     },
     fetchDataListaAeropuertos() {
       // Realiza la solicitud HTTP para obtener los datos de la API
-      axios.get(this.urlBase + '/api/aeropuertos/getall')
+      axios.get(urlBase + urlListarAeropuertos)
         .then(response => {
           // Asigna los datos de la respuesta a tableData
           this.tableData = response.data;

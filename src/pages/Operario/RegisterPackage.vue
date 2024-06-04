@@ -140,6 +140,10 @@
   import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
   import config from "../../config";
 
+  //Definimos las variables globales
+  let urlBase = config.urlBase,// aquí guardamos la base de la URL
+      urlRegistrarEnvio = '/api/paquete/register/envio',
+      urlListarAeropuertos = '/api/aeropuertos/getall';
   export default {
     components: {
       BaseTable,
@@ -148,7 +152,6 @@
     },
     data() {
       return {
-        urlBase: config.urlBase,// aquí guardamos la base de la URL
         formSubmitted: false,
         paquete: {
           ciudadOrigen: "SPIM",
@@ -225,7 +228,7 @@
             clienteRecibe: this.clienteRecibe
           };
           // Llamada a la API
-          const response = await axios.post(this.urlBase + '/api/paquete/register/envio', payload);
+          const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
 
           // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
           //if (response.data.success) {
@@ -278,8 +281,8 @@
       async fetchPaisesDestino() {
         try {
           //const response = await axios.get('http://localhost/api/aeropuertos/getall');
-          console.log(this.urlBase);
-          const response = await axios.get(this.urlBase + '/api/aeropuertos/getall');
+          console.log(urlBase);
+          const response = await axios.get(urlBase + urlListarAeropuertos);
       
           //this.lpaisesDestino = response.data;
           // Asumiendo que response.data es un arreglo de objetos con la estructura adecuada
