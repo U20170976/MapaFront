@@ -740,6 +740,11 @@ export default {
  this.$nextTick(() => {
         this.map.resize();
       });
+
+      const fechaInicio = this.fecha_inicio_simulacion;
+      const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
+
+      this.startSimulationLoop(fechaInicio,fechaInicioHora); 
       // Cargar todas las imágenes necesarias antes de configurar las capas
       this.loadImages(() => {
         // Una vez que las imágenes estén cargadas, configurar las capas
