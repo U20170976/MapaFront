@@ -6,7 +6,7 @@
       <div class="drop-zone" @dragover.prevent @drop="handleDrop">
         Arrastra y suelta tus archivos aquí
       </div>
-      <button @click="closeModal">Cerrar</button>
+      <button @click="closeModal" class="close-button">Cerrar</button>
     </div>
   </div>
 </template>
@@ -50,18 +50,48 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
 }
 
 .popup {
-  background: white;
+  background: #1e1e2f;
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  width: 400px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.popup h3 {
+  color: #ffffff;
+  margin-bottom: 20px;
 }
 
 .drop-zone {
   border: 2px dashed #ccc;
   padding: 20px;
   margin-top: 10px;
+  border-radius: 8px;
+  color: #aaa;
+}
+
+input[type="file"] {
+  display: block;
+  margin: 20px auto;
+  color: #ffffff;
+}
+
+.close-button {
+  background: #ff6589;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  color: white;
+  margin-top: 20px;
+}
+
+.close-button:hover {
+  background: #e05475;
 }
 </style>

@@ -190,4 +190,17 @@ export default {
   background-color: #2c2f48;
 }
 
+.upload-button {
+  background: linear-gradient(to right, #a100f2, #ff6589);
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.upload-button img {
+  width: 32px;
+  height: 32px;
+}
+
 </style>
