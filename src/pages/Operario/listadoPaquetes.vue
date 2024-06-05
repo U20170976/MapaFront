@@ -4,7 +4,37 @@
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
       <button @click="anadirPaquete">+ Registrar Envío</button>
+      <!--
+      <input type="file" @change="handleFileUpload"/>
+      <button @click="uploadFile">
+        <i class="fa fa-upload"></i>
+      </button>-->
+      <!-- Botón para abrir el popup -->
+
+      <button @click="openModal" class="upload-button">
+        <i class="fa fa-upload"></i>
+      </button>
+      <FileUploadModal v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" />
+      <!--
+      <button @click="openPopup" class="upload-button">
+        <i class="fa fa-upload"></i>
+      </button>
+      Popup de subida de archivos
+      <div v-if="isPopupOpen" class="popup-overlay" @click="closePopup">
+        <div class="popup" @click.stop>
+          <h3>Subir Archivos</h3>
+          <input type="file" @change="handleFileUpload" ref="fileInput" />
+          <div class="drop-zone" @dragover.prevent @drop="handleDrop">
+            Arrastra y suelta tus archivos aquí
+          </div>
+          <button @click="closePopup">Cerrar</button>
+        </div> 
+      </div>-->
       <!--<button @click="updateStatus">Actualizar Estados</button>-->
+      <!--<label for="fileInput">
+        <input type="file" id="fileInput" @change="handleFileUpload">
+        <i class="fa fa-upload"></i> Subir Archivo
+      </label>-->
     </div>
     <base-table-envios
       :columns="tableColumns"
@@ -27,6 +57,7 @@ import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
 import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
 import config from "../../config";
+import FileUploadModal from '@/components/FileUploadModal.vue';
 
 //Definimos las variables globales
 let urlBase = config.urlBase,// aquí guardamos la base de la URL
@@ -36,7 +67,8 @@ export default {
   name: 'listadoPaquetes',
   components: {
     BaseTableEnvios,
-    Pagination
+    Pagination,
+    FileUploadModal,
   },
   data() {
     return {
@@ -50,7 +82,8 @@ export default {
       ],
       tableData: [],
       currentPage: 1,
-      totalPages: 10
+      totalPages: 10,
+      isModalOpen: false,
     };
   },
   computed: {
@@ -82,6 +115,26 @@ export default {
         .catch(error => {
           console.error('Error al obtener los datos:', error);
         });
+    },
+    openModal() {
+      this.isModalOpen = true;
+    },
+    closeModal() {
+      this.isModalOpen = false;
+    },
+    async uploadFile() {
+      const formData = new FormData();
+      formData.append('file', this.file);
+
+      try {
+        const response = await fetch('http://example.com/upload', {
+          method: 'POST',
+          body: formData
+        });
+        console.log('Archivo subido exitosamente');
+      } catch (error) {
+        console.error('Error al subir el archivo', error);
+      }
     }
   },
   mounted() {
