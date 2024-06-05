@@ -10,7 +10,7 @@ export default {
   saltoTemporalSimulacion: 1,
   delaySimulacion: 200,
   //urlBase: 'http://localhost'
-  urlBase: 'http://localhost:8080' //con el puerto modificado de Renzo
-  //urlBase: 'https://inf226-982-3c.inf.pucp.edu.pe/tomcat'
+  //urlBase: 'http://localhost:8080' //con el puerto modificado de Renzo
+  urlBase: 'https://inf226-982-3c.inf.pucp.edu.pe/tomcat'
   
 }
