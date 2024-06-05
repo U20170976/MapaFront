@@ -273,7 +273,7 @@ import Mapa2 from '@/store/map2.json';
 import axios from 'axios';
 import Authentication from '@/store/authentication.js';
 import Simulation from '@/store/simulation.js';
-
+import config from "../config";
 
 const
   aeropuertos = [];
@@ -284,8 +284,13 @@ const calendarioVuelos = {};
 
 const envios = [];
 
+let urlBase = config.urlBase;// aquí guardamos la base de la URL
 
+let urlListarEnvios = '/api/paquete/';
 
+let saltoTemporalAux = config.saltoTemporalSimulacion;
+
+let delayAux = config.delaySimulacion;
 
 export default {
   props: ['title', 'content', 'isVisible', 'isVisibleResumen'],
@@ -498,7 +503,8 @@ export default {
       this.isPlanningOpen = !this.isPlanningOpen;
     },
     fetchAeropuertos() {
-      axios.get('http://localhost/api/aeropuertos')
+      console.log(urlBase+'/api/aeropuertos' );
+      axios.get(urlBase + '/api/aeropuertos')
         .then(response => {
           this.aeropuertos = response.data;
           this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
@@ -527,7 +533,7 @@ export default {
       const fecha = this.simulationDateTime.toISOString().split('T')[0];
       const hora = this.simulationDateTime.toTimeString().split(' ')[0].substring(0, 5);
 
-      axios.get(`http://localhost/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
+      axios.get(urlBase +`/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
           this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
@@ -650,7 +656,7 @@ export default {
 
       await this.continuarSimulacion(this.currentDate, this.currentHour);
       // Añadir un retraso antes de obtener los resultados de la simulación
-      await this.delay(200); // 500ms de retraso, ajusta según sea necesario
+      await this.delay(delayAux); // 500ms de retraso, ajusta según sea necesario
       await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
 
     },
@@ -800,13 +806,13 @@ export default {
         // console.log(fechaInicioHora);
         cont = 1;
         // Initiate the simulation with the date as a parameter
-        const response = await axios.get('http://localhost/api/simulacion/semanal/iniciarST', {
+        const response = await axios.get(urlBase +'/api/simulacion/semanal/iniciarST', {
           params: {
             fecha: fechaInicio,
             hora: fechaInicioHora,
             separarPaquetes: separarPaquetesCont,
             tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: 1
+            saltoTemporal: saltoTemporalAux
           }
         });
 
@@ -844,7 +850,7 @@ export default {
       }
       this.simulationInterval = setInterval(async () => {
 
-        const statusResponse = await axios.get('http://localhost/api/simulacion/semanal/estado');
+        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
         console.log("Estado de la simulación:", statusResponse.data);
         this.progresoPlanificacion = statusResponse.data.progreso;
         this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
@@ -923,13 +929,13 @@ export default {
       const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
 
       try {
-        const response = await axios.get('http://localhost/api/simulacion/semanal/continuarST', {
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/continuarST', {
           params: {
             fecha: fecha,
             hora: hora,
             separarPaquetes: separarPaquetesCont,
             tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: 1
+            saltoTemporal: saltoTemporalAux
           }
         });
         console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
@@ -947,7 +953,7 @@ export default {
 
     async finalizarSimulacion() {
       try {
-        const response = await axios.get('http://localhost/api/simulacion/semanal/finalizarST');
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
         console.log("Simulación finalizada:", response.data);
       } catch (error) {
         console.error("Error finalizando la simulación:", error);
@@ -959,7 +965,7 @@ export default {
 
     async checkSimulationStatus() {
       try {
-        const response = await axios.get('http://localhost/api/simulacion/semanal/estado');
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/estado');
         console.log("Estado de la simulación:", response.data);
         // Manejar la respuesta de estado si es necesario
       } catch (error) {
@@ -969,7 +975,7 @@ export default {
 
     async fetchSimulationResults(fecha, hora) {
       try {
-        const response = await axios.get('http://localhost/api/simulacion/semanal/resultados');
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
         console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
@@ -1006,7 +1012,7 @@ export default {
 
     async fetchSimulationResultsContinuar(fecha, hora) {
       try {
-        const response = await axios.get('http://localhost/api/simulacion/semanal/resultados');
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
         console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
@@ -1518,7 +1524,7 @@ export default {
         const fecha = fechaHora.toISOString().split('T')[0];
         const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
 
-        axios.get(`http://localhost/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
+        axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
           .then(response => {
             this.resultadosBusqueda = response.data;
           })
@@ -1544,7 +1550,7 @@ export default {
         const fecha = fechaHora.toISOString().split('T')[0];
         const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
 
-        axios.get(`http://localhost/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
+        axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
           .then(response => {
             this.resultadosBusquedaEnvio = response.data;
           })
@@ -1560,7 +1566,7 @@ export default {
       if (this.busquedaVuelo.trim() !== '') {
         const cadena = this.busquedaVuelo;
 
-        axios.get(`http://localhost/api/simulacion/semanal/vuelo`, {
+        axios.get(urlBase + `/api/simulacion/semanal/vuelo`, {
           params: {
             cadena: cadena
           }
