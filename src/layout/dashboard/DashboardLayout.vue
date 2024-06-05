@@ -8,7 +8,7 @@
         <!--sidebar-link to="/notifications" :name="$t('sidebar.notifications')" icon="tim-icons icon-bell-55"/-->
         <sidebar-link v-if="toggle.perfil" to="/profile" :name="$t('sidebar.userProfile')" icon="tim-icons icon-single-02"/>
         <!--sidebar-link to="/table-list" :name="$t('sidebar.tableList')" icon="tim-icons icon-puzzle-10"/-->
-        <!--sidebar-link to="/typography" :name="$t('sidebar.typography')" icon="tim-icons icon-align-center"/-->
+        
         <!--sidebar-link to="/dashboard?enableRTL=true" :name="$t('sidebar.rtlSupport')" icon="tim-icons icon-world"/-->
         <!--<sidebar-link v-if="toggle.gestionRutas" to="/admin/aviones" :name="$t('Aviones')" icon="tim-icons icon-send"/>-->
         <sidebar-link v-if="toggle.gestionSedes" to="/admin/aeropuertos" :name="$t('Aeropuertos')" icon="tim-icons icon-send"/>
@@ -18,6 +18,7 @@
         <!--<sidebar-link v-if="toggle.gestionUsuarios" to="/admin/usuarios" :name="$t('sidebar.usuarios')" icon="tim-icons icon-badge"/>-->      
         <!--<sidebar-link v-if="toggle.gestionUsuariosGerente" to="/gerente/usuarios" :name="$t('sidebar.usuarios-gerente')" icon="tim-icons icon-badge"/>-->
         <!--<sidebar-link v-if="toggle.listaHistorialSimulacion" to="/gerente/listarSimulacion" :name="$t('sidebar.listarHistSimulacion')" icon="tim-icons icon-badge"/>-->
+        <sidebar-link to="/typography" :name="$t('sidebar.monitoreo')" icon="tim-icons icon-world"/>
       </template>
     </side-bar>
     <div class="main-panel">

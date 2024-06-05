@@ -84,9 +84,9 @@
   <div class="col-md-auto">
     <button v-if="planificacionEnEsperaCancelar" class="btn-simulation-left font-weight-bold" @click="openCancelarModal">Cancelar Simulación</button>
   </div>
-  <div class="col-md-auto ml-auto">
+  <div class="col-md-auto ml-auto btn-container">
     <button v-if="planificacionEnEsperaDetener" class="btn-simulation-right font-weight-bold" @click="openDetenerModal">Detener Simulación</button>
-    <button v-if="planificacionEnEsperaRenaudar" class="btn-simulation-right font-weight-bold" @click="openReanudarModal">Reanudar Simulación</button>
+    <button v-if="planificacionEnEsperaRenaudar" class="btn-simulation-right-Rea font-weight-bold" @click="openReanudarModal">Reanudar Simulación</button>
   </div>
 </div>
  
@@ -468,7 +468,7 @@ export default {
     openDetenerModal() {
       this.showDetenerModal = true;
     },
-    openRenaudarModal() {
+    openReanudarModal() {
       this.showReanudarModal = true;
     },
     closeFechaInvalidaModal() {
@@ -1412,15 +1412,17 @@ export default {
 
     },
     reanudarSimulacion() {
+      const fechaInicio = this.fecha_inicio_simulacion;
+        const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
       this.showReanudarModal = false;
       this.planificacionEnEsperaDetener = true;
-      
+      this.planificacionEnEsperaRenaudar = false;
       let vue = this;
       vue.toggleIniciarDetener = false;
-      vue.toggleReanudar = false;
+      vue.toggleReanudar = true;
       this.isAnimating = true;
       if (!this.simulationInterval && this.simulationDateTime) {
-        this.startSimulationLoop(); // Reanudar la simulación desde el punto donde se detuvo
+        this.startSimulationLoop(fechaInicio,fechaInicioHora); // Reanudar la simulación desde el punto donde se detuvo
         this.movingFlights.forEach(vuelo => {
           vuelo.paused = false;
           this.animateFlight(vuelo);
@@ -2374,6 +2376,13 @@ button[disabled] {
 }
 
 
+.row.justify-content-between.align-items-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+
 
 .btn-simulation-left {
   background-color: red;
@@ -2395,6 +2404,26 @@ button[disabled] {
   cursor: pointer;
   font-weight: bold;
   margin-left: 320px; /* Added margin to separate buttons */
+  
+}
+
+
+.btn-simulation-right-Rea {
+  background-color: green;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 320px; /* Added margin to separate buttons */
+}
+
+.btn-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
 }
 
 .fullscreen-toggle {

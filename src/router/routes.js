@@ -11,7 +11,7 @@ import Profile from "@/pages/Profile.vue";
 import Notifications from"@/pages/Notifications.vue";
 import Icons from "@/pages/Icons.vue";
 import Maps from "@/pages/Maps.vue";
-import Typography from "@/pages/Typography.vue";
+import Monitoreo from "@/pages/Typography.vue";
 import TableList from "@/pages/TableList.vue";
 import listadoPaquetes from "@/pages/Operario/listadoPaquetes.vue";
 import ResumenEnvio from "@/pages/Operario/ResumenEnvio.vue";
@@ -141,8 +141,8 @@ export default ([
       },
       {
         path: "typography",
-        name: "typography",
-        component: {Typography,DashboardLayout}
+        name: "Monitoreo",
+        component: Monitoreo
       },
       {
         path: "table-list",
