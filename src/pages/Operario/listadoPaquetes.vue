@@ -4,7 +4,37 @@
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
       <button @click="anadirPaquete">+ Registrar Envío</button>
-      <button @click="updateStatus">Actualizar Estados</button>
+      <!--
+      <input type="file" @change="handleFileUpload"/>
+      <button @click="uploadFile">
+        <i class="fa fa-upload"></i>
+      </button>-->
+      <!-- Botón para abrir el popup -->
+
+      <button @click="openModal" class="upload-button">
+        <i class="fa fa-upload"></i>
+      </button>
+      <FileUploadModal v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" />
+      <!--
+      <button @click="openPopup" class="upload-button">
+        <i class="fa fa-upload"></i>
+      </button>
+      Popup de subida de archivos
+      <div v-if="isPopupOpen" class="popup-overlay" @click="closePopup">
+        <div class="popup" @click.stop>
+          <h3>Subir Archivos</h3>
+          <input type="file" @change="handleFileUpload" ref="fileInput" />
+          <div class="drop-zone" @dragover.prevent @drop="handleDrop">
+            Arrastra y suelta tus archivos aquí
+          </div>
+          <button @click="closePopup">Cerrar</button>
+        </div> 
+      </div>-->
+      <!--<button @click="updateStatus">Actualizar Estados</button>-->
+      <!--<label for="fileInput">
+        <input type="file" id="fileInput" @change="handleFileUpload">
+        <i class="fa fa-upload"></i> Subir Archivo
+      </label>-->
     </div>
     <base-table-envios
       :columns="tableColumns"
@@ -26,130 +56,99 @@
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
 import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
+import config from "../../config";
+import FileUploadModal from '@/components/FileUploadModal.vue';
 
+//Definimos las variables globales
+let urlBase = config.urlBase,// aquí guardamos la base de la URL
+    urlListarEnvios = '/api/paquete/'; 
 
 export default {
   name: 'listadoPaquetes',
   components: {
     BaseTableEnvios,
-    Pagination
+    Pagination,
+    FileUploadModal,
   },
   data() {
     return {
       searchword: '',
-      
       tableColumns: [
-        { text: 'Código de envío', value: 'codigoEnvio' },
-        { text: 'Estado', value: 'estado' },
-        { text: 'Tiempo transcurrido', value: 'tiempoTranscurrido' },
-        { text: 'Origen', value: 'origen' },
-        { text: 'Destino', value: 'destino' },
-        { text: 'Fecha y hora envío', value: 'fechaEnvio' },
-        { text: 'Fecha y hora llegada', value: 'fechaLlegada' }
-      ],
-      tableData: [
-        { codigoEnvio: 'FAS4445S', 
-          estado: 'En camino', 
-          tiempoTranscurrido: '20 horas', 
-          origen: 'Lima, Perú', 
-          destino: 'Washington, EEUU', 
-          fechaEnvio: '27/03/2024 - 11:30:40',
-          fechaLlegada: '28/03/2024 - 11:30:40' 
-        },
-        {
-          codigoEnvio: "FAS44ASE",
-          estado: "En camino",
-          tiempoTranscurrido: "20 horas",
-          origen: "Lima,Perú",
-          destino: "Washington, EEUU",
-          fechaEnvio: "15/05/2024 - 08:04:10",
-          fechaLlegada: "18/05/2024 - 13:05:10"
-        }
-        // más datos aquí...
-      ],   
-
-/*
-      --> JSON
-      {
-        "id": 1,
-        "idEnvio": "EN123456",
-        "ciudadOrigen": "Ciudad de Origen",
-        "ciudadDestino": "Ciudad de Destino",
-        "ciudadActual": "Ciudad Actual",
-        "fechaEnvio": "2024-05-22",
-        "horaEnvio": "14:30:00",
-        "cantidadPaquetes": 5,
-        "estadoEnvio": "En camino",
-        "coordinates": null,
-        "ruta": null
-      }
-      */
-     /*
-      tableColumns: [
-        { text: 'Código de envío', value: 'idEnvio' },
+        { text: 'Código de envío', value: 'id' },
         { text: 'Estado', value: 'estadoEnvio' },
-        { text: 'Tiempo transcurrido', value: 'tiempoTranscurrido' },
         { text: 'Origen', value: 'ciudadOrigen' },
         { text: 'Destino', value: 'ciudadDestino' },
-        { text: 'Fecha y hora envío', value: 'fechaEnvio' + ' - ' + 'horaEnvio' },
-        { text: 'Fecha y hora llegada', value: 'fechaLlegada' }
+        { text: 'Fecha y hora envío', value: 'fechaEnvio' }
       ],
-      tableData: [], // Ahora los datos se cargarán desde la API   
-*/
-      filteredData: [],
+      tableData: [],
       currentPage: 1,
-      totalPages: 10
+      totalPages: 10,
+      isModalOpen: false,
     };
+  },
+  computed: {
+    filteredData() {
+      if (this.searchword.trim() === '') {
+        return this.tableData;
+      }
+      const searchwordLower = this.searchword.toLowerCase();
+      return this.tableData.filter(item =>
+        item.ciudadOrigen.toLowerCase().includes(searchwordLower) ||
+        item.ciudadDestino.toLowerCase().includes(searchwordLower)
+      );
+    }
   },
   methods: {
     anadirPaquete() {
       this.$router.push('RegisterPackage');
       console.log('Añadir Nuevo Paquete');
     },
-    updateStatus() {
-      // lógica para actualizar los estados
-      console.log('Actualizar Estados');
-    },
     handlePageChange(page) {
       this.currentPage = page;
-      // implementar lógica de cambio de página
       console.log('Página actual:', page);
     },
     fetchDataListaEnvios() {
-      // Realiza la solicitud HTTP para obtener los datos de la API
-      axios.get('http://localhost/api/paquete/')
+      axios.get(urlBase + urlListarEnvios)
         .then(response => {
-          // Asigna los datos de la respuesta a tableData
           this.tableData = response.data;
-          // Actualiza los datos filtrados
-          this.filteredData = response.data;
         })
         .catch(error => {
           console.error('Error al obtener los datos:', error);
         });
+    },
+    openModal() {
+      this.isModalOpen = true;
+    },
+    closeModal() {
+      this.isModalOpen = false;
+    },
+    async uploadFile() {
+      const formData = new FormData();
+      formData.append('file', this.file);
+
+      try {
+        const response = await fetch('http://example.com/upload', {
+          method: 'POST',
+          body: formData
+        });
+        console.log('Archivo subido exitosamente');
+      } catch (error) {
+        console.error('Error al subir el archivo', error);
+      }
     }
   },
   mounted() {
-    // inicializar los datos filtrados
-    console.log('Página actual:', this.data);
-    this.filteredData = this.tableData;
-    // Llama a fetchData() cuando el componente se monta para cargar los datos
-    //this.fetchDataListaEnvios();
-  }
+    this.fetchDataListaEnvios();
+  },
 };
+
 </script>
 <style scoped>
-.gestion-envios {
+.listado-paquetes {
   background-color: #2c2f48;
   color: #ffffff;
   padding: 20px;
   border-radius: 8px;
-}
-
-h1 {
-  text-align: center;
-  font-size: 1.5em;
-  margin-bottom: 20px;
 }
 
 .search-and-actions {

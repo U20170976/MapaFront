@@ -15,24 +15,29 @@
             </div>
             <div class="form-group">
               <label>Cantidad de Paquetes</label>
-              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="cantidadPaquetes">
+              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="paquete.cantidadPaquetes">
             </div>
           </div>
           <div class="col-md-6">
             <div class="form-group">
               <label>Ciudad, País - Destino</label>
-              <select class="form-control" v-model="clienteDestino.ciudadPais">
+              <select class="form-control" v-model="paquete.ciudadDestino" required>
                 <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
-                <option v-for="paisDestino in lpaisesDestino" :key="paisDestino.id" :value="paisDestino">
-                  {{ paisDestino.ciudad.nombre }}, {{ paisDestino.pais.nombre }}
+                <option v-for="paisDestino in filteredPaisesDestino" :key="paisDestino.id" :value="`${paisDestino.codigoOACI}`">
+                  {{ paisDestino.nombreCiudad }} - {{ paisDestino.pais }}
                 </option>
               </select>
+               <!-- Mensaje de error -->
+              <div v-if="!paquete.ciudadDestino && formSubmitted" class="invalid-feedback">
+                Por favor, seleccione una ciudad y país.
+              </div>
             </div>
-
+            <!--
             <div class="form-group">
               <label>Descripción(opcional)</label>
               <input type="text" class="form-control" placeholder="Descripción" v-model="descripcionPaquete">
             </div>
+            -->
           </div>
         </div>
       </div>
@@ -50,22 +55,24 @@
             <div class="form-group">
               <label>DNI / RUC</label>
               <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc" @keypress.enter="filterClient(clienteOrigen.numDniRuc)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteManda.documentoIdentidad">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteOrigen.nombreCompleto">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteManda.nombres">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteOrigen.email">
+              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteManda.correo">
+              <!--
               <div v-if="email && !isEmailValid" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
               </div>
+              -->
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteOrigen.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteManda.telefono">
             </div>
           </div>
         </div>
@@ -83,22 +90,24 @@
             <div class="form-group">
               <label>DNI / RUC</label>
               <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteDestino.numDniRuc">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad">
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteDestino.nombreCompleto">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteRecibe.nombres">
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteDestino.email">
+              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteRecibe.correo">
+              <!--
               <div v-if="email && !isEmailValid" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
               </div>
+              -->
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteDestino.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteRecibe.telefono">
             </div>
           </div>
         </div>
@@ -122,53 +131,61 @@
 <script>
   import { BaseTable } from "@/components";
   import axios from 'axios';
+  //import { useToast } from 'vue-toastification';
   import NotificationTemplate from '../Notifications/NotificationTemplate';
   import NotificationTemplatePaqueteSuccess from '../Notifications/NotificationTemplatePaqueteSuccess';
   import NotificationTemplatePaqueteError from '../Notifications/NotificationTemplatePaqueteError';
   import { BaseAlert } from '@/components';
   import listadoPaquetes from "../Operario/listadoPaquetes";
   import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
+  import config from "../../config";
 
-  import Authentication from '@/store/authentication.js';
-
-
+  //Definimos las variables globales
+  let urlBase = config.urlBase,// aquí guardamos la base de la URL
+      urlRegistrarEnvio = '/api/paquete/register/envio',
+      urlListarAeropuertos = '/api/aeropuertos/getall';
   export default {
     components: {
       BaseTable,
       listadoPaquetes,
-      ResumenEnvio,
+      ResumenEnvio
     },
     data() {
       return {
-        clienteOrigen:{
-          id:'',
-          ciudadPais: '', /*Aqui se guardaría el valor, pero en paisOrigen y ciudadOrigen ya se guarda los valores que se encuentran por defecto*/
-          nombreCompleto: '',
-          email:'',
-          telefono:'',
-          numDniRuc:''
+        formSubmitted: false,
+        paquete: {
+          ciudadOrigen: "SPIM",
+          ciudadDestino: "",
+          ciudadActual: "SPIM",
+          fechaEnvio: "",
+          horaEnvio: "",
+          cantidadPaquetes: '',
+          estadoEnvio: "En Almacén",
+          coordinates: null,
+          ruta: null
         },
-        clienteDestino:{
-          id:'',
-          ciudadPais: '',
-          nombreCompleto: '',
-          email:'',
-          telefono:'',
-          numDniRuc:''
+        clienteManda:{
+          documentoIdentidad: "",
+          nombres: "",
+          correo:"",
+          telefono:"",
+          tipo:"1"
         },
-        descripcionPaquete: '',
-        cantidadPaquetes: '',
-        paisOrigen: '',
+        clienteRecibe:{
+          documentoIdentidad: "",
+          nombres: "",
+          correo:"",
+          telefono:"",
+          tipo:"2"
+        },
+        //descripcionPaquete: "",
+        paisOrigen: "",
         ciudadOrigen:"",
         loading: true,
         error: '',
         selectedSede: "", // Inicializa como cadena vacía
-        lpaisesDestino: [
-          { id: 1, pais: { nombre: 'Perú' }, ciudad: { nombre: 'Lima' } },
-          { id: 2, pais: { nombre: 'Argentina' }, ciudad: { nombre: 'Buenos Aires' } },
-          { id: 3, pais: { nombre: 'Chile' }, ciudad: { nombre: 'Santiago' } }
-          // Agrega más paises con ciudades según sea necesario
-        ],
+    
+        lpaisesDestino: [],
         reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
 
         type: ["", "info", "success", "warning", "danger"],
@@ -188,117 +205,101 @@
         this.error = "La geolocalización no está disponible en este navegador.";
         this.loading = false;
       }
-      /*
-      let vue = this;
       
-
-      var date = new Date();
-      var day = date.getDate();
-      var month = date.getMonth() + 1;
-      var year = date.getFullYear();
-      var hour = date.getUTCHours();
-      var min = date.getUTCMinutes();
-      console.log("Hora");
-      console.log(day.toString().slice(-2) + month.toString().slice(-2) + year.toString().slice(-2) + hour.toString().slice(-2) + min.toString().slice(-2));
-
-      vue.data_usuario.id = Authentication.getProfile().id;
-
-      axios.get(this.$store.state.appUri+'/usuarios/obtenerDatosSede/' + vue.data_usuario.id)
-      .then(function(response){
-        vue.data_usuario.sedeOrigen = response.data.sede.codigoOaci;
-        vue.data_usuario.pais = response.data.sede.pais.nombre;
-      }),
-
-      axios.get(this.$store.state.appUri+'/sedes/listarSedes')
-      .then(function(response){
-        vue.sedes = response.data;
-      }),
-      axios.get(this.$store.state.appUri+'/usuarios/listar')
-      .then(function(response){
-        vue.clientes = response.data;
-      }),
-      axios.get(this.$store.state.appUri+'/categorias/findAll')
-      .then(function(response){
-        vue.categorias = response.data;
-      })
-      */
+      this.fetchPaisesDestino();
     },
-/*
     computed: {
-      isEmailValid() {
-        return this.reg.test(this.email);
-      },
-      emailValidationClass() {
-        if (this.email === '') {
-          return '';
-        }
-        return this.isEmailValid ? 'has-success' : 'has-error';
+      filteredPaisesDestino() {
+        return this.lpaisesDestino.filter(paisDestino => {
+                                                          return `${paisDestino.codigoOACI}` !== `SPIM`;
+                                                         });
       }
     },
-*/
     methods:{
-      /*
-      filterClient:function(numeroDocumento){
-        let vue = this;
-        var lista = vue.clientes.filter(
-          function(cust){
-            return cust.numeroDocumento==numeroDocumento
+      async registrarEnvio() {
+        const dateTime = this.obtenerFechaHoraActual();
+        this.paquete.fechaEnvio = dateTime.fechaEnvio;
+        this.paquete.horaEnvio = dateTime.horaEnvio;
+        this.formSubmitted = true;
+        try {
+             const payload = {
+            paquete: this.paquete,
+            clienteManda: this.clienteManda,
+            clienteRecibe: this.clienteRecibe
+          };
+          // Llamada a la API
+          const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
+
+          // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
+          //if (response.data.success) {
+          if (response.data.id !== 0){
+            console.log('Envío registrado exitosamente:', response.data);
+            //this.$toast.success('El envío se ha registrado exitosamente.');
+            // Muestra una notificación de éxito
+            /*
+            this.$notify({
+              component: NotificationTemplatePaqueteSuccess,
+              horizontalAlign: 'center',
+              verticalAlign: 'top',
+            });
+            */
+            // Navega a la página de resumen del envío
+            //this.$router.push({ name: 'Resumen de Envío', params: { idEnvio: response.data } });
+            /*
+            this.$router.push({ 
+                name: 'Resumen de Envío', 
+                props: { envio: response.data }
+            });*/
+
+            this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
+
+          } else {
+            console.error('Error en la respuesta:', response.data);
+            // Muestra una notificación de error
+            //this.$toast.error('Hubo un error al registrar el envío.');
+            /*
+            this.$notify({
+              component: NotificationTemplatePaqueteError,
+              horizontalAlign: 'center',
+              verticalAlign: 'top',
+            });
+            */
           }
-        )
-        vue.cliente = lista[0];
-      },
-      addItem(){
-
-        let date = new Date();
-        let day = date.getDate();
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
-        let hour = date.getUTCHours();
-        let min = date.getUTCMinutes();
-
-        
-        console.log(day+month+year+hour+min);
-        if(this.categoria.id == null || this.paquete.descripcion == null || this.email == null){
-            this.notifyVue('top', 'center',4,NotificationTemplatePaqueteError);
-            return;
+        } catch (error) {
+          console.error('Error al registrar el envío: ', error);
+          // Muestra una notificación de error
+          //this.$toast.error('Hubo un error al registrar el envío.');
+          /*
+          this.$notify({
+            component: NotificationTemplatePaqueteError,
+            horizontalAlign: 'center',
+            verticalAlign: 'top',
+          });
+          */
         }
-
-        
-
-        var paquete = {
-          oaci_sede_origen:this.paquete.oaci_sede_origen,
-          oaci_sede_destino:this.paquete.oaci_sede_destino,
-          id_categoria:this.categoria.id,
-          descripcion:this.paquete.descripcion,
-          fecha_registro:"2020-05-18T08:34:00.000", // COLOCAR FECHA ACTUAL
-          estado:"EN_ALMACEN",
-          numeroDocumento:this.dniinput,
-          codigo:     this.paquete.oaci_sede_origen + "-" +
-                      year.toString()+month.toString()+day.toString()+"-"+
-                      hour.toString()+":"+min.toString()+"-"+
-                      this.oaci_sede_destino
+      },
+      async fetchPaisesDestino() {
+        try {
+          //const response = await axios.get('http://localhost/api/aeropuertos/getall');
+          console.log(urlBase);
+          const response = await axios.get(urlBase + urlListarAeropuertos);
+      
+          //this.lpaisesDestino = response.data;
+          // Asumiendo que response.data es un arreglo de objetos con la estructura adecuada
+          
+          this.lpaisesDestino = response.data.sort((a, b) => {
+            // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
+            if (a.pais < b.pais) return -1;
+            if (a.pais >= b.pais) return 1;
+            return 0;
+          });
+          
+        } catch (error) {
+          this.error = 'Error al cargar los datos';
+          console.error(error);
         }
-        var paqueteTabla = {
-          descripcion:this.paquete.descripcion,
-          categoria:this.categoria.descripcion          
-        }
-        this.table1.data.push(paqueteTabla);
-        this.paquete.push(paquete);
-        //console.log(this.paquete);
-        //console.log(this.categoria);
       },
-      obtenerCategoria(categoria){
-          this.categoria = categoria;
-          //console.log(categoria);
-      },
-      obtenerCiudad(sede){
-        let vue = this;
-          vue.ciudad = sede.pais.ciudad;
-          vue.paquete.oaci_sede_origen = vue.data_usuario.sedeOrigen;
-          vue.paquete.oaci_sede_destino = sede.codigoOaci;
-          //console.log(this.ciudad);
-      },
-      */
+
       obtenerUbicacionActual(position){
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
@@ -334,50 +335,44 @@
         }
         this.loading = false;
       },
-      /*
-      isPackageEmpty: function() {
-          return (this.table1.data.length == 0) ? this.notifyVue('top', 'center',4,NotificationTemplatePaqueteError) : 'has-error';
-      },
-      
-      notifyVue(verticalAlign, horizontalAlign,color,componente) {
-        //const color = 4;
-        //console.log(color);
-        this.$notify({
-          component: componente,
-          icon: "tim-icons icon-bell-55",
-          horizontalAlign: horizontalAlign,
-          verticalAlign: verticalAlign,
-          type: this.type[color],
-          timeout: 0
-        });
-      },
-      enviarPaquete(){
-        let vue = this;
-
-        if(this.table1.data.length == 0 || this.email==null || this.dniinput==null || this.cliente.nombreRazonSocial==null ){
-          this.notifyVue('top', 'center',4,NotificationTemplatePaqueteError);
-        }else{
-            axios.post(vue.$store.state.appUri+'/paquetes/insertarLista', vue.paquete)
-            .then(response => {})
-            .catch(e => {
-              vue.errors.push(e)
-            });
-            vue.paquete = [];
-            vue.table1.data = [];
-            this.notifyVue('top', 'center',2,NotificationTemplatePaqueteSuccess)
-        }
-      },
-      */
-      registrarEnvio() {
-        console.log('registrarEnvio llamado');
-        this.$router.push('ResumenEnvio');
-      },
       regresarAlListar(){
         console.log('listadoPaquetes llamado');
         this.$router.push('listadoPaquetes');
+      },
+      obtenerFechaHoraActual() {
+        const currentDate = new Date();
+
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+
+        const formattedDate = `${year}${month}${day}`;
+
+        const hours = String(currentDate.getHours()).padStart(2, '0');
+        const minutes = String(currentDate.getMinutes()).padStart(2, '0');
+
+        const formattedTime = `${hours}:${minutes}`;
+
+        return {
+          fechaEnvio: formattedDate,
+          horaEnvio: formattedTime
+        };
       }
-    },
-    props: {
+      /*
+      {
+    "idEnvio": "15",
+    "ciudadOrigen": "Sevilla",
+    "ciudadDestino": "Lima",
+    "ciudadActual": "Lima",
+    "fechaEnvio": "20240803",
+    "horaEnvio": "15:00",
+    "cantidadPaquetes": 4,
+    "estadoEnvio": "aa",
+    "coordinates": null,
+    "ruta": null
+}
+*/
+      
 
     }
   }

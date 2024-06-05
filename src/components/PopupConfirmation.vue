@@ -13,7 +13,7 @@
 
 
   
-  <script>
+<script>
   export default {
     name: 'PopupConfirmation',
     props: {
@@ -26,16 +26,16 @@
       confirm() {
         this.$emit('confirm');
         this.$emit('close');
-        this.$router.push('listadoPaquetes'); // Redirigir a otra página
+        this.$router.push({ name: 'Gestión de Envíos' }); // Redirigir a otra página
       },
       cancel() {
         this.$emit('close');
       }
     }
   }
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -78,5 +78,5 @@
   button:hover {
     background-color: #d83454;
   }
-  </style>
+</style>
   
