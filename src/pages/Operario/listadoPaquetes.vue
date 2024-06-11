@@ -125,20 +125,6 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
-    async uploadFile() {
-      const formData = new FormData();
-      formData.append('file', this.file);
-
-      try {
-        const response = await fetch('http://example.com/upload', {
-          method: 'POST',
-          body: formData
-        });
-        console.log('Archivo subido exitosamente');
-      } catch (error) {
-        console.error('Error al subir el archivo', error);
-      }
-    }
   },
   mounted() {
     this.fetchDataListaEnvios();

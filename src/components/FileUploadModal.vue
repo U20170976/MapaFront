@@ -35,6 +35,10 @@
 
 <script>
 import axios from 'axios';
+import config from '../config';
+
+
+let urlBase = config.urlBase;// aquí guardamos la base de la URL
 
 export default {
   props: {
@@ -118,14 +122,18 @@ export default {
 
       const formData = new FormData();
       formData.append("file", this.file);
+      console.log(urlBase + '/pedidos/upload/diario');
 
       try {
-        const response = await axios.post('/pedidos/upload/diario', formData, {
+        
+
+        const response = await axios.post(urlBase + '/api/paquete/pedidos/upload/diario', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }
         });
         this.handleSuccessMessage(response.data.Mensaje || "Archivo subido exitosamente."); // Llama al método de éxito
+        console.log('Archivo subido exitosamente:', response.data);
         this.errorMessage = null; // Limpiar mensaje de error si hay uno previo
         setTimeout(() => {
           this.successMessage = null; // Ocultar el mensaje después de unos segundos
