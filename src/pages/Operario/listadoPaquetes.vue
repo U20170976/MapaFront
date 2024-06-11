@@ -33,6 +33,7 @@
     <div v-if="errorMessage" class="error-message right-message">
       <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
     </div>
+    
   </div>
 </template>
 
@@ -99,14 +100,15 @@ export default {
       this.successMessage = message;
       setTimeout(() => {
         this.successMessage = null; // Ocultar el mensaje después de unos segundos
-      }, 3000);
+      }, 10000);
     },
     // Método para manejar el mensaje de error
     handleErrorMessage(message) {
       this.errorMessage = message;
+      
       setTimeout(() => {
         this.errorMessage = null; // Ocultar el mensaje después de unos segundos
-      }, 3000);
+      }, 10000);
     },
     fetchDataListaEnvios() {
       axios.get(urlBase + urlListarEnvios)
@@ -207,9 +209,9 @@ export default {
 .success-message,
 .error-message {
   position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 1000px;
+  left: 80%;
+  transform: translateX(15%);
   background-color: rgba(40, 167, 69, 0.9); /* Cambiar el color de fondo para el mensaje de éxito */
   color: white;
   padding: 10px 20px;
@@ -233,22 +235,27 @@ export default {
 /* Ajustar los estilos para los mensajes de éxito y error */
 .right-message {
   position: fixed;
-  top: 10px;
-  right: 900px; /* Ajustar la posición a la derecha */
-  max-width: 300px; /* Limitar el ancho para evitar que los mensajes ocupen toda la pantalla */
-  background-color: rgba(40, 167, 69, 0.9); /* Cambiar el color de fondo para el mensaje de éxito */
+  top: 20px;
+  right: 20px; /* Ajusta esta propiedad para mover los mensajes hacia la derecha */
+  max-width: 300px; /* Ajusta esta propiedad para controlar el ancho máximo del mensaje */
+  background-color: rgba(40, 167, 69, 0.9);
   color: white;
-  padding: 10px 80px;
+  padding: 10px 20px;
   border-radius: 5px;
   display: flex;
-  align-items: right;
-  justify-content: space-between; /* Alinear el ícono y el texto */
+  align-items: center;
+  justify-content: space-between;
   font-size: 16px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 9000;
 }
 
 .error-message.right-message {
   background-color: rgba(220, 53, 69, 0.9); /* Cambiar el color de fondo para el mensaje de error */
+}
+
+.contendor-notificacion{
+  position: relative;
 }
 
 </style>
