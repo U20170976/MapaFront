@@ -60,7 +60,7 @@ export default {
     return {
       searchword: '',
       tableColumns: [
-        { text: 'Código de envío', value: 'id' },
+        { text: 'Código de envío', value: 'idEnvio' },
         { text: 'Estado', value: 'estadoEnvio' },
         { text: 'Origen', value: 'ciudadOrigen' },
         { text: 'Destino', value: 'ciudadDestino' },
