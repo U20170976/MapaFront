@@ -11,7 +11,13 @@
           <div class="col-md-6">
             <div class="form-group">
               <label>Ciudad, País - Origen</label>
-              <input type="text" class="form-control" :value="`${ciudadOrigen} - ${paisOrigen}`" disabled>
+              <!--<input type="text" class="form-control" :value="`${ciudadOrigen} - ${paisOrigen}`" disabled>-->
+              <select class="form-control" v-model="paquete.ciudadOrigen" required @change="updateDestinos">
+                <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
+                <option v-for="paisOrigen in lpaisesDestino" :key="paisOrigen.id" :value="`${paisOrigen.codigoOACI}`">
+                  {{ paisOrigen.nombreCiudad }} - {{ paisOrigen.pais }}
+                </option>
+              </select>
             </div>
             <div class="form-group">
               <label>Cantidad de Paquetes</label>
@@ -197,6 +203,7 @@
       };
     },
     mounted(){
+      /*
       if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(this.obtenerUbicacionActual, this.handleLocationError);
       } 
@@ -206,14 +213,19 @@
         this.error = "La geolocalización no está disponible en este navegador.";
         this.loading = false;
       }
-      
+      */
       this.fetchPaisesDestino();
     },
     computed: {
-      filteredPaisesDestino() {
+      /*filteredPaisesDestino() {
         return this.lpaisesDestino.filter(paisDestino => {
                                                           return `${paisDestino.codigoOACI}` !== `SPIM`;
                                                          });
+      },*/
+      filteredPaisesDestino() {
+        return this.lpaisesDestino.filter(paisDestino => {
+                                                          return `${paisDestino.codigoOACI}` !== this.paquete.ciudadOrigen;
+                                                        });
       }
     },
     methods:{
@@ -358,23 +370,11 @@
           fechaEnvio: formattedDate,
           horaEnvio: formattedTime
         };
+      },
+      updateDestinos() {
+      // Limpiar la ciudad destino cuando se actualiza la ciudad origen
+      this.paquete.ciudadDestino = '';
       }
-      /*
-      {
-    "idEnvio": "15",
-    "ciudadOrigen": "Sevilla",
-    "ciudadDestino": "Lima",
-    "ciudadActual": "Lima",
-    "fechaEnvio": "20240803",
-    "horaEnvio": "15:00",
-    "cantidadPaquetes": 4,
-    "estadoEnvio": "aa",
-    "coordinates": null,
-    "ruta": null
-}
-*/
-      
-
     }
   }
 </script>
