@@ -13,104 +13,7 @@
       <button v-if="showFullscreenButton" class="fullscreen-toggle" @click="toggleFullscreen">
   {{ isFullscreen ? 'Salir Pantalla Completa' : 'Pantalla Completa' }}
 </button>
-      <div id="planning-controls" class="planning-controls"> 
-  <button class="planning-toggle" @click="togglePlanning">
-    {{ isPlanningOpen ? '▲ Cerrar Opciones' : '▼ Abrir Opciones' }}
-  </button>
-  <div :style="{ display: isPlanningOpen ? 'block' : 'none' }">
-    <div class="row" style="margin-top:20px;">
-      <div class="col-md-4 pr-md-1">
-        <base-input label="Fecha Inicio" type="date" format="yyyy-MM-dd" placeholder="Fecha Inicio"
-          v-model="fecha_inicio_simulacion" :disabled="isDateInputDisabled">
-        </base-input>
-      </div>
-      <div class="col-md-4 pr-md-1">
-        <label class="custom-label">¿Quisieras separar los paquetes?</label>
-        <div>
-          <input type="radio" id="separarPaquetesSi" value="true" v-model="separarPaquetes"
-            :disabled="isButtonDisabledSeparar">
-          <label for="separarPaquetesSi">Sí</label>
-          <input type="radio" id="separarPaquetesNo" value="false" v-model="separarPaquetes"
-            :disabled="isButtonDisabledSeparar">
-          <label for="separarPaquetesNo">No</label>
-        </div>
-      </div>
-      <div class="col-md-4 pr-md-1" v-if="separarPaquetes === 'true'">
-        <base-input label="Tamaño del Grupo" type="number" placeholder="Tamaño del Grupo" v-model="tamanoGrupo"
-          :disabled="isButtonDisabledSeparar">
-        </base-input>
-      </div>
-    </div>
-    <div class="row">
-
-  <!-- Modal Cancelar -->
-  <div v-if="showCancelarModal" class="modal-overlay" @click="closeCancelarModal">
-    <div class="modal-content" @click.stop>
-      <h2>Cancelar Simulación</h2>
-      <p>¿Deseas cancelar la simulación?</p>
-      <button class="modal-button" @click="cancelarSimulacion">Cancelar</button>
-      <button class="modal-button" @click="closeCancelarModal">Cerrar</button>
-    </div>
-  </div>
-
-  <!-- Modal Detener -->
-  <div v-if="showDetenerModal" class="modal-overlay" @click="closeDetenerModal">
-    <div class="modal-content" @click.stop>
-      <h2>Detener Simulación</h2>
-      <p>¿Deseas detener la simulacion?</p>
-      <button class="modal-button" @click="detenerSimulacion">Detener</button>
-      <button class="modal-button" @click="closeDetenerModal">Cerrar</button>
-    </div>
-  </div>
-
-  <!-- Modal Reanudar -->
-  <div v-if="showReanudarModal" class="modal-overlay" @click="closeReanudarModal">
-    <div class="modal-content" @click.stop>
-      <h2>Reanudar Simulación</h2>
-      <p>¿Deseas reanudar la simulación?</p>
-      <button class="modal-button" @click="reanudarSimulacion">Reanudar</button>
-      <button class="modal-button" @click="closeReanudarModal">Cerrar</button>
-    </div>
-  </div>
-      <div class="col-md-3" style="margin-top:20px;"
-        v-if="!toggleIniciarDetener && validarFechaIniciarPlanificacion">
-        <b-button @click="validarFechaIniciarPlanificacion" :class="{ 'button-disabled': isButtonDisabled }"
-          :disabled="isButtonDisabled" type="primary" fill>
-          {{ planificacionBotonTexto }}
-        </b-button>
-       
-      </div>
-      <div class="row justify-content-between align-items-center" style="margin-top:20px;">
-  <div class="col-md-auto">
-    <button v-if="planificacionEnEsperaCancelar" class="btn-simulation-left font-weight-bold" @click="openCancelarModal">Cancelar Simulación</button>
-  </div>
-  <div class="col-md-auto ml-auto btn-container">
-    <button v-if="planificacionEnEsperaDetener" class="btn-simulation-right font-weight-bold" @click="openDetenerModal">Detener Simulación</button>
-    <button v-if="planificacionEnEsperaRenaudar" class="btn-simulation-right-Rea font-weight-bold" @click="openReanudarModal">Reanudar Simulación</button>
-  </div>
-</div>
- 
-     <!-- Modal Fecha Invalida -->
-  <div v-if="showFechaInvalidaModal" class="modal-overlay" @click="closeFechaInvalidaModal">
-    <div class="modal-content" @click.stop>
-      <h2>Error</h2>
-      <p>La fecha de inicio de simulación no puede estar vacía.</p>
-      <button class="modal-button" @click="closeFechaInvalidaModal">Cerrar</button>
-    </div>
-  </div>
-
-  <!-- Modal Confirmar Fecha -->
-  <div v-if="showConfirmarFechaModal" class="modal-overlay" @click="closeConfirmarFechaModal">
-    <div class="modal-content" @click.stop>
-      <h2>Confirmar</h2>
-      <p>¿Deseas iniciar la planificación en esta fecha: {{ fecha_inicio_simulacion }}?</p>
-      <button class="modal-button" @click="confirmarPlanificacion">Confirmar</button>
-      <button class="modal-button" @click="closeConfirmarFechaModal">Cancelar</button>
-    </div>
-  </div>
-    </div>
-  </div>
-</div>
+  
 
       <div class="datetime-display">
         {{ currentDateTime }}
@@ -123,6 +26,9 @@
           'icon-allow-overlap': true
         }" @click="onAirportClick" />
 
+<div id="airport-popup" class="airport-popup" v-if="showPopup" :style="{ top: popupPosition.top, left: popupPosition.left }">
+  {{ currentAirportCode }}
+</div>
       <MglGeojsonLayer v-for="(vuelo, index) in filteredVuelos" :key="`vuelo-layer-${index}`"
         :sourceId="`vuelo-${index}`" :layerId="`avion-${index}`" :type="'symbol'"
         :source="createGeojsonSourceForVuelo(vuelo)" :layout="{
@@ -200,7 +106,7 @@
     <div class="map-search-container">
 
 
-      <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled"
+      <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" 
         placeholder="Buscar envío">
       <div v-if="resultadosBusquedaEnvio.length" class="search-results">
         <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
@@ -213,7 +119,7 @@
       </div>
 
       <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
-        :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
+         placeholder="Buscar aeropuerto">
       <div v-if="resultadosBusqueda.length" class="search-results">
         <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
           @click="abrirModal(aeropuerto)">
@@ -222,7 +128,7 @@
         </div>
       </div>
 
-      <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled"
+      <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" 
         placeholder="Buscar vuelo">
       <div v-if="resultadosBusquedaVuelo.length" class="search-results">
         <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
@@ -301,7 +207,9 @@ export default {
   },
   data() {
     return {
-
+      showPopup: false,
+      currentAirportCode: '',
+      popupPosition: { top: '0px', left: '0px' },
       showFechaInvalidaModal: false,
       showConfirmarFechaModal: false,
       showCancelarModal: false,
@@ -316,6 +224,7 @@ export default {
       simulationStarted: false,
       filteredVuelos: [],
       allVuelos: [],
+      primerosVuelos: [],
       vuelosOrdenadoGMT0: [],
       progresoPlanificacion: 0, // Añade esto al estado
       isButtonDisabledSeparar: false,
@@ -441,7 +350,8 @@ export default {
   },
   mounted() {
     console.log("Aeropuertos disponibles:", aeropuertos);
-
+    // Inicializar currentDateTime al cargar el mapa
+    this.updateCurrentDateTimeDisplay();
     this.fetchAeropuertos();
     let vue = this;
     // this.updateTime();
@@ -452,16 +362,19 @@ export default {
         setInterval(() => {
           this.updateAirportCapacities();
           this.updateFlightCapacities();
-          this.checkForCollapse();
         }, 1000);  // Actualiza cada segundo
       });
     });
+  
   },
   destroyed() {
     clearInterval(this.setInterval);
   },
   
   methods: {
+    toGMT0(date) {
+    return new Date(date.toISOString()); // Asegura que la fecha se convierta correctamente a GMT
+  },
     openCancelarModal() {
       this.showCancelarModal = true;
     },
@@ -533,7 +446,7 @@ export default {
       const fecha = this.simulationDateTime.toISOString().split('T')[0];
       const hora = this.simulationDateTime.toTimeString().split(' ')[0].substring(0, 5);
 
-      axios.get(urlBase +`/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
+      axios.get(urlBase +`/api/diaDia/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
           this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
@@ -645,21 +558,6 @@ export default {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
 
-    async updateSimulationHourly() {
-      // Esta función se ejecuta cada hora en tiempo simulado
-      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 1);
-      this.currentDate = this.currentDateTimeAux.toISOString().split('T')[0];
-      this.currentHour = this.currentDateTimeAux.toISOString().split('T')[1].substring(0, 5);
-
-      console.log("Fecha current Simular ", this.currentDate);
-      console.log("Hora current Simular ", this.currentHour);
-
-      await this.continuarSimulacion(this.currentDate, this.currentHour);
-      // Añadir un retraso antes de obtener los resultados de la simulación
-      await this.delay(delayAux); // 500ms de retraso, ajusta según sea necesario
-      await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
-
-    },
 
 
     // Add a method to animate only visible flights
@@ -674,22 +572,36 @@ export default {
     },
 
     // Modify checkAndAnimateFlights to use animateVisibleFlights
+
+ 
+    toGMT0Check(date) {
+  return new Date(Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
+    date.getSeconds()
+  ));
+},
     checkAndAnimateFlights() {
-
+      
       const currentTime = this.simulationDateTime.getTime();
-      console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
+     // console.log(`Tiempo de simulación actual: ${new Date(this.currentDateTime).toISOString()}`);
+      
       this.pendingFlights.forEach(vuelo => {
-        const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
+        const vueloStartTimeGMT0 = this.toGMT0Check(new Date(vuelo.fechaHoraSalidaGMT0));
+        const vueloStartTime = vueloStartTimeGMT0.getTime();
+   // console.log(`Tiempo de simulación actual vuelos star: ${new Date(vuelo.fechaHoraSalidaGMT0).toISOString()}`);
+    if (currentTime >= vueloStartTime && !vuelo.animated) {
+      vuelo.animated = true; // Marcar el vuelo como animado
+      console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
+      vuelo.isActive = false;
 
-        const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas convertidas a milisegundos
-        const nuevoVueloStartTime = new Date(vueloStartTime - cincoHorasEnMilisegundos);
-        if (currentTime >= nuevoVueloStartTime && !vuelo.animated) {
-          vuelo.animated = true; // Marcar el vuelo como animado
-          console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
-          vuelo.isActive = false;
-          this.animateFlight(vuelo);
-        }
-      });
+      this.animateFlight(vuelo);
+    }
+  });
+
       this.pendingFlights = this.pendingFlights.filter(vuelo => !vuelo.animated); // Remover los vuelos animados
 
       // Call animateVisibleFlights periodically
@@ -698,7 +610,10 @@ export default {
 
     },
     updateCurrentDateTimeDisplay() {
-      this.currentDateTime = this.simulationDateTime.toLocaleString('es-ES', {
+      
+      const currentDateTimeGMT0 = this.toGMT0(new Date());
+     // console.log("udpate TIME", currentDateTimeGMT0);
+    this.currentDateTime = currentDateTimeGMT0.toLocaleString('es-ES', {
         timeZone: 'UTC',
         year: 'numeric',
         month: '2-digit',
@@ -731,7 +646,26 @@ export default {
         });
       });
     },
+    toGMT0Inicio(date) {
+  // Convertir la fecha y hora a GMT
+  const gmtDate = new Date(date.toISOString());
+  return gmtDate;
+},
 
+onAirportMouseEnter(event) {
+    const feature = event.features[0];
+    const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === feature.properties.codigoOACI);
+    if (aeropuerto) {
+      this.currentAirportCode = aeropuerto.codigoOACI;
+      this.showPopup = true;
+      const coordinates = feature.geometry.coordinates.slice();
+      const popupCoordinates = this.map.project([coordinates[0], coordinates[1]]);
+      this.popupPosition = { top: `${popupCoordinates.y}px`, left: `${popupCoordinates.x}px` }; // Ajuste la posición del popup
+    }
+  },
+  onAirportMouseLeave() {
+    this.showPopup = false;
+  },
 
     onMapLoaded(event) {
       // Establecer referencia al mapa en componente y store global si es necesario
@@ -741,20 +675,284 @@ export default {
         this.map.resize();
       });
 
-      const fechaInicio = this.fecha_inicio_simulacion;
-      const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
+    const currentDateTimeGMT0 = this.toGMT0Inicio(new Date());
+    const fechaInicio = currentDateTimeGMT0.toISOString().split('T')[0];
+    const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
+    console.log('Fecha y hora en GMT 0:', fechaInicio + ' ' + fechaInicioHora);
 
+ console.log("HOLA", currentDateTimeGMT0.toISOString()); 
+ this.simulationDateTime = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
+
+ this.loadVuelosEnCamino(fechaInicio, fechaInicioHora)
+    .then(vuelos => {
+      vuelos.forEach(vuelo => this.animateFlightAntes(vuelo));
+    })
+    .catch(error => {
+      console.error("Error loading vuelos en camino:", error);
+    });
+ 
       this.startSimulationLoop(fechaInicio,fechaInicioHora); 
-      // Cargar todas las imágenes necesarias antes de configurar las capas
+    
       this.loadImages(() => {
         // Una vez que las imágenes estén cargadas, configurar las capas
         this.setupAirportLayer(); // Configurar la capa de aeropuertos primero
         // this.setupFlightLayers(); // Configurar las capas de vuelos después
         this.map.on('click', 'aeropuertosLayer', this.onAirportClick);
-
+        this.map.on('mouseenter', 'aeropuertosLayer', this.onAirportMouseEnter);
+        this.map.on('mouseleave', 'aeropuertosLayer', this.onAirportMouseLeave);
 
       });
+      this.map.on('mouseenter', 'aeropuertosLayer', () => {
+    this.map.getCanvas().style.cursor = 'pointer';
+  });
+
+  this.map.on('mouseleave', 'aeropuertosLayer', () => {
+    this.map.getCanvas().style.cursor = '';
+  });
     },
+
+
+
+
+    animateFlightAntes(vuelo) {
+    console.log("LEGGOO CURREN");
+    const sourceId = `vuelo-${vuelo.id}`;
+    const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
+
+    if (!this.map.getSource(sourceId)) {
+      console.log(`Updating source ${sourceId}`);
+      this.map.addSource(sourceId, {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {
+            id: vuelo.id,
+            'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+            'icon-rotate': bearing // Calculate bearing and set icon rotation
+          },
+          geometry: {
+            type: 'Point',
+            coordinates: vuelo.origen
+          }
+        }
+      });
+
+      this.map.addLayer({
+        id: `avion-${vuelo.id}`,
+        type: 'symbol',
+        source: sourceId,
+        layout: {
+          'icon-image': ['get', 'icon-image'],
+          'icon-size': 0.3,
+          'icon-allow-overlap': true,
+          'icon-rotate': ['get', 'icon-rotate'] // Use icon-rotate property
+        }
+      });
+
+      this.map.on('click', `avion-${vuelo.id}`, this.onFlightClick);
+    }
+
+    const currentTime = new Date(new Date().toISOString()); // Ensure current time is in GMT0
+  const flightStartTime = new Date(vuelo.fechaHoraSalidaGMT0);
+  const flightEndTime = new Date(vuelo.fechaHoraLlegadaGMT0);
+
+    const elapsedTime = (currentTime - flightStartTime) / 1000; // Elapsed time in seconds
+    const totalFlightTime = (flightEndTime - flightStartTime) / 1000; // Total flight time in seconds
+
+    const flightProgress = Math.min(elapsedTime / totalFlightTime, 1); // Ensure progress is at most 1
+
+    const startLatLng = vuelo.origen;
+    const endLatLng = vuelo.destino;
+
+    const currentLat = startLatLng[1] + (endLatLng[1] - startLatLng[1]) * flightProgress;
+    const currentLng = startLatLng[0] + (endLatLng[0] - startLatLng[0]) * flightProgress;
+
+    const steps = 10000; // Number of animation steps
+    const interval = (totalFlightTime * 1000) / steps; // Interval between steps in milliseconds
+
+    let currentStep = flightProgress * steps;
+    const incrementLat = (endLatLng[1] - startLatLng[1]) / steps;
+    const incrementLng = (endLatLng[0] - startLatLng[0]) / steps;
+
+    const move = () => {
+      if (currentStep <= steps) {
+        const currentLat = startLatLng[1] + incrementLat * currentStep;
+        const currentLng = startLatLng[0] + incrementLng * currentStep;
+
+        console.log(`Updating position to: [${currentLng}, ${currentLat}]`);
+
+        this.map.getSource(sourceId).setData({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [currentLng, currentLat]
+          },
+          properties: {
+            id: vuelo.id,
+            'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+            'icon-rotate': bearing
+          } 
+        });
+
+        currentStep++;
+        setTimeout(move, interval);
+      } else {
+        // Ensure the final position is exact
+        this.map.getSource(sourceId).setData({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: endLatLng
+          },
+          properties: {
+            id: vuelo.id,
+            'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+            'icon-rotate': bearing
+          }
+        });
+
+        setTimeout(() => {
+          if (this.map.getLayer(`avion-${vuelo.id}`)) {
+            this.map.removeLayer(`avion-${vuelo.id}`);
+          }
+          if (this.map.getSource(sourceId)) {
+            this.map.removeSource(sourceId);
+          }
+        }, 1000);
+      }
+    };
+
+    move();
+  },
+      // Método modificado animateFlight para usar vuelo.fechaHoraSalidaGMT0 y vuelo.fechaHoraLlegadaGMT0
+     /* animateFlightAntes(vuelo) {
+  console.log("LEGGOO CURREN");
+  const sourceId = `vuelo-${vuelo.id}`;
+  const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
+
+  const currentTimeGMT0 = new Date();
+  const departureTimeGMT0 = new Date(vuelo.fechaHoraSalidaGMT0);
+  const elapsedTime = (currentTimeGMT0 - departureTimeGMT0) / 1000; // Elapsed time in seconds
+  const totalFlightTime = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo) * 60; // Total flight time in seconds
+  const progress = Math.min(elapsedTime / totalFlightTime, 1); // Progress ratio (capped at 1)
+
+  const interpolate = (start, end, factor) => start + (end - start) * factor;
+
+  const startLatLng = [
+    interpolate(vuelo.origen[0], vuelo.destino[0], progress),
+    interpolate(vuelo.origen[1], vuelo.destino[1], progress)
+  ];
+
+  if (!this.map.getSource(sourceId)) {
+    console.log(`Updating source ${sourceId}`);
+    this.map.addSource(sourceId, {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {
+          id: vuelo.id,
+          'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+          'icon-rotate': bearing // Calculate bearing and set icon rotation
+        },
+        geometry: {
+          type: 'Point',
+          coordinates: startLatLng
+        }
+      }
+    });
+    this.map.addLayer({
+      id: `avion-${vuelo.id}`,
+      type: 'symbol',
+      source: sourceId,
+      layout: {
+        'icon-image': ['get', 'icon-image'],
+        'icon-size': 0.3,
+        'icon-allow-overlap': true,
+        'icon-rotate': ['get', 'icon-rotate'] // Use icon-rotate property
+      }
+    });
+
+    this.map.on('click', `avion-${vuelo.id}`, this.onFlightClick);
+  }
+
+  const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
+  const flightDurationSimulationSeconds = flightDurationMinutes * 60;
+  const realTimeSeconds = flightDurationSimulationSeconds / 1;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
+
+  console.log(flightDurationMinutes);
+  const steps = 10000; // MEJORA VISUALIZACIÓN PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RÁPIDO
+  const interval = (realTimeSeconds * 1000) / steps;  // DEBE HABER SUFICIENTES SALTOS POR SEGUNDO O X TIEMPO PARA QUE SE VISUALICE EN TIEMPO REAL
+  console.log(steps);
+
+  const endLatLng = vuelo.destino;
+
+  let currentStep = 0;
+  const incrementLat = (endLatLng[1] - startLatLng[1]) / steps;
+  const incrementLng = (endLatLng[0] - startLatLng[0]) / steps;
+
+  const move = () => {
+    if (currentStep <= steps) {
+      const currentLat = startLatLng[1] + incrementLat * currentStep;
+      const currentLng = startLatLng[0] + incrementLng * currentStep;
+
+      this.map.getSource(sourceId).setData({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [currentLng, currentLat]
+        },
+        properties: {
+          id: vuelo.id,
+          'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+          'icon-rotate': bearing
+        }
+      });
+
+      currentStep++;
+      setTimeout(move, interval);
+    } else {
+      // Asegúrate de que la posición final sea la exacta
+      this.map.getSource(sourceId).setData({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: endLatLng
+        },
+        properties: {
+          id: vuelo.id,
+          'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+          'icon-rotate': bearing
+        }
+      });
+      setTimeout(() => {
+        if (this.map.getLayer(`avion-${vuelo.id}`)) {
+          this.map.removeLayer(`avion-${vuelo.id}`);
+        }
+        if (this.map.getSource(sourceId)) {
+          this.map.removeSource(sourceId);
+        }
+      }, 1000);
+    }
+  };
+
+  move();
+},*/
+    async loadVuelosEnCamino(fecha, hora) {
+    try {
+      const response = await axios.get(urlBase +`/api/diaDia/vuelosEnCamino`, {
+        params: {
+          fecha: fecha,
+          hora: hora
+        }
+      });
+      console.log("Vuelos en camino:", response.data);
+      this.primerosVuelos = response.data;
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching vuelos en camino:", error);
+      throw error;
+    }
+  },
 
 
     setupAirportLayer() {
@@ -779,97 +977,35 @@ export default {
       }
     },
 
+/*
 
-    iniciarSimulacion() {
-      let vue = this;
-    },
-
-    confirmarPlanificacion() {
-    this.showConfirmarFechaModal = false;
-    this.iniciarPlanificacion();
-  },
-
-    async iniciarPlanificacion() {
-
-      this.isDateInputDisabled = true;
-      this.isButtonDisabled = true;
-      this.isButtonDisabledSeparar = true;
-      this.showFullscreenButton = true;
-
-      try {
-        let cont = 0;
-
-        this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
-        this.planificacionEnEspera = true;
-
-        const fechaInicio = this.fecha_inicio_simulacion;
-        const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
-        const separarPaquetesCont = this.separarPaquetes === 'true';
-        const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
-
-        // console.log(fechaInicio);
-        // console.log(fechaInicioHora);
-        cont = 1;
-        // Initiate the simulation with the date as a parameter
-        const response = await axios.get(urlBase +'/api/simulacion/semanal/iniciarST', {
-          params: {
-            fecha: fechaInicio,
-            hora: fechaInicioHora,
-            separarPaquetes: separarPaquetesCont,
-            tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: saltoTemporalAux
-          }
-        });
-
-
-        console.log("Simulación iniciada:", response.data);
-        await this.checkSimulationStatus();
-        this.currentDateTimeAux = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
-        this.currentDate = fechaInicio;
-        this.currentHour = fechaInicioHora;
-
-        if (!this.fecha_inicio_simulacion) {
-          console.error("Fecha de inicio de simulación no está definida");
-          return;
-        }
-
-        this.simulationDateTime = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
-
-        this.startSimulationLoop(fechaInicio, fechaInicioHora);
-
-      } catch (error) {
-        console.error("Error iniciando simulación:", error);
-        this.planificacionBotonTexto = 'Iniciar Planificación';
-        this.planificacionEnEspera = false;
-        this.isButtonDisabled = false;  // Habilitar el botón si ocurre un error
-      }
-    },
-
-
-    startSimulationLoop(fechaInicio, fechaInicioHora) {
-
-
+    async startSimulationLoop(fechaInicio, fechaInicioHora) {
+      this.simulationDateTime = this.toGMT0Inicio(new Date());
+      this.pendingFlights = [];
+      this.allVuelos = [];
       this.updateCurrentDateTimeDisplay();
       if (this.simulationInterval) {
         clearInterval(this.simulationInterval);
       }
-      this.simulationInterval = setInterval(async () => {
+      await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
 
-        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-        console.log("Estado de la simulación:", statusResponse.data);
-        this.progresoPlanificacion = statusResponse.data.progreso;
-        this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
-        if (statusResponse.data.estado !== "En Progreso") {
-          //clearInterval(this.simulationInterval);
-          this.planificacionBotonTexto = 'Iniciar Planificación';
-          this.planificacionEnEspera = false;
+      let realSecondsElapsed = 0; 
+      this.simulationInterval = setInterval(async () => {
+        this.updateAirportData();
+        const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
+      const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
+       // console.log("TIEMPO ACTUALIZADO CONTINUO", fechaInicioaUX+ fechaInicioHoraAUX);
+        console.log("SEGUNDOS", realSecondsElapsed);
+        this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 1000);
+    this.updateCurrentDateTimeDisplay();
           this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
-        this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
-      this.planificacionEnEsperaDetener = true;
+          this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
+          this.planificacionEnEsperaDetener = true;
           this.toggleIniciarDetener = true; // Mostrar el botón de "Iniciar Simulación"
           this.validarFechaIniciarPlanificacion = false;
           this.isButtonDisabled = false;
           this.showFullscreenButton = true;
+          realSecondsElapsed++;
 
           // AQUI COMIENZA LA SIMULACION
           let vue = this;
@@ -879,53 +1015,75 @@ export default {
           this.isAnimating = true;
           this.searchEnabled = true;
           if (!this.isSimulating) {
-            await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
+          
             this.isSimulating = true;
+          //  await this.delay(delayAux); 
+            
 
-
-            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
-            this.updateCurrentDateTimeDisplay();
-
-            this.updateAirportData();
-
-            this.checkAndAnimateFlights();
-
-          } else {
-
-            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
-            this.updateCurrentDateTimeDisplay();
-
-            this.updateAirportData();
-
-            const endDate = new Date(this.fecha_inicio_simulacion);
-            endDate.setDate(endDate.getDate() + 7);
-            const endDateAux = new Date(this.fecha_inicio_simulacion);
-            endDateAux.setDate(endDateAux.getDate() + 9);
-            if (this.simulationDateTime < endDate) {
-              if (this.simulationDateTime.getMinutes() % 60 === 0) {
-
-                await this.updateSimulationHourly();
-
-              }
-              this.checkAndAnimateFlightsContinuar();
-
-            }
-
-            else if (this.simulationDateTime >= endDateAux) {
-              clearInterval(this.simulationInterval);
-            }
-            else {
-              await this.finalizarSimulacion();
-            }
 
           }
+          if (realSecondsElapsed % 300 === 0) {
+      const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
+      const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
 
+      console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
 
-        }
+      await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
+    }
+
+          
+    this.checkAndAnimateFlights();
+  
 
       }, 1000); // Ejecutar cada segundo en tiempo real
-    },
+    },*/
 
+
+    async startSimulationLoop(fechaInicio, fechaInicioHora) {
+  this.simulationDateTime = this.toGMT0Inicio(new Date());
+  this.pendingFlights = [];
+  this.allVuelos = [];
+  this.updateCurrentDateTimeDisplay();
+  if (this.simulationInterval) {
+    clearInterval(this.simulationInterval);
+  }
+  await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
+
+  let realSecondsElapsed = 0; 
+  let startTime = performance.now();
+
+  this.simulationInterval = setInterval(async () => {
+    let currentTime = performance.now();
+    let elapsedTime = (currentTime - startTime) / 1000;
+    startTime = currentTime;
+
+    // Actualiza simulationDateTime basado en el tiempo transcurrido real
+    this.simulationDateTime = new Date(this.simulationDateTime.getTime() + elapsedTime * 1000);
+    console.log("Tiempo actual de simulación start loop:", this.simulationDateTime.toISOString());
+    console.log("Segundos", realSecondsElapsed);
+    this.updateCurrentDateTimeDisplay();
+    this.updateAirportData();
+
+    this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
+    this.planificacionEnEsperaDetener = true;
+    this.toggleIniciarDetener = true; // Mostrar el botón de "Iniciar Simulación"
+    this.validarFechaIniciarPlanificacion = false;
+    this.isButtonDisabled = false;
+    this.showFullscreenButton = true;
+    realSecondsElapsed += elapsedTime;
+
+    if (realSecondsElapsed >= 300) {
+      realSecondsElapsed = 0;
+      const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
+      const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
+
+      console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
+      await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
+    }
+    
+    this.checkAndAnimateFlights();
+  }, 1000); // Ejecutar cada segundo en tiempo real
+},
 
 
     async continuarSimulacion(fecha, hora) {
@@ -956,38 +1114,26 @@ export default {
 
 
 
-    async finalizarSimulacion() {
-      try {
-        const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
-        console.log("Simulación finalizada:", response.data);
-      } catch (error) {
-        console.error("Error finalizando la simulación:", error);
-      }
-    },
 
 
-
-
-    async checkSimulationStatus() {
-      try {
-        const response = await axios.get(urlBase + '/api/simulacion/semanal/estado');
-        console.log("Estado de la simulación:", response.data);
-        // Manejar la respuesta de estado si es necesario
-      } catch (error) {
-        console.error("Error verificando estado de simulación:", error);
-      }
-    },
 
     async fetchSimulationResults(fecha, hora) {
+      console.log(fecha + hora);
       try {
-        const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
+        const saltoTemporal = 5; // Define el salto temporal según tus necesidades
+      const response = await axios.get(`${urlBase}/api/diaDia/resultados`, {
+        params: {
+          fecha: fecha,
+          hora: hora,
+          saltoTemporal: saltoTemporal
+        }
+      });
         console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
         console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
         let filteredVuelos = [];
-        this.pendingFlights = [];
-        this.allVuelos = [];
+
         let count = 0;
 
         // Procesar los vuelos en vuelosOrdenadoGMT0
@@ -1003,9 +1149,9 @@ export default {
         filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
         console.log("CUENTA ACTUALIZADOS:" + count);
-        this.vuelosOrdenadoGMT0 = filteredVuelos;
+        //this.vuelosOrdenadoGMT0 = filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
-        this.$set(this, 'filteredVuelos', filteredVuelos);
+        this.$set(this, 'filteredVuelos', [...this.pendingFlights]); 
         console.log("Vuelos disponibles ACTUALIZADOS:", filteredVuelos);
         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
@@ -1015,192 +1161,28 @@ export default {
 
 
 
-    async fetchSimulationResultsContinuar(fecha, hora) {
-      try {
-        const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-        console.log("Resultados de la simulación:", response.data);
-        const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
-
-        console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
-        //  let filteredVuelos = [];
-        //   this.pendingFlights = [];
-        let count = 0;
-
-        // Procesar los vuelos en vuelosOrdenadoGMT0
-        fetchedVuelos.forEach(vuelo => {
-          vuelo.animated = false; // Agregar propiedad animated
-          //  filteredVuelos.push(vuelo);
-          this.pendingFlights.push(vuelo);
-          this.allVuelos.push(vuelo); // Acumular vuelos
-          count++;
-        });
-
-        // Ordenar los vuelos por fecha y hora de salida
-        this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
-
-        console.log("CUENTA ACTUALIZADOS:" + count);
-        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
-        console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
-      } catch (error) {
-        console.error("Error obteniendo resultados de la simulación:", error);
-      }
-    },
 
 
+    calculateBearing(begin, end) {
+  const lat = Math.abs(begin[1] - end[1]);
+  const lng = Math.abs(begin[0] - end[0]);
 
-    checkAndAnimateFlightsContinuar() {
-
-
-      const currentTime = this.simulationDateTime.getTime();
-      console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
-
-      this.allVuelos.forEach(vuelo => {
-        const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
-
-        const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas convertidas a milisegundos
-        const nuevoVueloStartTime = new Date(vueloStartTime - cincoHorasEnMilisegundos);
-        if (currentTime >= nuevoVueloStartTime && !vuelo.animated) {
-          vuelo.animated = true; // Marcar el vuelo como animado
-          console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
-          vuelo.isActive = false;
-          this.animateFlight(vuelo);
-        }
-      });
-      this.allVuelos = this.allVuelos.filter(vuelo => !vuelo.animated); // Remover los vuelos animados
-
-      // Call animateVisibleFlights periodically
-
-      this.animateVisibleFlights();
-
-    },
-
-
-
-
-
-    calculateBearing(origin, destination, id) {
-
-      const [lng1aux, lat1aux] = origin;
-      const [lng2aux, lat2aux] = destination;
-      const deltaLng = lng1aux - lng2aux;
-      const deltaLat = lat2aux - lat1aux;
-
-      const [lng1, lat1] = origin.map(coord => Math.abs(coord * Math.PI) / 180); // Usar valor absoluto
-      const [lng2, lat2] = destination.map(coord => Math.abs(coord * Math.PI) / 180); // Usar valor absoluto
-      let dLng, dLat;
-
-      if (deltaLng > 0 && deltaLat > 0) {
-        if (deltaLng > deltaLat) {
-          //console.log("ENE ",id);
-          // Este-Noreste (ENE)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = -Math.abs(lat2 - lat1);
-        } else if (deltaLng < deltaLat) {
-          //   console.log("NNE ",id);
-          // Norte-Noreste (NNE)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = -Math.abs(lat2 - lat1);
-        } else {
-          //   console.log("NE ",id);
-          // Noreste (NE)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = -Math.abs(lat2 - lat1);
-        }
-      } else if (deltaLng < 0 && deltaLat > 0) {
-        if (Math.abs(deltaLng) > deltaLat) {
-          //   console.log("ONO ",id);
-          // Oeste-Noroeste (ONO)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = -Math.abs(lat2 - lat1);
-        } else if (Math.abs(deltaLng) < deltaLat) {
-          //   console.log("NNO ",id);
-          // Norte-Noroeste (NNO)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        } else {
-          //   console.log("NO ",id);
-          // Noroeste (NO)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = -Math.abs(lat2 - lat1);
-        }
-      } else if (deltaLng > 0 && deltaLat < 0) {
-        if (deltaLng > Math.abs(deltaLat)) {
-          //  console.log("ESE ",id);
-          // Este-Sureste (ESE)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        } else if (deltaLng < Math.abs(deltaLat)) {
-          //   console.log("SSE ",id);
-          // Sur-Sureste (SSE)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        } else {
-          // console.log("SE ",id);
-          // Sureste (SE)
-          dLng = -Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        }
-      } else if (deltaLng < 0 && deltaLat < 0) {
-        if (Math.abs(deltaLng) > Math.abs(deltaLat)) {
-          //  console.log("OSO ",id);
-          // Oeste-Suroeste (OSO)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        } else if (Math.abs(deltaLng) < Math.abs(deltaLat)) {
-          //   console.log("SSO ",id);
-          // Sur-Suroeste (SSO)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        } else {
-          //   console.log("SO ",id);
-          // Suroeste (SO)
-          dLng = Math.abs(lng2 - lng1);
-          dLat = Math.abs(lat2 - lat1);
-        }
-      } else if (deltaLng === 0 && deltaLat > 0) {
-        // console.log("Norte ",id);
-        // Norte
-        return 0;
-      } else if (deltaLng === 0 && deltaLat < 0) {
-        //  console.log("Sur ",id);
-        // Sur
-        return 180;
-      } else if (deltaLat === 0 && deltaLng > 0) {
-        // console.log("Este ",id);
-        // Este
-        return 90;
-      } else if (deltaLat === 0 && deltaLng < 0) {
-        //  console.log("Oeste ",id);
-        // Oeste
-        return 270;
-      }
-
-      const y = Math.sin(dLng) * Math.cos(lat2) + Math.sin(dLat) * Math.sin(lat2);
-      const x = Math.cos(lat1) * Math.sin(lat2) -
-        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng) +
-        Math.sin(dLat) * Math.sin(lat2);;
-
-      let bearing = (Math.atan2(y, x) * 180) / Math.PI;
-      bearing = (bearing + 360) % 360;
-
-      return bearing;
-
-    },
+  if (begin[1] < end[1] && begin[0] < end[0]) {
+    return (Math.atan(lng / lat) * 180) / Math.PI;
+  } else if (begin[1] >= end[1] && begin[0] < end[0]) {
+    return ((90 - (Math.atan(lng / lat) * 180) / Math.PI) + 90);
+  } else if (begin[1] >= end[1] && begin[0] >= end[0]) {
+    return ((Math.atan(lng / lat) * 180) / Math.PI + 180);
+  } else if (begin[1] < end[1] && begin[0] >= end[0]) {
+    return ((90 - (Math.atan(lng / lat) * 180) / Math.PI) + 270);
+  }
+  return -1;
+},
     animateFlight(vuelo) {
-      if (vuelo.capacidadCargaUsado > vuelo.capacidadCargaMaxima) {
 
-        this.collapseReason = 'EXCESO DE PAQUETES EN VUELOS';
-        console.log("Collapse detected!");
-        //this.showCollapseAlert("collapseReason", "llapseDetails");
-        this.handleCollapse();
-        return; //AVISO CON ESTO SE PODRIA PARAR EL MOVIMIENTO
-      }
-      // console.log(`Updating capacities for ${vuelo.ciudadDestino} with ${cantidadPaquetes} packages`);
-
-      //this.updateAirportCapacitiesColapse(vuelo.ciudadDestino, vuelo.cantidadPaquetes);
-
+      console.log("LEGGOO CURREN");
       const sourceId = `vuelo-${vuelo.id}`;
-      const bearing = this.calculateBearing(vuelo.origen, vuelo.destino, vuelo.id);
+      const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
       if (!this.map.getSource(sourceId)) {
         console.log(`Updating source ${sourceId}`);
         this.map.addSource(sourceId, {
@@ -1231,121 +1213,75 @@ export default {
           }
         });
 
-        this.map.on('click', `avion-${vuelo.id}`, (e) => {
-          const vueloId = e.features[0].properties.id;
-          const clickedVuelo = this.pendingFlights.find(v => v.id === vueloId);
-          console.log("Vuelo clicado:", clickedVuelo);
-          if (clickedVuelo) {
-            this.onFlightClick(e, clickedVuelo);
-          } else {
-            console.error("No se encontró el vuelo clicado en allVuelos");
-          }
-        });
+        this.map.on('click', `avion-${vuelo.id}`, this.onFlightClick);
       }
 
-      const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
-      const flightDurationSimulationSeconds = flightDurationMinutes * 60;
-      const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 2160 simulated seconds = 1 real second
+    const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
+    const flightDurationSimulationSeconds = flightDurationMinutes * 60;
+    const realTimeSeconds = flightDurationSimulationSeconds / 1;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
 
+    console.log(flightDurationMinutes);
+    const steps = 10000; // MEJORA VISUALIZACIÓN PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RÁPIDO
+    const interval = (realTimeSeconds * 1000) / steps;  // DEBE HABER SUFICIENTES SALTOS POR SEGUNDO O X TIEMPO PARA QUE SE VISUALICE EN TIEMPO REAL
+    console.log(steps);
 
-      console.log(flightDurationMinutes)
-      const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
-      const interval = (realTimeSeconds * 1000) / steps;
-      console.log(steps)
-      // let steps =336;
-      let currentStep = vuelo.pausedAtStep || 0; // Usa pausedAtStep si existe
-      let currentPos = vuelo.pausedAtPos || [...vuelo.origen];
-      const incrementLat = (vuelo.destino[1] - vuelo.origen[1]) / steps;
-      const incrementLng = (vuelo.destino[0] - vuelo.origen[0]) / steps;
+    const startLatLng = vuelo.origen;
+    const endLatLng = vuelo.destino;
 
-      const move = () => {
-        if (!this.isAnimating) {
-          vuelo.pausedAtStep = currentStep; // Guarda el paso actual
-          vuelo.pausedAtPos = currentPos; // Guarda la posición actual
-          vuelo.paused = true;
-          return; // Sal de la animación si está en pausa
-        }
-        vuelo.paused = false;
-        vuelo.currentStep = currentStep;
-        vuelo.currentPos = currentPos;
+    let currentStep = 0;
+    const incrementLat = (endLatLng[1] - startLatLng[1]) / steps;
+    const incrementLng = (endLatLng[0] - startLatLng[0]) / steps;
+
+    const move = () => {
         if (currentStep <= steps) {
-          currentPos[0] += incrementLng;
-          currentPos[1] += incrementLat;
-          if (this.map.getSource(sourceId)) {
+            const currentLat = startLatLng[1] + incrementLat * currentStep;
+            const currentLng = startLatLng[0] + incrementLng * currentStep;
+
+        //    console.log(`Updating position to: [${currentLng}, ${currentLat}]`);
+
             this.map.getSource(sourceId).setData({
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: currentPos
-              },
-              properties: {
-                id: vuelo.id,
-                'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
-                'icon-rotate': bearing // Update rotation dynamically
-              }
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: [currentLng, currentLat]
+                },
+                properties: {
+                    id: vuelo.id,
+                    'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+                    'icon-rotate': bearing
+                }
             });
-          }
-          currentStep++;
-          //  requestAnimationFrame(move);
-          setTimeout(move, interval);
+
+            currentStep++;
+            setTimeout(move, interval);
         } else {
-          // Ensure the final position is the exact destination
-          if (this.map.getSource(sourceId)) {
+            // Asegúrate de que la posición final sea la exacta
             this.map.getSource(sourceId).setData({
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: vuelo.destino
-              },
-              properties: {
-                id: vuelo.id,
-                'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
-                'icon-rotate': bearing
-              }
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: endLatLng
+                },
+                properties: {
+                    id: vuelo.id,
+                    'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+                    'icon-rotate': bearing
+                }
             });
-          }
-          setTimeout(() => {
-            if (this.map.getLayer(`avion-${vuelo.id}`)) {
-              this.map.removeLayer(`avion-${vuelo.id}`);
-            }
-            if (this.map.getSource(sourceId)) {
-              this.map.removeSource(sourceId);
-            }
-          }, 1000); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
+            setTimeout(() => {
+                if (this.map.getLayer(`avion-${vuelo.id}`)) {
+                    this.map.removeLayer(`avion-${vuelo.id}`);
+                }
+                if (this.map.getSource(sourceId)) {
+                    this.map.removeSource(sourceId);
+                }
+            }, 1000);
         }
+    };
 
+    move();
+},
 
-
-      };
-      move();
-    },
-
-    updateAirportCapacitiesColapse(codigoOACI, paquetes) {
-      this.collapseReason = 'EXCESO DE PAQUETES EN AEROPUERTOS';
-      const aeropuerto = aeropuertos.find(a => a.codigoOACI === codigoOACI);
-      if (aeropuerto) {
-        aeropuerto.capacidadDeAlmacenamientoUsado += paquetes;
-        console.log(`New storage used: ${aeropuerto.capacidadDeAlmacenamientoUsado}/${aeropuerto.capacidadAlmacenamientoMaximo}`);
-        if (aeropuerto.capacidadDeAlmacenamientoUsado > aeropuerto.capacidadAlmacenamientoMaximo) {
-          console.log("Airport collapse detected!");
-          const collapseReason = 'Exceso de paquetes';
-          const collapseDetails = {
-            location: 'Lima, Perú - SMTP',
-            packagesInvolved: '956'
-          };
-          this.showModal();
-        }
-      }
-    },
-
-    checkForCollapse() {
-      console.log("Checking for collapse...");
-      if (aeropuertos.some(aero => aero.capacidadDeAlmacenamientoUsado > aero.capacidadAlmacenamientoMaximo) ||
-        envios.some(envio => envio.ruta.vuelos.some(vuelo => vuelo.capacidadCargaUsado > vuelo.capacidadCargaMaxima))) {
-        console.log("Collapse detected!");
-        this.showModal();
-      }
-    },
 
 
 
@@ -1392,87 +1328,6 @@ export default {
       this.isVisible = false;
     },
 
-    detenerSimulacion() {
-      this.showDetenerModal = false;
-      let vue = this;
-      clearInterval(this.simulationInterval);
-      this.planificacionEnEsperaDetener = false;
-      this.planificacionEnEsperaRenaudar = true;
-      this.simulationInterval = null;
-      vue.toggleIniciarDetener = false;
-      vue.toggleReanudar = true;
-      this.isAnimating = false;
-
-      this.pendingFlights.forEach(vuelo => {
-        if (vuelo.animated && !vuelo.paused) {
-          vuelo.paused = true;
-          vuelo.pausedAtStep = vuelo.currentStep;
-          vuelo.pausedAtPos = vuelo.currentPos;
-          this.movingFlights.push(vuelo); // Agregar vuelo en movimiento a la estructura
-        }
-      });
-
-
-
-
-    },
-    reanudarSimulacion() {
-      const fechaInicio = this.fecha_inicio_simulacion;
-        const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
-      this.showReanudarModal = false;
-      this.planificacionEnEsperaDetener = true;
-      this.planificacionEnEsperaRenaudar = false;
-      let vue = this;
-      vue.toggleIniciarDetener = false;
-      vue.toggleReanudar = true;
-      this.isAnimating = true;
-      if (!this.simulationInterval && this.simulationDateTime) {
-        this.startSimulationLoop(fechaInicio,fechaInicioHora); // Reanudar la simulación desde el punto donde se detuvo
-        this.movingFlights.forEach(vuelo => {
-          vuelo.paused = false;
-          this.animateFlight(vuelo);
-        });
-
-        this.movingFlights = [];
-
-      }
-
-    },
-    async cancelarSimulacion() {
-      this.showCancelarModal = false;
-      this.planificacionEnEsperaCancelar = false;
-      this.planificacionEnEsperaRenaudar = false;
-      this.planificacionEnEsperaDetener = false;
-      this.showFullscreenButton = false;
-      let vue = this;
-      // vue.toggleIniciarDetener = true;
-      console.log("SE DETIENE LA SIMULACION");
-      await this.finalizarSimulacion();
-      clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
-      this.isSimulating = false;
-      Simulation.stopSimulation();
-      console.log(vue.fecha_fin_simulacion);
-      this.validarFechaIniciarPlanificacion = true;
-      this.isDateInputDisabled = false;
-
-      this.filteredVuelos.forEach(vuelo => {
-        const sourceId = `vuelo-${vuelo.id}`;
-        if (this.map.getLayer(`avion-${vuelo.id}`)) {
-          this.map.removeLayer(`avion-${vuelo.id}`);
-        }
-        if (this.map.getSource(sourceId)) {
-          this.map.removeSource(sourceId);
-        }
-      });
-      this.fetchAeropuertos();
-      this.isButtonDisabled = false;  // Habilitar el botón de planificación
-      this.simulationDateTime = null;
-      this.envios = [];
-      this.calendarioVuelos = {};
-      this.pendingFlights = [];
-      window.location.reload();
-    },
 
     onAirportClick(event) {
       const feature = event.features[0];
@@ -1491,15 +1346,19 @@ export default {
     },
 
     onFlightClick(event, vuelo) {
-      if (vuelo) {
-        this.openFlightModals.push({
-          id: `${vuelo.id}-${new Date().getTime()}`,
-          data: vuelo
-        });
-      } else {
-        console.error("No se encontró el vuelo clicado en allVuelos");
-      }
-    },
+  const vueloId = event.features[0].properties.id;
+  console.log(event.features[0].properties.id);
+  const allFlights = [...this.pendingFlights, ...this.filteredVuelos, ...this.allVuelos, ...this.primerosVuelos];
+  const clickedVuelo = allFlights.find(v => v.id === vueloId);
+  if (clickedVuelo) {
+    this.openFlightModals.push({
+      id: `${vueloId}-${new Date().getTime()}`,
+      data: clickedVuelo
+    });
+  } else {
+    console.error("No se encontró el vuelo clicado en filteredVuelos");
+  }
+},
     closeFlightModal(id) {
       this.openFlightModals = this.openFlightModals.filter(modal => modal.id !== id);
     },
@@ -1531,7 +1390,7 @@ export default {
         const fecha = fechaHora.toISOString().split('T')[0];
         const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
 
-        axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
+        axios.get(urlBase + `/api/diaDia/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
           .then(response => {
             this.resultadosBusqueda = response.data;
           })
@@ -1557,7 +1416,7 @@ export default {
         const fecha = fechaHora.toISOString().split('T')[0];
         const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
 
-        axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
+        axios.get(urlBase + `/api/diaDia/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
           .then(response => {
             this.resultadosBusquedaEnvio = response.data;
           })
@@ -1573,7 +1432,7 @@ export default {
       if (this.busquedaVuelo.trim() !== '') {
         const cadena = this.busquedaVuelo;
 
-        axios.get(urlBase + `/api/simulacion/semanal/vuelo`, {
+        axios.get(urlBase + `/api/diaDia/vuelo`, {
           params: {
             cadena: cadena
           }
@@ -1596,7 +1455,7 @@ export default {
       this.openEnvioModals.push({
         id: envio.id,
         data: envio
-      });
+      }); 
     },
     abrirVueloModal(vuelo) {
       this.openFlightModals.push({
@@ -2424,6 +2283,21 @@ button[disabled] {
   margin-left: 320px; /* Added margin to separate buttons */
 }
 
+
+.airport-popup {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  padding: 5px;
+  border-radius: 5px;
+  z-index: 1000;
+  pointer-events: none; /* Para que el popup no interfiera con otros eventos del mouse */
+  transform: translate(-50%, 10px); /* Centramos el popup horizontalmente y lo colocamos debajo del icono */
+}
+
+.mapboxgl-canvas {
+  cursor: pointer; /* Cambia el cursor a puntero cuando está sobre el mapa */
+}
 .btn-container {
   display: flex;
   justify-content: center;
