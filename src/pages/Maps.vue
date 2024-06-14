@@ -523,8 +523,35 @@ export default {
   destroyed() {
    // clearInterval(this.setInterval);
   },
-  
+  beforeDestroy() {
+    this.cleanupBeforeExit();
+  },
   methods: {
+    async cleanupBeforeExit() {
+      // Ensure simulation is finalized before exit
+      try {
+        await this.finalizarSimulacionSolo();
+        console.log("Simulación finalizada antes de salir.");
+      } catch (error) {
+        console.error("Error finalizando la simulación antes de salir:", error);
+      }
+
+      // Additional cleanup actions if needed
+      clearInterval(this.simulationInterval);
+      this.simulationInterval = null;
+      this.isSimulating = false;
+      // Any other cleanup code you need...
+    },
+    async finalizarSimulacionSolo() {
+      try {
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
+        console.log("Simulación finalizada:", response.data);
+        
+        // Any other finalization code if needed...
+      } catch (error) {
+        console.error("Error finalizando la simulación:", error);
+      }
+    },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen;
     },

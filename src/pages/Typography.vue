@@ -371,13 +371,23 @@ export default {
   
   },
   destroyed() {
-    clearInterval(this.setInterval);
+    //clearInterval(this.setInterval);
   },
-  
+  beforeDestroy() {
+    // Detener cualquier intervalo de tiempo y limpiar los datos antes de que el componente sea destruido
+    this.resetSimulationData();
+  },
   methods: {
     toGMT0(date) {
     return new Date(date.toISOString()); // Asegura que la fecha se convierta correctamente a GMT
   },
+  resetSimulationData() {
+      clearInterval(this.simulationInterval);
+      this.simulationInterval = null;
+      this.pendingFlights = [];
+      this.allVuelos = [];
+      // Reinicia otros datos según sea necesario
+    },
     openCancelarModal() {
       this.showCancelarModal = true;
     },
