@@ -30,7 +30,7 @@
           <input type="radio" id="separarPaquetesSi" value="true" v-model="separarPaquetes"
             :disabled="isButtonDisabledSeparar">
           <label for="separarPaquetesSi">Sí</label>
-          <input type="radio" id="separarPaquetesNo" value="false" v-model="separarPaquetes"
+          <input type="radio" id="separarPaquetesNo" value="false" v-model="separarPaquetes" 
             :disabled="isButtonDisabledSeparar">
           <label for="separarPaquetesNo">No</label>
         </div>
@@ -169,6 +169,47 @@
           <li><span class="icon airport-icon"></span>Aeropuerto</li>
         </ul>
       </div>
+      <div class="map-search-container">
+
+
+<input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled"
+  placeholder="Buscar envío">
+<div v-if="resultadosBusquedaEnvio.length" class="search-results">
+  <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
+    @click="abrirEnvioModal(envio)">
+    <p><strong>{{ envio.idEnvio }}</strong></p>
+    <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
+    <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
+    <p>Estado: {{ envio.estadoEnvio }}</p>
+  </div>
+</div>
+
+<input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
+  :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
+<div v-if="resultadosBusqueda.length" class="search-results">
+  <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
+    @click="abrirModal(aeropuerto)">
+    <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
+    <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
+  </div>
+</div>
+
+<input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled"
+  placeholder="Buscar vuelo">
+<div v-if="resultadosBusquedaVuelo.length" class="search-results">
+  <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
+    @click="abrirVueloModal(vuelo)">
+    <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
+    <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
+    <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
+  </div>
+</div>
+
+</div>
+
+
+
+
 
     </MglMap>
 
@@ -242,46 +283,6 @@
         </div>
         <button class="modal-button-envio" @click="closeEnvioModal(modal.id)">Cerrar</button>
       </div>
-    </div>
-
-
-
-    <div class="map-search-container">
-
-
-      <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled"
-        placeholder="Buscar envío">
-      <div v-if="resultadosBusquedaEnvio.length" class="search-results">
-        <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
-          @click="abrirEnvioModal(envio)">
-          <p><strong>{{ envio.idEnvio }}</strong></p>
-          <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
-          <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
-          <p>Estado: {{ envio.estadoEnvio }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
-        :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
-      <div v-if="resultadosBusqueda.length" class="search-results">
-        <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
-          @click="abrirModal(aeropuerto)">
-          <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
-          <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled"
-        placeholder="Buscar vuelo">
-      <div v-if="resultadosBusquedaVuelo.length" class="search-results">
-        <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
-          @click="abrirVueloModal(vuelo)">
-          <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
-          <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
-          <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
-        </div>
-      </div>
-
     </div>
 
 
@@ -520,7 +521,7 @@ export default {
     });
   },
   destroyed() {
-    clearInterval(this.setInterval);
+   // clearInterval(this.setInterval);
   },
   
   methods: {
@@ -897,9 +898,9 @@ export default {
       
     }
     else if (now > nuevoVueloStartTimeLlegada){
-      console.log(`ENTRO CONDICIONAL ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
+   //   console.log(`ENTRO CONDICIONAL ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
       if (vuelo.fechaSalida.length === 5) { // Si está en movimiento
-                console.log(`ENTRO MOVIMIENTO NEGATIVO ${new Date(now).toISOString()}`);
+     //           console.log(`ENTRO MOVIMIENTO NEGATIVO ${new Date(now).toISOString()}`);
                 vuelo.fechaSalida = "LISTOLISTO";
             this.cantidadVuelosMovimiento--;
             this.capacidadCargaUsadoTotal -= vuelo.capacidadCargaUsado;
@@ -983,7 +984,7 @@ let progressInterval = setInterval(async () => {
 
       this.updateCurrentDateTimeDisplay();
       if (this.simulationInterval) {
-        clearInterval(this.simulationInterval);
+       // clearInterval(this.simulationInterval);
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
@@ -1030,7 +1031,7 @@ let progressInterval = setInterval(async () => {
     }
             
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
-            this.updateCurrentDateTimeDisplay();
+            this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
             this.actualizarContadoresVuelos();
@@ -1259,7 +1260,7 @@ closeFinalizationModal() {
       const sourceId = `vuelo-${vuelo.id}`;
       const bearing = this.calculateBearing(vuelo.origen, vuelo.destino, vuelo.id);
       if (!this.map.getSource(sourceId)) {
-        console.log(`Updating source ${sourceId}`);
+      //  console.log(`Updating source ${sourceId}`);
         this.map.addSource(sourceId, {
           type: 'geojson',
           data: {
@@ -1297,10 +1298,10 @@ closeFinalizationModal() {
       const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 2160 simulated seconds = 1 real second
 
 
-      console.log(flightDurationMinutes)
+     // console.log(flightDurationMinutes)
       const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
-      console.log(steps)
+      //console.log(steps)
       // let steps =336;
       let currentStep = vuelo.pausedAtStep || 0; // Usa pausedAtStep si existe
       let currentPos = vuelo.pausedAtPos || [...vuelo.origen];
@@ -1374,9 +1375,9 @@ closeFinalizationModal() {
       const aeropuerto = aeropuertos.find(a => a.codigoOACI === codigoOACI);
       if (aeropuerto) {
         aeropuerto.capacidadDeAlmacenamientoUsado += paquetes;
-        console.log(`New storage used: ${aeropuerto.capacidadDeAlmacenamientoUsado}/${aeropuerto.capacidadAlmacenamientoMaximo}`);
+      //  console.log(`New storage used: ${aeropuerto.capacidadDeAlmacenamientoUsado}/${aeropuerto.capacidadAlmacenamientoMaximo}`);
         if (aeropuerto.capacidadDeAlmacenamientoUsado > aeropuerto.capacidadAlmacenamientoMaximo) {
-          console.log("Airport collapse detected!");
+        //  console.log("Airport collapse detected!");
           const collapseReason = 'Exceso de paquetes';
           const collapseDetails = {
             location: 'Lima, Perú - SMTP',
@@ -1451,7 +1452,7 @@ closeFinalizationModal() {
       vue.toggleIniciarDetener = false;
       vue.toggleReanudar = true;
       this.isAnimating = false;
-
+      this.searchEnabled = true;
       this.pendingFlights.forEach(vuelo => {
         if (vuelo.animated && !vuelo.paused) {
           vuelo.paused = true;
@@ -1620,73 +1621,64 @@ closeFinalizationModal() {
     },
 
 
-    buscarAeropuerto() {
-      if (this.busquedaAeropuerto.trim() !== '') {
-        const cadena = this.busquedaAeropuerto;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
-
-        axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
-          .then(response => {
-            this.resultadosBusqueda = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching aeropuertos:", error);
-          });
-      } else {
-        this.resultadosBusqueda = [];
+ 
+    async buscarAeropuerto() {
+    if (this.busquedaAeropuerto.trim() !== '') {
+      const cadena = this.busquedaAeropuerto;
+      const fechaHora = new Date(this.currentDateTime);
+      console.log(`FECHA BUSQUEDA AEROPUERTO ${new Date(fechaHora).toISOString()}`);
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
+      try {
+        const response = await axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`);
+        this.resultadosBusqueda = response.data;
+        
+      } catch (error) {
+        console.error("Error fetching aeropuertos:", error);
       }
-    },
-    abrirModal(aeropuerto) {
+    } else {
+      this.resultadosBusqueda = [];
+    }
+  },
+
+  async buscarEnvio() {
+    if (this.busquedaEnvio.trim() !== '') {
+      const cadena = this.busquedaEnvio;
+      const fechaHora = new Date(this.currentDateTime);
+      console.log(`FECHA BUSQUEDA ENVIO ${new Date(fechaHora).toISOString()}`);
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
+      try {
+        const response = await axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`);
+        this.resultadosBusquedaEnvio = response.data;
+      } catch (error) {
+        console.error("Error fetching envios:", error);
+      }
+    } else {
+      this.resultadosBusquedaEnvio = [];
+    }
+  },
+
+  async buscarVuelo() {
+    if (this.busquedaVuelo.trim() !== '') {
+      const cadena = this.busquedaVuelo;
+      try {
+        const response = await axios.get(urlBase + `/api/simulacion/semanal/vuelo`, {
+          params: { cadena: cadena }
+        });
+        this.resultadosBusquedaVuelo = response.data ? [response.data] : [];
+      } catch (error) {
+        console.error("Error fetching vuelos:", error);
+      }
+    } else {
+      this.resultadosBusquedaVuelo = [];
+    }
+  },
+  abrirModal(aeropuerto) {
       this.openModals.push({
         id: aeropuerto.id,
         data: aeropuerto
       });
-    },
-
-
-    buscarEnvio() {
-      if (this.busquedaEnvio.trim() !== '') {
-        const cadena = this.busquedaEnvio;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
-
-        axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
-          .then(response => {
-            this.resultadosBusquedaEnvio = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching envios:", error);
-          });
-      } else {
-        this.resultadosBusquedaEnvio = [];
-      }
-    },
-    buscarVuelo() {
-
-      if (this.busquedaVuelo.trim() !== '') {
-        const cadena = this.busquedaVuelo;
-
-        axios.get(urlBase + `/api/simulacion/semanal/vuelo`, {
-          params: {
-            cadena: cadena
-          }
-        })
-          .then(response => {
-            if (response.data) {
-              this.resultadosBusquedaVuelo = [response.data]; // Assuming response.data is a single flight object
-            } else {
-              this.resultadosBusquedaVuelo = [];
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching vuelos:", error);
-          });
-      } else {
-        this.resultadosBusquedaVuelo = [];
-      }
     },
     abrirEnvioModal(envio) {
       this.openEnvioModals.push({

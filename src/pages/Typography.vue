@@ -51,6 +51,45 @@
         </ul>
       </div>
 
+
+      <div class="map-search-container">
+
+
+<input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" 
+  placeholder="Buscar envío">
+<div v-if="resultadosBusquedaEnvio.length" class="search-results">
+  <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
+    @click="abrirEnvioModal(envio)">
+    <p><strong>{{ envio.idEnvio }}</strong></p>
+    <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
+    <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
+    <p>Estado: {{ envio.estadoEnvio }}</p>
+  </div>
+</div>
+
+<input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
+   placeholder="Buscar aeropuerto">
+<div v-if="resultadosBusqueda.length" class="search-results">
+  <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
+    @click="abrirModal(aeropuerto)">
+    <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
+    <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
+  </div>
+</div>
+
+<input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" 
+  placeholder="Buscar vuelo">
+<div v-if="resultadosBusquedaVuelo.length" class="search-results">
+  <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
+    @click="abrirVueloModal(vuelo)">
+    <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
+    <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
+    <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
+  </div>
+</div>
+
+</div>
+
     </MglMap>
 
 
@@ -103,43 +142,7 @@
 
 
 
-    <div class="map-search-container">
 
-
-      <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" 
-        placeholder="Buscar envío">
-      <div v-if="resultadosBusquedaEnvio.length" class="search-results">
-        <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
-          @click="abrirEnvioModal(envio)">
-          <p><strong>{{ envio.idEnvio }}</strong></p>
-          <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
-          <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
-          <p>Estado: {{ envio.estadoEnvio }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
-         placeholder="Buscar aeropuerto">
-      <div v-if="resultadosBusqueda.length" class="search-results">
-        <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
-          @click="abrirModal(aeropuerto)">
-          <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
-          <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" 
-        placeholder="Buscar vuelo">
-      <div v-if="resultadosBusquedaVuelo.length" class="search-results">
-        <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
-          @click="abrirVueloModal(vuelo)">
-          <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
-          <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
-          <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
-        </div>
-      </div>
-
-    </div>
 
 
 
@@ -720,7 +723,7 @@ onAirportMouseEnter(event) {
     const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
 
     if (!this.map.getSource(sourceId)) {
-      console.log(`Updating source ${sourceId}`);
+     // console.log(`Updating source ${sourceId}`);
       this.map.addSource(sourceId, {
         type: 'geojson',
         data: {
@@ -779,7 +782,7 @@ onAirportMouseEnter(event) {
         const currentLat = startLatLng[1] + incrementLat * currentStep;
         const currentLng = startLatLng[0] + incrementLng * currentStep;
 
-        console.log(`Updating position to: [${currentLng}, ${currentLat}]`);
+       // console.log(`Updating position to: [${currentLng}, ${currentLat}]`);
 
         this.map.getSource(sourceId).setData({
           type: 'Feature',
@@ -1184,7 +1187,7 @@ onAirportMouseEnter(event) {
       const sourceId = `vuelo-${vuelo.id}`;
       const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
       if (!this.map.getSource(sourceId)) {
-        console.log(`Updating source ${sourceId}`);
+    //    console.log(`Updating source ${sourceId}`);
         this.map.addSource(sourceId, {
           type: 'geojson',
           data: {
@@ -1383,24 +1386,82 @@ onAirportMouseEnter(event) {
     },
 
 
-    buscarAeropuerto() {
-      if (this.busquedaAeropuerto.trim() !== '') {
-        const cadena = this.busquedaAeropuerto;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
+    async buscarAeropuerto() {
+  if (this.busquedaAeropuerto.trim() !== '') {
+    const cadena = this.busquedaAeropuerto;
+    const fechaHora = new Date();
+    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+    const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
-        axios.get(urlBase + `/api/diaDia/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
-          .then(response => {
-            this.resultadosBusqueda = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching aeropuertos:", error);
-          });
-      } else {
-        this.resultadosBusqueda = [];
+    try {
+      console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fechaHoraGMT0}, hora: ${hora}`);
+      const response = await axios.get(`${urlBase}/api/diaDia/aeropuerto`, {
+        params: {
+          cadena: cadena,
+          fecha: fecha,
+          hora: hora
+        }
+      });
+      console.log("Resultados de la búsqueda:", response.data);
+      this.resultadosBusqueda = response.data;
+    } catch (error) {
+      console.error("Error fetching aeropuertos:", error);
+    }
+  } else {
+    this.resultadosBusqueda = [];
+  }
+},
+
+  async buscarEnvio() {
+    if (this.busquedaEnvio.trim() !== '') {
+      const cadena = this.busquedaEnvio;
+      const fechaHora = new Date();
+    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+    const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
+
+      try {
+        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fechaHoraGMT0}, hora: ${hora}`);
+        const response = await axios.get(`${urlBase}/api/diaDia/paquete`, {
+          params: {
+            cadena: cadena,
+            fecha: fecha,
+            hora: hora
+          }
+        });
+        this.resultadosBusquedaEnvio = response.data;
+      } catch (error) {
+        console.error("Error fetching envios:", error);
       }
-    },
+    } else {
+      this.resultadosBusquedaEnvio = [];
+    }
+  },
+
+  async buscarVuelo() {
+    if (this.busquedaVuelo.trim() !== '') {
+      const cadena = this.busquedaVuelo;
+
+      try {
+        const response = await axios.get(urlBase + `/api/diaDia/vuelo`, {
+          params: {
+            cadena: cadena
+          }
+        });
+        if (response.data) {
+          this.resultadosBusquedaVuelo = [response.data]; // Assuming response.data is a single flight object
+        } else {
+          this.resultadosBusquedaVuelo = [];
+        }
+      } catch (error) {
+        console.error("Error fetching vuelos:", error);
+      }
+    } else {
+      this.resultadosBusquedaVuelo = [];
+    }
+  },
+
     abrirModal(aeropuerto) {
       this.openModals.push({
         id: aeropuerto.id,
@@ -1408,49 +1469,6 @@ onAirportMouseEnter(event) {
       });
     },
 
-
-    buscarEnvio() {
-      if (this.busquedaEnvio.trim() !== '') {
-        const cadena = this.busquedaEnvio;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
-
-        axios.get(urlBase + `/api/diaDia/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
-          .then(response => {
-            this.resultadosBusquedaEnvio = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching envios:", error);
-          });
-      } else {
-        this.resultadosBusquedaEnvio = [];
-      }
-    },
-    buscarVuelo() {
-
-      if (this.busquedaVuelo.trim() !== '') {
-        const cadena = this.busquedaVuelo;
-
-        axios.get(urlBase + `/api/diaDia/vuelo`, {
-          params: {
-            cadena: cadena
-          }
-        })
-          .then(response => {
-            if (response.data) {
-              this.resultadosBusquedaVuelo = [response.data]; // Assuming response.data is a single flight object
-            } else {
-              this.resultadosBusquedaVuelo = [];
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching vuelos:", error);
-          });
-      } else {
-        this.resultadosBusquedaVuelo = [];
-      }
-    },
     abrirEnvioModal(envio) {
       this.openEnvioModals.push({
         id: envio.id,
