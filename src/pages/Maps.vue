@@ -1028,7 +1028,7 @@ let progressInterval = setInterval(async () => {
       await this.continuarSimulacion(this.currentDate, this.currentHour);
       initialExecution = false; // Asegura que solo se ejecute una vez
     }
-
+            
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay();
 

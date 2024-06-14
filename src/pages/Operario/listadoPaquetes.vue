@@ -4,38 +4,16 @@
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
       <button @click="anadirPaquete">+ Registrar Envío</button>
-      <!--
-      <input type="file" @change="handleFileUpload"/>
-      <button @click="uploadFile">
-        <i class="fa fa-upload"></i>
-      </button>-->
       <!-- Botón para abrir el popup -->
-
       <button @click="openModal" class="upload-button">
         <i class="fa fa-upload"></i>
       </button>
-      <FileUploadModal v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" />
-      <!--
-      <button @click="openPopup" class="upload-button">
-        <i class="fa fa-upload"></i>
-      </button>
-      Popup de subida de archivos
-      <div v-if="isPopupOpen" class="popup-overlay" @click="closePopup">
-        <div class="popup" @click.stop>
-          <h3>Subir Archivos</h3>
-          <input type="file" @change="handleFileUpload" ref="fileInput" />
-          <div class="drop-zone" @dragover.prevent @drop="handleDrop">
-            Arrastra y suelta tus archivos aquí
-          </div>
-          <button @click="closePopup">Cerrar</button>
-        </div> 
-      </div>-->
-      <!--<button @click="updateStatus">Actualizar Estados</button>-->
-      <!--<label for="fileInput">
-        <input type="file" id="fileInput" @change="handleFileUpload">
-        <i class="fa fa-upload"></i> Subir Archivo
-      </label>-->
+      <FileUploadModal v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" 
+                  :handleSuccessMessage="handleSuccessMessage" :handleErrorMessage="handleErrorMessage" />
+      
     </div>
+    
+    
     <base-table-envios
       :columns="tableColumns"
       :data="filteredData"
@@ -48,6 +26,14 @@
       :total-pages="totalPages"
       @page-changed="handlePageChange"
     />
+    <!-- Ajustar la posición de los mensajes de éxito y error -->
+    <div v-if="successMessage" class="success-message right-message">
+      <i class="fas fa-check-circle"></i> {{ successMessage }}
+    </div>
+    <div v-if="errorMessage" class="error-message right-message">
+      <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+    </div>
+    
   </div>
 </template>
 
@@ -74,7 +60,7 @@ export default {
     return {
       searchword: '',
       tableColumns: [
-        { text: 'Código de envío', value: 'id' },
+        { text: 'Código de envío', value: 'idEnvio' },
         { text: 'Estado', value: 'estadoEnvio' },
         { text: 'Origen', value: 'ciudadOrigen' },
         { text: 'Destino', value: 'ciudadDestino' },
@@ -84,6 +70,8 @@ export default {
       currentPage: 1,
       totalPages: 10,
       isModalOpen: false,
+      successMessage: null,
+      errorMessage: null,
     };
   },
   computed: {
@@ -107,6 +95,21 @@ export default {
       this.currentPage = page;
       console.log('Página actual:', page);
     },
+    // Método para manejar el mensaje de éxito
+    handleSuccessMessage(message) {
+      this.successMessage = message;
+      setTimeout(() => {
+        this.successMessage = null; // Ocultar el mensaje después de unos segundos
+      }, 10000);
+    },
+    // Método para manejar el mensaje de error
+    handleErrorMessage(message) {
+      this.errorMessage = message;
+      
+      setTimeout(() => {
+        this.errorMessage = null; // Ocultar el mensaje después de unos segundos
+      }, 10000);
+    },
     fetchDataListaEnvios() {
       axios.get(urlBase + urlListarEnvios)
         .then(response => {
@@ -122,20 +125,6 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
-    async uploadFile() {
-      const formData = new FormData();
-      formData.append('file', this.file);
-
-      try {
-        const response = await fetch('http://example.com/upload', {
-          method: 'POST',
-          body: formData
-        });
-        console.log('Archivo subido exitosamente');
-      } catch (error) {
-        console.error('Error al subir el archivo', error);
-      }
-    }
   },
   mounted() {
     this.fetchDataListaEnvios();
@@ -201,6 +190,58 @@ export default {
 .upload-button img {
   width: 32px;
   height: 32px;
+}
+
+.success-message,
+.error-message {
+  position: fixed;
+  top: 1000px;
+  left: 80%;
+  transform: translateX(15%);
+  background-color: rgba(40, 167, 69, 0.9); /* Cambiar el color de fondo para el mensaje de éxito */
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.error-message {
+  background-color: rgba(220, 53, 69, 0.9); /* Cambiar el color de fondo para el mensaje de error */
+}
+
+.success-message i,
+.error-message i {
+  margin-right: 10px;
+}
+
+/* Otros estilos... */
+/* Ajustar los estilos para los mensajes de éxito y error */
+.right-message {
+  position: fixed;
+  top: 20px;
+  right: 20px; /* Ajusta esta propiedad para mover los mensajes hacia la derecha */
+  max-width: 300px; /* Ajusta esta propiedad para controlar el ancho máximo del mensaje */
+  background-color: rgba(40, 167, 69, 0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 9000;
+}
+
+.error-message.right-message {
+  background-color: rgba(220, 53, 69, 0.9); /* Cambiar el color de fondo para el mensaje de error */
+}
+
+.contendor-notificacion{
+  position: relative;
 }
 
 </style>
