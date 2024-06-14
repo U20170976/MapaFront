@@ -159,6 +159,13 @@ export default ([
         name: "Gestión de Envíos",
         component: listadoPaquetes
       },
+      /*
+      {
+        path: "operario/listadoPaquetes/detalle",
+        name: "Detalle del Envío",
+        component: DetalleEnvio
+      },
+      */
       {
         path: "/operario/ResumenEnvio",
         name: "Resumen de Envío",

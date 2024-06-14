@@ -17,6 +17,8 @@ import Vuex from "vuex";
 import VueConfirmDialog from "vue-confirm-dialog";
 import VuejsDialog from "vuejs-dialog";
 
+
+
 import RouterPrefetch from 'vue-router-prefetch'
 import App from "./App";
 // TIP: change to import router from "./router/starterRouter"; to start with a clean layout
@@ -33,6 +35,9 @@ import VueAxios from 'vue-axios';
 import VueMapbox from "vue-mapbox";
 import Mapbox from "mapbox-gl";
 import VueUploadComponent from 'vue-upload-component';
+import '@fortawesome/fontawesome-free/css/all.css';
+import '@fortawesome/fontawesome-free/js/all.js';
+
 
 //
 Vue.use(BlackDashboard);
@@ -48,6 +53,13 @@ Vue.use(VueUploadComponent);
 // Install BootstrapVue
 Vue.use(BootstrapVue)
 
+/*
+const routes = [
+  { path: '/', component: BaseTableEnvios },
+  { path: '/detalle/:id', component: DetalleEnvio }
+  // Puedes agregar más rutas según tu aplicación
+];
+*/
 
 /* eslint-disable no-new */
 new Vue({

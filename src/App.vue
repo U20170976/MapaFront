@@ -10,7 +10,10 @@
   </div>
 </template>
 
+
+
 <script>
+
   export default {
     methods: {
       disableRTL() {

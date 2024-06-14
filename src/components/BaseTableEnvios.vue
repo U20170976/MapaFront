@@ -23,6 +23,13 @@
             <template v-if="column.value === 'fechaEnvio'">
               {{ formatFechaYHora(row.fechaEnvio, row.horaEnvio) }}
             </template>
+            <!-- Botón de detalles -->
+            <template class="details-cell" v-else-if="column.value === 'details'">
+              <button @click="$emit('view-details', row.idEnvio)" class="details-button">
+                <i class="fa fa-file-text"></i>
+              
+              </button>
+            </template>
             <!-- Si no, mostramos el valor normal -->
             <template v-else>
               {{ row[column.value] }}
@@ -88,7 +95,7 @@ export default{
       fecha = `${day}-${month}-${year}`;
       // Concatenamos fecha y hora con un guion o como mejor prefieras
       return `${fecha} / ${hora}`;
-    }
+    },
   }
 };
 </script>
@@ -123,4 +130,26 @@ th, td {
   padding: 20px;
   color: #cccccc;
 }
+
+.details-cell {
+  text-align: center;
+  vertical-align: middle; /* Centra el contenido verticalmente */
+}
+
+.details-button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 18px; /* Aumenta el tamaño del botón */
+}
+
+.details-button .fa {
+  font-size: 18px; /* Aumenta el tamaño del icono */
+}
+
+.details-button:hover .fa {
+  color: #e05eb5; /* Cambia el color cuando el botón está en hover */
+}
+
 </style>

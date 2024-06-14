@@ -20,6 +20,7 @@
       :searchword="searchword"
       thead-classes="thead-custom-class"
       tbody-classes="tbody-custom-class"
+      @view-details="viewDetails"
     />
     <pagination
       :current-page="currentPage"
@@ -64,7 +65,8 @@ export default {
         { text: 'Estado', value: 'estadoEnvio' },
         { text: 'Origen', value: 'ciudadOrigen' },
         { text: 'Destino', value: 'ciudadDestino' },
-        { text: 'Fecha y hora envío', value: 'fechaEnvio' }
+        { text: 'Fecha y hora envío', value: 'fechaEnvio' },
+        { text: 'Detalles', value: 'details', sortable: false } // Nueva columna para los detalles
       ],
       tableData: [],
       currentPage: 1,
@@ -125,6 +127,12 @@ export default {
     closeModal() {
       this.isModalOpen = false;
     },
+    viewDetails(id) {
+      // Aquí puedes manejar la lógica para mostrar los detalles del envío
+      console.log('Ver detalles para el envío con ID:', id);
+      // Podrías abrir un modal o navegar a una página de detalles, por ejemplo:
+      this.$router.push({ name: 'PackageDetails', params: { id } });
+    }
   },
   mounted() {
     this.fetchDataListaEnvios();
