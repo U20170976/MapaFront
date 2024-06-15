@@ -768,7 +768,7 @@ onAirportMouseEnter(event) {
     const fechaHora = new Date();
     const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
     const currentTime = new Date(new Date().toISOString()); // Ensure current time is in GMT0
-    console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
+   // console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
   const flightStartTime = new Date(vuelo.fechaHoraSalidaGMT0);
   const flightEndTime = new Date(vuelo.fechaHoraLlegadaGMT0);
 
