@@ -456,9 +456,10 @@ export default {
 
 
     updateAirportData() {
-      const fecha = this.simulationDateTime.toISOString().split('T')[0];
-      const hora = this.simulationDateTime.toTimeString().split(' ')[0].substring(0, 5);
-
+      const fechaHora = new Date();
+    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+    const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
       axios.get(urlBase +`/api/diaDia/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
@@ -764,12 +765,14 @@ onAirportMouseEnter(event) {
 
       this.map.on('click', `avion-${vuelo.id}`, this.onFlightClick);
     }
-
+    const fechaHora = new Date();
+    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
     const currentTime = new Date(new Date().toISOString()); // Ensure current time is in GMT0
+    console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
   const flightStartTime = new Date(vuelo.fechaHoraSalidaGMT0);
   const flightEndTime = new Date(vuelo.fechaHoraLlegadaGMT0);
 
-    const elapsedTime = (currentTime - flightStartTime) / 1000; // Elapsed time in seconds
+    const elapsedTime = (fechaHoraGMT0 - flightStartTime) / 1000; // Elapsed time in seconds
     const totalFlightTime = (flightEndTime - flightStartTime) / 1000; // Total flight time in seconds
 
     const flightProgress = Math.min(elapsedTime / totalFlightTime, 1); // Ensure progress is at most 1
@@ -1405,7 +1408,7 @@ onAirportMouseEnter(event) {
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
     try {
-      console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fechaHoraGMT0}, hora: ${hora}`);
+      console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
       const response = await axios.get(`${urlBase}/api/diaDia/aeropuerto`, {
         params: {
           cadena: cadena,
@@ -1432,7 +1435,7 @@ onAirportMouseEnter(event) {
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
       try {
-        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fechaHoraGMT0}, hora: ${hora}`);
+        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(`${urlBase}/api/diaDia/paquete`, {
           params: {
             cadena: cadena,

@@ -171,12 +171,9 @@
       </div>
       <div class="map-search-container">
 
-
-<input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled"
-  placeholder="Buscar envío">
+<input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled" placeholder="Buscar envío">
 <div v-if="resultadosBusquedaEnvio.length" class="search-results">
-  <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
-    @click="abrirEnvioModal(envio)">
+  <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card" @click="abrirEnvioModal(envio)">
     <p><strong>{{ envio.idEnvio }}</strong></p>
     <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
     <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
@@ -184,21 +181,17 @@
   </div>
 </div>
 
-<input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
-  :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
+<input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto" :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
 <div v-if="resultadosBusqueda.length" class="search-results">
-  <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
-    @click="abrirModal(aeropuerto)">
+  <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card" @click="abrirModal(aeropuerto)">
     <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
     <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
   </div>
 </div>
 
-<input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled"
-  placeholder="Buscar vuelo">
+<input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled" placeholder="Buscar vuelo">
 <div v-if="resultadosBusquedaVuelo.length" class="search-results">
-  <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
-    @click="abrirVueloModal(vuelo)">
+  <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card" @click="abrirVueloModal(vuelo)">
     <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
     <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
     <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
@@ -256,35 +249,48 @@
 
 
     <div v-for="modal in openModals" :key="modal.id" class="modal-overlay-airport" @click="closeAirportModal(modal.id)">
-      <div class="modal-content-airport" @click.stop>
-        <h2>Información del Aeropuerto</h2>
-        <p><strong>Ciudad:</strong> {{ modal.data.nombreCiudad }}</p>
-        <p><strong>País:</strong> {{ modal.data.pais }}</p>
-        <p><strong>Capacidad de Almacenamiento Máximo:</strong> {{ modal.data.capacidadAlmacenamientoMaximo }}</p>
-        <p><strong>Capacidad de Almacenamiento Usado:</strong> {{ modal.data.capacidadDeAlmacenamientoUsado }}</p>
-        <p><strong>Coordenadas:</strong> {{ modal.data.coordinates.join(', ') }}</p>
-        <button class="modal-button-airport" @click="closeAirportModal(modal.id)">Cerrar</button>
+  <div class="modal-content-airport" @click.stop>
+    <h2>Información del Aeropuerto</h2>
+    <p><strong>Ciudad:</strong> {{ modal.data.nombreCiudad }}</p>
+    <p><strong>País:</strong> {{ modal.data.pais }}</p>
+    <p><strong>Capacidad de Almacenamiento Máximo:</strong> {{ modal.data.capacidadAlmacenamientoMaximo }}</p>
+    <p><strong>Capacidad de Almacenamiento Usado:</strong> {{ modal.data.capacidadDeAlmacenamientoUsado }}</p>
+    <p><strong>Coordenadas:</strong> {{ formatCoordinates(modal.data.coordinates) }}</p>
+    <p v-if="!modal.data.paquetes || modal.data.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
+    <div v-else>
+      <h3 class="paquetes-title">Paquetes almacenados ({{ modal.data.paquetes.length }}):</h3>
+      <div class="paquetes-list">
+        <div v-for="paquete in modal.data.paquetes" :key="paquete.id" class="paquete-item">
+          <p><strong>ID del Paquete:</strong> {{ paquete.id }}</p>
+          <p><strong>ID del Envío:</strong> {{ paquete.idEnvio }}</p>
+          <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
+        </div>
       </div>
     </div>
+    <button class="modal-button-airport" @click="closeAirportModal(modal.id)">Cerrar</button>
+  </div>
+</div>
     <!-- <div id="map" style="height:750px!important;"></div> -->
 
-    <div v-for="modal in openEnvioModals" :key="modal.id" class="modal-overlay-envio"
-      @click="closeEnvioModal(modal.id)">
-      <div class="modal-content-envio" @click.stop>
-        <h2>Plan de Vuelo del Envío {{ modal.data.idEnvio }}</h2>
-        <div v-for="(vuelo, index) in modal.data.ruta.vuelos" :key="vuelo.id">
-          <hr>
-          <h3>Vuelo #{{ index + 1 }}</h3>
-          <p><strong>Aeropuerto de Salida:</strong> {{ vuelo.ciudadOrigen }}</p>
-          <p><strong>Aeropuerto de Llegada:</strong> {{ vuelo.ciudadDestino }}</p>
-          <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(vuelo.fechaHoraSalidaGMT0) }}</p>
-          <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(vuelo.fechaHoraLlegadaGMT0) }}</p>
-
-        </div>
-        <button class="modal-button-envio" @click="closeEnvioModal(modal.id)">Cerrar</button>
+    <div v-for="modal in openEnvioModals" :key="modal.id" class="modal-overlay-envio" @click="closeEnvioModal(modal.id)">
+  <div class="modal-content-envio" @click.stop>
+    <h2>Plan de Vuelo del Envío {{ modal.data.idEnvio }}</h2>
+    <div v-if="modal.data.ruta && modal.data.ruta.vuelos && modal.data.ruta.vuelos.length > 0">
+      <div v-for="(vuelo, index) in modal.data.ruta.vuelos" :key="vuelo.id">
+        <hr>
+        <h3>Vuelo #{{ index + 1 }}</h3>
+        <p><strong>Aeropuerto de Salida:</strong> {{ vuelo.ciudadOrigen }}</p>
+        <p><strong>Aeropuerto de Llegada:</strong> {{ vuelo.ciudadDestino }}</p>
+        <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(vuelo.fechaHoraSalidaGMT0) }}</p>
+        <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(vuelo.fechaHoraLlegadaGMT0) }}</p>
       </div>
     </div>
-
+    <div v-else>
+      <p>No tiene plan de vuelo</p>
+    </div>
+    <button class="modal-button-envio" @click="closeEnvioModal(modal.id)">Cerrar</button>
+  </div>
+</div>
 
 
 
@@ -527,6 +533,9 @@ export default {
     this.cleanupBeforeExit();
   },
   methods: {
+    formatCoordinates(coordinates) {
+    return coordinates.map(coord => coord.toFixed(2)).join(', ');
+  },
     async cleanupBeforeExit() {
       // Ensure simulation is finalized before exit
       try {
@@ -623,8 +632,9 @@ export default {
 
 
     updateAirportData() {
-      const fecha = this.simulationDateTime.toISOString().split('T')[0];
-      const hora = this.simulationDateTime.toTimeString().split(' ')[0].substring(0, 5);
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
 
       axios.get(urlBase +`/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
@@ -1158,7 +1168,7 @@ closeFinalizationModal() {
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
         console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
-        let filteredVuelos = [];
+        this.filteredVuelos = [];
         this.pendingFlights = [];
         this.allVuelos = [];
         let count = 0;
@@ -1167,7 +1177,7 @@ closeFinalizationModal() {
         fetchedVuelos.forEach(vuelo => {
           vuelo.animated = false; // Agregar propiedad animated
           vuelo.movimiento = false;
-          filteredVuelos.push(vuelo);
+          this.filteredVuelos.push(vuelo);
           
           this.pendingFlights.push(vuelo);
           this.allVuelos.push(vuelo); // Acumular vuelos
@@ -1176,13 +1186,13 @@ closeFinalizationModal() {
         });
 
         // Ordenar los vuelos por fecha y hora de salida
-        filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
+        this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
         console.log("CUENTA ACTUALIZADOS:" + count);
-        this.vuelosOrdenadoGMT0 = filteredVuelos;
+        this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
-        this.$set(this, 'filteredVuelos', filteredVuelos);
-        console.log("Vuelos disponibles ACTUALIZADOS:", filteredVuelos);
+        this.$set(this, 'filteredVuelos', this.filteredVuelos);
+        console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
        
         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
@@ -1652,37 +1662,48 @@ closeFinalizationModal() {
     async buscarAeropuerto() {
     if (this.busquedaAeropuerto.trim() !== '') {
       const cadena = this.busquedaAeropuerto;
-      const fechaHora = new Date(this.currentDateTime);
-      console.log(`FECHA BUSQUEDA AEROPUERTO ${new Date(fechaHora).toISOString()}`);
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const fecha = fechaHora.toISOString().split('T')[0];
       const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
       try {
+        console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`);
         this.resultadosBusqueda = response.data;
         
       } catch (error) {
         console.error("Error fetching aeropuertos:", error);
+         this.resultadosBusqueda = []; // Ensure results are cleared on error
       }
     } else {
-      this.resultadosBusqueda = [];
+        this.resultadosBusqueda = [];
     }
+  },
+
+  parseDateTime(dateTimeStr) {
+    const [datePart, timePart] = dateTimeStr.split(', ');
+    const [day, month, year] = datePart.split('/');
+    const date = `${year}-${month}-${day}`;
+    const time = timePart.replace(' UTC', '');
+    return new Date(`${date}T${time}Z`);
   },
 
   async buscarEnvio() {
     if (this.busquedaEnvio.trim() !== '') {
       const cadena = this.busquedaEnvio;
-      const fechaHora = new Date(this.currentDateTime);
-      console.log(`FECHA BUSQUEDA ENVIO ${new Date(fechaHora).toISOString()}`);
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const fecha = fechaHora.toISOString().split('T')[0];
       const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
+
       try {
+        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`);
         this.resultadosBusquedaEnvio = response.data;
       } catch (error) {
         console.error("Error fetching envios:", error);
+          this.resultadosBusquedaEnvio = []; // Ensure results are cleared on error
       }
     } else {
-      this.resultadosBusquedaEnvio = [];
+        this.resultadosBusquedaEnvio = [];
     }
   },
 
@@ -1696,6 +1717,7 @@ closeFinalizationModal() {
         this.resultadosBusquedaVuelo = response.data ? [response.data] : [];
       } catch (error) {
         console.error("Error fetching vuelos:", error);
+          this.resultadosBusquedaVuelo = []; // Ensure results are cleared on error
       }
     } else {
       this.resultadosBusquedaVuelo = [];
@@ -1726,7 +1748,7 @@ closeFinalizationModal() {
 
   },
   computed: {
-
+/*
     filteredVuelos() {
       const filtered = [];
 
@@ -1738,7 +1760,7 @@ closeFinalizationModal() {
       });
 
       return filtered;
-    }
+    }*/
   }
 
 }
@@ -2123,7 +2145,33 @@ closeFinalizationModal() {
   /* Alto z-index para asegurar que está sobre otros elementos */
 }
 
+.paquetes-list {
+  max-height: 300px; /* Ajusta esta altura según tus necesidades */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.paquetes-title {
+  color: #00B074; /* Color azul para el título de "Paquetes" */
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
 
+.paquete-item {
+  background: #ffffff;
+  border: 1px solid #00B074;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.paquete-item p {
+  margin: 5px 0;
+}
 
 .modal-content-flight {
   background: white;
@@ -2745,6 +2793,20 @@ margin: 0 auto;
   background-color: #4caf50;
   width: 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .airplane-icon {
   background-image: url('/img/avion.png');
