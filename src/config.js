@@ -7,7 +7,12 @@ export default {
     teal: "#00d6b4",
     primaryGradient: ['rgba(76, 211, 150, 0.1)', 'rgba(53, 183, 125, 0)', 'rgba(119,52,169,0)'],
   },
-  saltoTemporalSimulacion: 1,
+  saltoTemporalSimulacionIniciar: 1,
+  NSimulacionIniciar: 10,
+  FitnessSimulacionIniciar: 20000, 
+  saltoTemporalSimulacionContinuar: 1,
+  NSimulacionContinuar: 10,
+  FitnessSimulacionContinuar: 10000, 
   delaySimulacion: 500,
   //urlBase: 'http://localhost'
   //urlBase: 'http://localhost:8080' //con el puerto modificado de Renzo
