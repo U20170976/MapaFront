@@ -2318,7 +2318,7 @@ closeFinalizationModal() {
     let content = '';
     if (type === 'vuelo' && this.detalle.tipo === 'vuelo') {
       content = `
-        Información del Vuelo (Descargado con fecha ${fecha} y hora ${hora}):
+        Información del Vuelo con fecha ${fecha} y hora ${hora}:
         Id: ${this.detalle.datos.id}
         Aeropuerto de Salida: ${this.getCiudadYPais(this.detalle.datos.ciudadOrigen)}
         Aeropuerto de Llegada: ${this.getCiudadYPais(this.detalle.datos.ciudadDestino)}
@@ -2334,7 +2334,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'aeropuerto' && this.detalle.tipo === 'aeropuerto') {
       content = `
-        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
         Ciudad y País: ${this.detalle.datos.nombreCiudad}, ${this.detalle.datos.pais}
         Coordenadas: ${this.formatCoordinates(this.detalle.datos.coordinates)}
         Paquetes almacenados: ${this.detalle.datos.paquetes.length === 0 ? 'No hay paquetes' : ''}
@@ -2346,7 +2346,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'envio' && this.detalle.tipo === 'envio') {
       content = `
-        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} (Descargado  con fecha ${fecha} y hora ${hora}):
+        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} con fecha ${fecha} y hora ${hora}:
         ${this.detalle.datos.ruta.vuelos.length === 0 ? 'No tiene plan de vuelo' : ''}
         ${this.detalle.datos.ruta.vuelos.map((vuelo, index) => `
           Vuelo #${index + 1}:
@@ -2373,7 +2373,7 @@ closeFinalizationModal() {
 
     if (type === 'vuelo') {
       content = `
-        Información del Vuelo (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Vuelo con fecha ${fecha} y hora ${hora}:
         Id: ${data.id}
         Aeropuerto de Salida: ${this.getCiudadYPais(data.ciudadOrigen)}
         Aeropuerto de Llegada: ${this.getCiudadYPais(data.ciudadDestino)}
@@ -2391,7 +2391,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'aeropuerto') {
       content = `
-        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
         Ciudad: ${data.nombreCiudad}
         País: ${data.pais}
         Capacidad de Almacenamiento Máximo: ${data.capacidadAlmacenamientoMaximo}

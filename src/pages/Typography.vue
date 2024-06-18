@@ -961,9 +961,11 @@ destinationPoint(point, angle, distance) {
         return 'Datos de aeropuertos no encontrados';
       }
     } else {
+      
       // Caso de un solo aeropuerto
       const aeropuerto = this.mapaAeropuertos[codigoOACI];
       if (aeropuerto) {
+        console.log(`${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`);
         return `${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`;
       } else {
         return 'Aeropuerto no encontrado';
@@ -978,7 +980,7 @@ destinationPoint(point, angle, distance) {
         .then(response => {
           this.aeropuertos = response.data;
                   // Llenar el mapa de aeropuertos indexado por codigoOACI
-        this.mapaAeropuertos = this.aeropuertos.reduce((map, aeropuerto) => {
+                  this.mapaAeropuertos = this.aeropuertos.reduce((map, aeropuerto) => {
           map[aeropuerto.codigoOACI] = aeropuerto;
           return map;
         }, {});
@@ -1012,6 +1014,10 @@ destinationPoint(point, angle, distance) {
       axios.get(urlBase +`/api/diaDia/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
+          this.mapaAeropuertos = this.aeropuertos.reduce((map, aeropuerto) => {
+          map[aeropuerto.codigoOACI] = aeropuerto;
+          return map;
+        }, {});
           this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
             type: 'Feature',
             geometry: {
@@ -1254,6 +1260,9 @@ onAirportMouseEnter(event) {
     this.showPopup = false;
   },
 
+
+
+
     onMapLoaded(event) {
       // Establecer referencia al mapa en componente y store global si es necesario
       this.map = event.map;
@@ -1261,7 +1270,7 @@ onAirportMouseEnter(event) {
  this.$nextTick(() => {
         this.map.resize();
       });
-
+      this.fetchAeropuertos();
     const currentDateTimeGMT0 = this.toGMT0Inicio(new Date());
     const fechaInicio = currentDateTimeGMT0.toISOString().split('T')[0];
     const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
@@ -1269,6 +1278,7 @@ onAirportMouseEnter(event) {
 
  console.log("HOLA", currentDateTimeGMT0.toISOString()); 
  this.simulationDateTime = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
+
 
  this.loadVuelosEnCamino(fechaInicio, fechaInicioHora)
     .then(vuelos => {
@@ -1278,6 +1288,7 @@ onAirportMouseEnter(event) {
       console.error("Error loading vuelos en camino:", error);
     });
  
+
       this.startSimulationLoop(fechaInicio,fechaInicioHora); 
     
       this.loadImages(() => {
@@ -1679,6 +1690,7 @@ toGMT0Inicio(date) {
 
 
     async startSimulationLoop(fechaInicio, fechaInicioHora) {
+
   this.simulationDateTime = this.toGMT0Inicio(new Date());
   this.pendingFlights = [];
   this.allVuelos = [];
@@ -1695,7 +1707,7 @@ toGMT0Inicio(date) {
     let currentTime = performance.now();
     let elapsedTime = (currentTime - startTime) / 1000;
     startTime = currentTime;
-
+    this.startAutoUpdatePaquetes(); 
     // Actualiza simulationDateTime basado en el tiempo transcurrido real
     this.simulationDateTime = new Date(this.simulationDateTime.getTime() + elapsedTime * 1000);
     //console.log("Tiempo actual de simulación start loop:", this.simulationDateTime.toISOString());
@@ -1722,7 +1734,8 @@ toGMT0Inicio(date) {
     }
     
     this.checkAndAnimateFlights();
-  }, 1000); // Ejecutar cada segundo en tiempo real
+   }, 1000); // Ejecutar cada segundo en tiempo real
+ 
 },
 
 
@@ -2073,6 +2086,7 @@ toGMT0Inicio(date) {
           }
         });
         this.resultadosBusquedaEnvio = response.data;
+        console.log(response.data);
       } catch (error) {
         console.error("Error fetching envios:", error);
       }
@@ -2137,7 +2151,7 @@ toGMT0Inicio(date) {
  let content = '';
  if (type === 'vuelo' && this.detalle.tipo === 'vuelo') {
    content = `
-     Información del Vuelo (Descargado con fecha ${fecha} y hora ${hora}):
+     Información del Vuelo con fecha ${fecha} y hora ${hora}:
      Id: ${this.detalle.datos.id}
      Aeropuerto de Salida: ${this.getCiudadYPais(this.detalle.datos.ciudadOrigen)}
      Aeropuerto de Llegada: ${this.getCiudadYPais(this.detalle.datos.ciudadDestino)}
@@ -2153,7 +2167,7 @@ toGMT0Inicio(date) {
    `;
  } else if (type === 'aeropuerto' && this.detalle.tipo === 'aeropuerto') {
    content = `
-     Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+     Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
      Ciudad y País: ${this.detalle.datos.nombreCiudad}, ${this.detalle.datos.pais}
      Coordenadas: ${this.formatCoordinates(this.detalle.datos.coordinates)}
      Paquetes almacenados: ${this.detalle.datos.paquetes.length === 0 ? 'No hay paquetes' : ''}
@@ -2165,7 +2179,7 @@ toGMT0Inicio(date) {
    `;
  } else if (type === 'envio' && this.detalle.tipo === 'envio') {
    content = `
-     Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} (Descargado  con fecha ${fecha} y hora ${hora}):
+     Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} con fecha ${fecha} y hora ${hora}:
      ${this.detalle.datos.ruta.vuelos.length === 0 ? 'No tiene plan de vuelo' : ''}
      ${this.detalle.datos.ruta.vuelos.map((vuelo, index) => `
        Vuelo #${index + 1}:
@@ -2193,7 +2207,7 @@ console.log("EEEEEEEEE");
  if (type === 'vuelo') {
   console.log("fecha", fecha, " ",hora );
    content = `
-     Información del Vuelo (Descargado  con fecha ${fecha} y hora ${hora}):
+     Información del Vuelo con fecha ${fecha} y hora ${hora}:
      Id: ${data.id}
      Aeropuerto de Salida: ${this.getCiudadYPais(data.ciudadOrigen)}
      Aeropuerto de Llegada: ${this.getCiudadYPais(data.ciudadDestino)}
@@ -2212,7 +2226,7 @@ console.log("EEEEEEEEE");
  } else if (type === 'aeropuerto') {
   console.log("fecha", fecha, " ",hora );
    content = `
-     Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+     Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
      Ciudad: ${data.nombreCiudad}
      País: ${data.pais}
      Capacidad de Almacenamiento Máximo: ${data.capacidadAlmacenamientoMaximo}
