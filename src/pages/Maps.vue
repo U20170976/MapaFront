@@ -40,7 +40,7 @@
           :disabled="isButtonDisabledSeparar" class="custom-input">
         </base-input>
       </div>
-    </div>
+    </div> 
     <div class="row">
 
   <!-- Modal Cancelar -->
@@ -162,7 +162,7 @@
     {{ isLegendOpen ? '▲ Cerrar Leyenda' : '▼ Abrir Leyenda' }}
   </button>
   <ul :style="{ display: isLegendOpen ? 'block' : 'none' }" class="legend-content">
-    <li><strong>Información de Vuelos</strong></li>
+    <li><strong>Información de Aeropuertos</strong></li>
     <li><span class="icon airport-green"></span>Menor a 50%</li>
     <li><span class="icon airport-orange"></span>Entre 50% y 80%</li>
     <li><span class="icon airport-red"></span>Mayor a 80%</li>
@@ -177,6 +177,18 @@
       <div class="map-search-container">
         
   <!-- Buscadores existentes -->
+  <div>
+      
+      <label>
+        <span class="checkbox-title">Búsqueda de Paquetes</span>
+      </label>
+    </div>
+    <div>
+      
+      <label>
+        <span class="checkbox-title">por su código de envío</span>
+      </label>
+    </div>
   <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" placeholder="Buscar paquete" :disabled="!busquedasHabilitadas">
   <div v-if="resultadosBusquedaEnvio.length>0" class="search-results">
     <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card" @click="mostrarEnvio(envio)">
@@ -186,6 +198,12 @@
       <p>Estado: {{ envio.estadoEnvio }}</p>
     </div>
   </div>
+  <div>
+      
+      <label>
+        <span class="checkbox-title">Búsqueda de Aeropuerto</span>
+      </label>
+    </div>
   <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto" placeholder="Buscar aeropuerto" :disabled="!busquedasHabilitadas">
   <div v-if="resultadosBusqueda.length>0" class="search-results">
     <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card" @click="mostrarAeropuerto(aeropuerto)">
@@ -194,24 +212,32 @@
       <p>Capacidad Usada: {{ aeropuerto.capacidadDeAlmacenamientoUsado }}</p>
     </div>
   </div>
-  <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" placeholder="Buscar vuelo" :disabled="!busquedasHabilitadas">
+  
   <div class="checkbox-group">
     <div>
+      
       <label>
-        <input type="checkbox" v-model="buscarPorId" @change="toggleCheckbox('id')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Buscar por Id</span>
+        <span class="checkbox-title">Tipos de Búsqueda de Vuelo</span>
+      </label>
+    </div>
+    <div>
+      
+      <label>
+        <input type="checkbox" v-model="buscarPorId" @change="toggleCheckbox('id')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por Id</span>
       </label>
     </div>
     <div>
       <label>
-        <input type="checkbox" v-model="buscarPorCiudadOrigen" @change="toggleCheckbox('origen')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Buscar por Ciudad Origen</span>
+        <input type="checkbox" v-model="buscarPorCiudadOrigen" @change="toggleCheckbox('origen')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por el aeropuerto que salen</span>
       </label>
     </div>
     <div>
       <label>
-        <input type="checkbox" v-model="buscarPorCiudadDestino" @change="toggleCheckbox('destino')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Buscar por Ciudad Destino</span>
+        <input type="checkbox" v-model="buscarPorCiudadDestino" @change="toggleCheckbox('destino')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por el aeropuerto que llegan</span>
       </label>
     </div>
   </div>
+  <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" placeholder="Buscar vuelo" :disabled="!busquedasHabilitadas">
   <div v-if="resultadosBusquedaVuelo.length > 0" class="search-results">
     <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card" @click="mostrarVuelo(vuelo)">
       <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
@@ -243,7 +269,9 @@
         </div>
       </div>
     </div>
+    <button class="modal-button-flight" @click="downloadDetails('vuelo')">Descargar</button>
     <button class="modal-button-flight" @click="detalle = null">Cerrar</button>
+    
   </div>
 </div>
   <div v-if="detalle.tipo === 'aeropuerto'" class="detail-container">
@@ -262,6 +290,7 @@
         </div>
       </div>
     </div>
+    <button class="modal-button-airport" @click="downloadDetails('aeropuerto')">Descargar</button>
     <button class="modal-button-airport" @click="detalle = null">Cerrar</button>
   </div>
 </div>
@@ -289,6 +318,7 @@
     <div v-else>
       <p>No tiene plan de vuelo</p>
     </div>
+    <button class="modal-button-envio" @click="downloadDetails('envio')">Descargar</button>
     <button class="modal-button-envio" @click="detalle = null">Cerrar</button>
   </div>
 </div>
@@ -357,6 +387,7 @@
         </div>
       </div>
     </div>
+    <button class="modal-button-flight" @click="downloadDetailsModal('vuelo', modal.data)">Descargar</button>
     <button class="modal-button-flight" @click="closeFlightModal(modal.id)">Cerrar</button>
   </div>
 </div>
@@ -380,6 +411,11 @@
         </div>
       </div>
     </div>
+    <button class="modal-button-airport" 
+        @click="downloadDetailsModal('aeropuerto', modal.data)" 
+        v-if="isDownloadVisible">
+  Descargar
+</button>
     <button class="modal-button-airport" @click="closeAirportModal(modal.id)">Cerrar</button>
   </div>
 </div>
@@ -479,6 +515,7 @@ export default {
   },
   data() {
     return {
+      isDownloadVisible: false, 
       busquedasHabilitadas: false, // Variable para controlar el estado de habilitación
       buscarPorId: false,
     buscarPorCiudadOrigen: false,
@@ -545,6 +582,15 @@ export default {
       envios: envios,
       calendarioVuelos: {},
       movingFlights: [],
+      currentDateTimeInfo: new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      }), // Convertir la fecha correctamente
       currentDateTime: new Date().toLocaleString('es-ES', {
         timeZone: 'America/Lima',
         year: 'numeric',
@@ -668,11 +714,12 @@ export default {
       this.buscarPorId = false;
       this.buscarPorCiudadDestino = false;
     } else if (type === 'destino') {
-      this.buscarPorId = false;
+      this.buscarPorId = false; 
       this.buscarPorCiudadOrigen = false;
     }
   },
     mostrarEnvio(envio) {
+       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
         this.detalle = { tipo: 'envio', datos: envio };
         if (envio && envio.ruta && envio.ruta.vuelos) {
     envio.ruta.vuelos.forEach(vuelo => {
@@ -708,6 +755,7 @@ export default {
         }
     },
     mostrarAeropuerto(aeropuerto) {
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       this.detalle = { tipo: 'aeropuerto', datos: aeropuerto };
     
     // Reset any previously selected airport icon
@@ -811,6 +859,7 @@ mostrarAeropuertoFlight(aeropuerto) {
         return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
     },
   mostrarVuelo(vuelo) {
+    this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
         this.detalle = { tipo: 'vuelo', datos: vuelo };
 
         const isFlightVisible = this.map.queryRenderedFeatures({ layers: [`avion-${vuelo.id}`] }).length > 0;
@@ -1506,9 +1555,9 @@ let progressInterval = setInterval(async () => {
       }
     },
 
-
+ 
     startSimulationLoop(fechaInicio, fechaInicioHora) {
-
+      this.isDownloadVisible = true;
       this.busquedasHabilitadas = true;
       this.updateCurrentDateTimeDisplay();
       if (this.simulationInterval) {
@@ -2038,7 +2087,7 @@ closeFinalizationModal() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'simulacion_reporte.doc';
+    link.download = 'Simulacion_Reporte.doc';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -2096,6 +2145,7 @@ closeFinalizationModal() {
     },
 
     onAirportClick(event) {
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const feature = event.features[0];
 
       const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === feature.properties.codigoOACI);
@@ -2114,7 +2164,7 @@ closeFinalizationModal() {
     },
 
     onFlightClick(event, vuelo) {
-
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const vueloId = event.features[0].properties.id;
       console.log(event.features[0].properties.id)
   // Combina both pendingFlights and filteredVuelos into one array
@@ -2259,9 +2309,108 @@ closeFinalizationModal() {
     },
     closeEnvioModal(id) {
       this.openEnvioModals = this.openEnvioModals.filter(modal => modal.id !== id);
+    },
+    downloadDetails(type) {
+   
+      let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
+      let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+     
+    let content = '';
+    if (type === 'vuelo' && this.detalle.tipo === 'vuelo') {
+      content = `
+        Información del Vuelo (Descargado con fecha ${fecha} y hora ${hora}):
+        Id: ${this.detalle.datos.id}
+        Aeropuerto de Salida: ${this.getCiudadYPais(this.detalle.datos.ciudadOrigen)}
+        Aeropuerto de Llegada: ${this.getCiudadYPais(this.detalle.datos.ciudadDestino)}
+        Fecha y Hora de Salida: ${this.formatDateTime(this.detalle.datos.fechaHoraSalidaGMT0)}
+        Fecha y Hora de Llegada: ${this.formatDateTime(this.detalle.datos.fechaHoraLlegadaGMT0)}
+        Tiempo Estimado de Vuelo: ${this.formatDuration(this.detalle.datos.tiempoEstimadoVuelo)}
+        Paquetes: ${this.detalle.datos.paquetesAlmacenados.length === 0 ? 'No hay paquetes' : ''}
+        ${this.detalle.datos.paquetesAlmacenados.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'aeropuerto' && this.detalle.tipo === 'aeropuerto') {
+      content = `
+        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Ciudad y País: ${this.detalle.datos.nombreCiudad}, ${this.detalle.datos.pais}
+        Coordenadas: ${this.formatCoordinates(this.detalle.datos.coordinates)}
+        Paquetes almacenados: ${this.detalle.datos.paquetes.length === 0 ? 'No hay paquetes' : ''}
+        ${this.detalle.datos.paquetes.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'envio' && this.detalle.tipo === 'envio') {
+      content = `
+        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} (Descargado  con fecha ${fecha} y hora ${hora}):
+        ${this.detalle.datos.ruta.vuelos.length === 0 ? 'No tiene plan de vuelo' : ''}
+        ${this.detalle.datos.ruta.vuelos.map((vuelo, index) => `
+          Vuelo #${index + 1}:
+          id del vuelo: ${vuelo.id}
+          Aeropuerto de Salida: ${this.getCiudadYPais(vuelo.ciudadOrigen)}
+          Aeropuerto de Llegada: ${this.getCiudadYPais(vuelo.ciudadDestino)}
+          Fecha y Hora de Salida: ${this.formatDateTime(vuelo.fechaHoraSalidaGMT0)}
+          Fecha y Hora de Llegada: ${this.formatDateTime(vuelo.fechaHoraLlegadaGMT0)}
+        `).join('\n')}
+      `;
     }
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalles_${type}.doc`;
+    link.click();
+  },
+  downloadDetailsModal(type, data) {
+  console.log("EEEEEEEEE");
+      let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
+      let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+      console.log("EEEEEEEEEAQQQ");
+    let content = '';
 
-
+    if (type === 'vuelo') {
+      content = `
+        Información del Vuelo (Descargado  con fecha ${fecha} y hora ${hora}):
+        Id: ${data.id}
+        Aeropuerto de Salida: ${this.getCiudadYPais(data.ciudadOrigen)}
+        Aeropuerto de Llegada: ${this.getCiudadYPais(data.ciudadDestino)}
+        Capacidad de Carga Máxima: ${data.capacidadCargaMaxima}
+        Capacidad de Carga Usado: ${data.capacidadCargaUsado}
+        Fecha y Hora de Salida: ${this.formatDateTime(data.fechaHoraSalidaGMT0)}
+        Fecha y Hora de Llegada: ${this.formatDateTime(data.fechaHoraLlegadaGMT0)}
+        Tiempo Estimado de Vuelo: ${this.formatDuration(data.tiempoEstimadoVuelo)}
+        Paquetes: ${data.paquetesAlmacenados.length === 0 ? 'No hay paquetes' : ''}
+        ${data.paquetesAlmacenados.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'aeropuerto') {
+      content = `
+        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Ciudad: ${data.nombreCiudad}
+        País: ${data.pais}
+        Capacidad de Almacenamiento Máximo: ${data.capacidadAlmacenamientoMaximo}
+        Capacidad de Almacenamiento Usado: ${data.capacidadDeAlmacenamientoUsado}
+        Coordenadas: ${this.formatCoordinates(data.coordinates)}
+        Paquetes almacenados: ${data.paquetes.length === 0 ? 'No hay paquetes' : ''}
+        ${data.paquetes.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    }
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalles_${type}.doc`;
+    link.click();
+  },
   },
   computed: {
 /*
@@ -2340,7 +2489,13 @@ closeFinalizationModal() {
 
 .checkbox-label {
   color: #e0e0e0; /* Un color claro */
-}
+} 
+
+.checkbox-title {
+  color: #e0e0e0; /* Un color claro */
+  font-weight: bold;
+  font-size: 1rem;
+} 
 
 .main-map {
   width: 100% !important;
@@ -2629,6 +2784,7 @@ closeFinalizationModal() {
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+  width: 40%;
   /* Espaciado superior para separarlo del contenido */
   font-weight: bold;
   align-self: center;
@@ -2734,7 +2890,12 @@ closeFinalizationModal() {
   margin-top: 10px;
   font-weight: bold;
   align-self: center;
+  width: 40%;
 }
+
+
+
+
 
 .modal-button-flight:hover {
   background-color: darkgreen;
@@ -2805,7 +2966,7 @@ button[disabled] {
 
 .search-results {
   width: 100%;
-  max-width: 210px;
+  max-width: 230px;
   /* Coincidir con el ancho del campo de búsqueda */
   max-height: 200px;
   overflow-y: auto;
@@ -2826,10 +2987,10 @@ button[disabled] {
   padding: 10px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   color: black !important;
   /* Cambia el color de la letra a negro */
-  background-color: rgb(155, 152, 152) !important;
+  background-color: rgb(110, 110, 110) !important;
   /* Fondo rojo para el card */
   font-weight: bold !important;
   /* Letra en negrita */
@@ -2837,7 +2998,7 @@ button[disabled] {
 
 
 .search-result-card:hover {
-  background-color: #757373 !important;
+  background-color: #929292 !important;
 }
 
 
@@ -2888,6 +3049,7 @@ button[disabled] {
   margin-top: 10px;
   font-weight: bold;
   align-self: center;
+  width: 40%;
 }
 
 
