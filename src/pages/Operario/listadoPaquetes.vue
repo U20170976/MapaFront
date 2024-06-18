@@ -99,18 +99,35 @@ export default {
     },
     // Método para manejar el mensaje de éxito
     handleSuccessMessage(message) {
+      //window.location.reload(); // Refrescar la página completa
       this.successMessage = message;
+      this.loadTableData(); // Llamar a la función para recargar los datos de la tabla
       setTimeout(() => {
         this.successMessage = null; // Ocultar el mensaje después de unos segundos
+        
       }, 10000);
     },
     // Método para manejar el mensaje de error
     handleErrorMessage(message) {
+      //window.location.reload(); // Refrescar la página completa
       this.errorMessage = message;
-      
+      this.loadTableData(); // Llamar a la función para recargar los datos de la tabla
       setTimeout(() => {
         this.errorMessage = null; // Ocultar el mensaje después de unos segundos
       }, 10000);
+    },
+    // Método para recargar los datos de la tabla
+    loadTableData() {
+      // Lógica para recargar los datos de la tabla
+      // Esto puede ser una llamada a una API, o cualquier otra lógica para obtener los datos
+      // Ejemplo:
+      this.$http.get(urlBase + urlListarEnvios)
+        .then(response => {
+          this.tableData = response.data;
+        })
+        .catch(error => {
+          console.error('Error al obtener los datos: ', error);
+        });
     },
     fetchDataListaEnvios() {
       axios.get(urlBase + urlListarEnvios)
@@ -131,7 +148,7 @@ export default {
       // Aquí puedes manejar la lógica para mostrar los detalles del envío
       console.log('Ver detalles para el envío con ID:', id);
       // Podrías abrir un modal o navegar a una página de detalles, por ejemplo:
-      this.$router.push({ name: 'PackageDetails', params: { id } });
+      this.$router.push({ name: 'DetalleEnvio', params: { id } });
     }
   },
   mounted() {

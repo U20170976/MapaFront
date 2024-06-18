@@ -25,7 +25,7 @@
             </template>
             <!-- Botón de detalles -->
             <template class="details-cell" v-else-if="column.value === 'details'">
-              <button @click="$emit('view-details', row.idEnvio)" class="details-button">
+              <button @click="$emit('view-details', row.id)" class="details-button">
                 <i class="fa fa-file-text"></i>
               
               </button>
