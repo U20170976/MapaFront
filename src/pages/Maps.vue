@@ -21,7 +21,7 @@
     <div class="row" style="margin-top:20px;">
       <div class="col-md-4 pr-md-1">
         <base-input label="Fecha Inicio" type="date" format="yyyy-MM-dd" placeholder="Fecha Inicio"
-          v-model="fecha_inicio_simulacion" :disabled="isDateInputDisabled">
+          v-model="fecha_inicio_simulacion" :disabled="isDateInputDisabled" class="custom-input">
         </base-input>
       </div>
       <div class="col-md-4 pr-md-1">
@@ -30,17 +30,17 @@
           <input type="radio" id="separarPaquetesSi" value="true" v-model="separarPaquetes"
             :disabled="isButtonDisabledSeparar">
           <label for="separarPaquetesSi">Sí</label>
-          <input type="radio" id="separarPaquetesNo" value="false" v-model="separarPaquetes"
+          <input type="radio" id="separarPaquetesNo" value="false" v-model="separarPaquetes" 
             :disabled="isButtonDisabledSeparar">
           <label for="separarPaquetesNo">No</label>
         </div>
       </div>
       <div class="col-md-4 pr-md-1" v-if="separarPaquetes === 'true'">
         <base-input label="Tamaño del Grupo" type="number" placeholder="Tamaño del Grupo" v-model="tamanoGrupo"
-          :disabled="isButtonDisabledSeparar">
+          :disabled="isButtonDisabledSeparar" class="custom-input">
         </base-input>
       </div>
-    </div>
+    </div> 
     <div class="row">
 
   <!-- Modal Cancelar -->
@@ -157,18 +157,179 @@
           'icon-rotate': ['get', 'icon-rotate'] // Use icon-rotate property
         }" @click="onFlightClick" />
 
-      <div id="legend" class="map-legend">
-        <button class="legend-toggle" @click="toggleLegend">
-          {{ isLegendOpen ? '▲ Cerrar Leyenda' : '▼ Abrir Leyenda' }}
-        </button>
-        <ul :style="{ display: isLegendOpen ? 'block' : 'none' }" class="legend-content">
-          <li><span class="dot greater-80"></span>Menor a 50%</li>
-          <li><span class="dot between-50-80"></span>Entre 50% y 80%</li>
-          <li><span class="dot less-50"></span>Mayor a 80%</li>
-          <li><span class="icon airplane-icon"></span>Vuelo</li>
-          <li><span class="icon airport-icon"></span>Aeropuerto</li>
-        </ul>
+<div id="legend" class="map-legend">
+  <button class="legend-toggle" @click="toggleLegend">
+    {{ isLegendOpen ? '▲ Cerrar Leyenda' : '▼ Abrir Leyenda' }}
+  </button>
+  <ul :style="{ display: isLegendOpen ? 'block' : 'none' }" class="legend-content">
+    <li><strong>Información de Aeropuertos</strong></li>
+    <li><span class="icon airport-green"></span>Menor a 50%</li>
+    <li><span class="icon airport-orange"></span>Entre 50% y 80%</li>
+    <li><span class="icon airport-red"></span>Mayor a 80%</li>
+    <li><span class="icon airport-selected-icon"></span>Vuelo seleccionado</li>
+    <li><strong>Información de Vuelos</strong></li>
+    <li><span class="icon flight-green"></span>Menor a 10%</li>
+    <li><span class="icon flight-orange"></span>Entre 10% y 30%</li>
+    <li><span class="icon flight-red"></span>Mayor a 30%</li>
+    <li><span class="icon flight-selected-icon"></span>Aeropuerto seleccionado</li>
+  </ul>
+</div>
+      <div class="map-search-container">
+        
+  <!-- Buscadores existentes -->
+  <div>
+      
+      <label>
+        <span class="checkbox-title">Búsqueda de Paquetes</span>
+      </label>
+    </div>
+    <div>
+      
+      <label>
+        <span class="checkbox-title">por su código de envío</span>
+      </label>
+    </div>
+  <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" placeholder="Buscar paquete" :disabled="!busquedasHabilitadas">
+  <div v-if="resultadosBusquedaEnvio.length>0" class="search-results">
+    <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card" @click="mostrarEnvio(envio)">
+      <p><strong>{{ envio.idEnvio }}</strong></p>
+      <p>Ciudad Actual: {{ getCiudadYPais(envio.ciudadActual) }}</p>
+      <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
+      <p>Estado: {{ envio.estadoEnvio }}</p>
+    </div>
+  </div>
+  <div>
+      
+      <label>
+        <span class="checkbox-title">Búsqueda de Aeropuerto</span>
+      </label>
+    </div>
+  <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto" placeholder="Buscar aeropuerto" :disabled="!busquedasHabilitadas">
+  <div v-if="resultadosBusqueda.length>0" class="search-results">
+    <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card" @click="mostrarAeropuerto(aeropuerto)">
+      <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
+      <p>Capacidad Máxima: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
+      <p>Capacidad Usada: {{ aeropuerto.capacidadDeAlmacenamientoUsado }}</p>
+    </div>
+  </div>
+  
+  <div class="checkbox-group">
+    <div>
+      
+      <label>
+        <span class="checkbox-title">Tipos de Búsqueda de Vuelo</span>
+      </label>
+    </div>
+    <div>
+      
+      <label>
+        <input type="checkbox" v-model="buscarPorId" @change="toggleCheckbox('id')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por Id</span>
+      </label>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" v-model="buscarPorCiudadOrigen" @change="toggleCheckbox('origen')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por el aeropuerto que salen</span>
+      </label>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" v-model="buscarPorCiudadDestino" @change="toggleCheckbox('destino')" :disabled="!busquedasHabilitadas"> <span class="checkbox-label">Por el aeropuerto que llegan</span>
+      </label>
+    </div>
+  </div>
+  <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" placeholder="Buscar vuelo" :disabled="!busquedasHabilitadas">
+  <div v-if="resultadosBusquedaVuelo.length > 0" class="search-results">
+    <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card" @click="mostrarVuelo(vuelo)">
+      <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
+      <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
+      <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
+    </div>
+  </div>
+  <div  v-if="detalle">
+  <div v-if="detalle.tipo === 'vuelo'" class="detail-container">
+    <div class="modal-content-flight">
+    <h2>Información del Vuelo</h2>
+    <p><strong>Id:</strong> {{ detalle.datos.id }}</p>
+    <p><strong>Aeropuerto de Salida:</strong> {{ getCiudadYPais(detalle.datos.ciudadOrigen) }}</p>
+    <p><strong>Aeropuerto de Llegada:</strong> {{ getCiudadYPais(detalle.datos.ciudadDestino) }}</p>
+    <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(detalle.datos.fechaHoraSalidaGMT0) }}</p>
+    <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(detalle.datos.fechaHoraLlegadaGMT0) }}</p>
+    <p><strong>Tiempo Estimado de Vuelo:</strong> {{ formatDuration(detalle.datos.tiempoEstimadoVuelo) }}</p>
+    <div v-if="!detalle.datos.paquetesAlmacenados || detalle.datos.paquetesAlmacenados.length === 0">
+      <h3 class="paquetes-title">Paquetes:</h3>
+      <p>No hay paquetes</p>
+    </div>
+    <div v-else>
+      <h3 class="paquetes-title">Paquetes Almacenados:</h3>
+      <div class="paquetes-list">
+        <div v-for="paquete in detalle.datos.paquetesAlmacenados" :key="paquete.id" class="paquete-item">
+          <p><strong>ID del Paquete:</strong> {{ paquete.id }}</p>
+          <p><strong>ID del Envío:</strong> {{ paquete.idEnvio }}</p>
+          <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
+        </div>
       </div>
+    </div>
+    <button class="modal-button-flight" @click="downloadDetails('vuelo')">Descargar</button>
+    <button class="modal-button-flight" @click="detalle = null">Cerrar</button>
+    
+  </div>
+</div>
+  <div v-if="detalle.tipo === 'aeropuerto'" class="detail-container">
+    <div class="modal-content-airport">
+    <h2>Información del Aeropuerto</h2>
+    <p><strong>Ciudad y País</strong> {{ detalle.datos.nombreCiudad }}, {{detalle.datos.pais }}</p>
+    <p><strong>Coordenadas:</strong> {{ formatCoordinates(detalle.datos.coordinates) }}</p>
+    <p v-if="!detalle.datos.paquetes || detalle.datos.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
+    <div v-else>
+      <h3 class="paquetes-title">Paquetes almacenados:</h3>
+      <div class="paquetes-list">
+        <div v-for="paquete in detalle.datos.paquetes" :key="paquete.id" class="paquete-item">
+          <p><strong>ID del Paquete:</strong> {{ paquete.id }}</p>
+          <p><strong>ID del Envío:</strong> {{ paquete.idEnvio }}</p>
+          <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
+        </div>
+      </div>
+    </div>
+    <button class="modal-button-airport" @click="downloadDetails('aeropuerto')">Descargar</button>
+    <button class="modal-button-airport" @click="detalle = null">Cerrar</button>
+  </div>
+</div>
+
+
+  
+  <div v-else-if="detalle.tipo === 'envio'" class="detail-container">
+    <div class="modal-content-envio">
+    <h2>Plan de Vuelo del Envío {{ detalle.datos.idEnvio }}</h2>
+    <div v-if="detalle.datos.ruta && detalle.datos.ruta.vuelos && detalle.datos.ruta.vuelos.length > 0">
+
+       
+        <div class="paquetes-list">
+          <div v-for="(vuelo, index) in detalle.datos.ruta.vuelos" :key="vuelo.id">
+            <hr>
+            <p><strong>Vuelo #</strong>{{ index + 1 }}</p>
+            <p><strong>id del vuelo</strong> {{ vuelo.id }}</p>
+          <p><strong>Aeropuerto de Salida:</strong> {{ getCiudadYPais(vuelo.ciudadOrigen) }}</p>
+        <p><strong>Aeropuerto de Llegada:</strong> {{ getCiudadYPais(vuelo.ciudadDestino) }}</p>
+        <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(vuelo.fechaHoraSalidaGMT0) }}</p>
+        <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(vuelo.fechaHoraLlegadaGMT0) }}</p>
+      </div>
+    </div>
+    </div>
+    <div v-else>
+      <p>No tiene plan de vuelo</p>
+    </div>
+    <button class="modal-button-envio" @click="downloadDetails('envio')">Descargar</button>
+    <button class="modal-button-envio" @click="detalle = null">Cerrar</button>
+  </div>
+</div>
+</div>
+
+
+</div>
+
+
+
+
 
     </MglMap>
 
@@ -197,97 +358,89 @@
     <button class="modal-button-reporte" @click="reloadPage">Cerrar</button>
   </div>
 </div>
-    <div v-for="modal in openFlightModals" :key="modal.id" class="modal-overlay-flight"
-      @click="closeFlightModal(modal.id)">
-      <div class="modal-content-flight" @click.stop>
-        <h2>Información del Vuelo</h2>
-        <p><strong>Id:</strong> {{ modal.data.id }}</p>
-        <p><strong>Aeropuerto de Salida:</strong> {{ modal.data.ciudadOrigen }}</p>
-        <p><strong>Aeropuerto de Llegada:</strong> {{ modal.data.ciudadDestino }}</p>
-        <p><strong>Capacidad de Carga Máxima:</strong> {{ modal.data.capacidadCargaMaxima }}</p>
-        <p><strong>Capacidad de Carga Usado:</strong> {{ modal.data.capacidadCargaUsado }}</p>
-        <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(modal.data.fechaHoraSalidaGMT0) }}</p>
-        <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(modal.data.fechaHoraLlegadaGMT0) }}</p>
-        <p><strong>Tiempo Estimado de Vuelo:</strong> {{ formatDuration(modal.data.tiempoEstimadoVuelo) }}</p>
-        <button class="modal-button-flight" @click="closeFlightModal(modal.id)">Cerrar</button>
-      </div>
-    </div>
 
 
-    <div v-for="modal in openModals" :key="modal.id" class="modal-overlay-airport" @click="closeAirportModal(modal.id)">
-      <div class="modal-content-airport" @click.stop>
-        <h2>Información del Aeropuerto</h2>
-        <p><strong>Ciudad:</strong> {{ modal.data.nombreCiudad }}</p>
-        <p><strong>País:</strong> {{ modal.data.pais }}</p>
-        <p><strong>Capacidad de Almacenamiento Máximo:</strong> {{ modal.data.capacidadAlmacenamientoMaximo }}</p>
-        <p><strong>Capacidad de Almacenamiento Usado:</strong> {{ modal.data.capacidadDeAlmacenamientoUsado }}</p>
-        <p><strong>Coordenadas:</strong> {{ modal.data.coordinates.join(', ') }}</p>
-        <button class="modal-button-airport" @click="closeAirportModal(modal.id)">Cerrar</button>
+
+
+<div v-for="modal in openFlightModals" :key="modal.id" class="modal-overlay-flight" @click="closeFlightModal(modal.id)">
+  <div class="modal-content-flight" @click.stop>
+    <h2>Información del Vuelo</h2>
+    <p><strong>Id:</strong> {{ modal.data.id }}</p>
+    <p><strong>Aeropuerto de Salida:</strong> {{ getCiudadYPais(modal.data.ciudadOrigen) }}</p>
+    <p><strong>Aeropuerto de Llegada:</strong> {{ getCiudadYPais(modal.data.ciudadDestino) }}</p>
+    <p><strong>Capacidad de Carga Máxima:</strong> {{ modal.data.capacidadCargaMaxima }}</p>
+    <p><strong>Capacidad de Carga Usado:</strong> {{ modal.data.capacidadCargaUsado }}</p>
+    <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(modal.data.fechaHoraSalidaGMT0) }}</p>
+    <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(modal.data.fechaHoraLlegadaGMT0) }}</p>
+    <p><strong>Tiempo Estimado de Vuelo:</strong> {{ formatDuration(modal.data.tiempoEstimadoVuelo) }}</p>
+    <div v-if="!modal.data.paquetesAlmacenados || modal.data.paquetesAlmacenados.length === 0">
+      <h3 class="paquetes-title">Paquetes:</h3>
+      <p>No hay paquetes</p>
+    </div>
+    <div v-else>
+      <h3 class="paquetes-title">Paquetes Almacenados:</h3>
+      <div class="paquetes-list">
+        <div v-for="paquete in modal.data.paquetesAlmacenados" :key="paquete.id" class="paquete-item">
+          <p><strong>ID del Paquete:</strong> {{ paquete.id }}</p>
+          <p><strong>ID del Envío:</strong> {{ paquete.idEnvio }}</p>
+          <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
+        </div>
       </div>
     </div>
+    <button class="modal-button-flight" @click="downloadDetailsModal('vuelo', modal.data)">Descargar</button>
+    <button class="modal-button-flight" @click="closeFlightModal(modal.id)">Cerrar</button>
+  </div>
+</div>
+
+<div v-for="modal in openModals" :key="modal.id" class="modal-overlay-airport" @click="closeAirportModal(modal.id)">
+  <div class="modal-content-airport" @click.stop>
+    <h2>Información del Aeropuerto</h2>
+    <p><strong>Ciudad:</strong> {{ modal.data.nombreCiudad }}</p>
+    <p><strong>País:</strong> {{ modal.data.pais }}</p>
+    <p><strong>Capacidad de Almacenamiento Máximo:</strong> {{ modal.data.capacidadAlmacenamientoMaximo }}</p>
+    <p><strong>Capacidad de Almacenamiento Usado:</strong> {{ modal.data.capacidadDeAlmacenamientoUsado }}</p>
+    <p><strong>Coordenadas:</strong> {{ formatCoordinates(modal.data.coordinates) }}</p>
+    <p v-if="!modal.data.paquetes || modal.data.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
+    <div v-else>
+      <h3 class="paquetes-title">Paquetes almacenados:</h3>
+      <div class="paquetes-list">
+        <div v-for="paquete in modal.data.paquetes" :key="paquete.id" class="paquete-item">
+          <p><strong>ID del Paquete:</strong> {{ paquete.id }}</p>
+          <p><strong>ID del Envío:</strong> {{ paquete.idEnvio }}</p>
+          <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
+        </div>
+      </div>
+    </div>
+    <button class="modal-button-airport" 
+        @click="downloadDetailsModal('aeropuerto', modal.data)" 
+        v-if="isDownloadVisible">
+  Descargar
+</button>
+    <button class="modal-button-airport" @click="closeAirportModal(modal.id)">Cerrar</button>
+  </div>
+</div>
     <!-- <div id="map" style="height:750px!important;"></div> -->
 
-    <div v-for="modal in openEnvioModals" :key="modal.id" class="modal-overlay-envio"
-      @click="closeEnvioModal(modal.id)">
-      <div class="modal-content-envio" @click.stop>
-        <h2>Plan de Vuelo del Envío {{ modal.data.idEnvio }}</h2>
-        <div v-for="(vuelo, index) in modal.data.ruta.vuelos" :key="vuelo.id">
-          <hr>
-          <h3>Vuelo #{{ index + 1 }}</h3>
-          <p><strong>Aeropuerto de Salida:</strong> {{ vuelo.ciudadOrigen }}</p>
-          <p><strong>Aeropuerto de Llegada:</strong> {{ vuelo.ciudadDestino }}</p>
-          <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(vuelo.fechaHoraSalidaGMT0) }}</p>
-          <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(vuelo.fechaHoraLlegadaGMT0) }}</p>
-
-        </div>
-        <button class="modal-button-envio" @click="closeEnvioModal(modal.id)">Cerrar</button>
+<div v-for="modal in openEnvioModals" :key="modal.id" class="modal-overlay-envio" @click="closeEnvioModal(modal.id)">
+  <div class="modal-content-envio" @click.stop>
+    <h2>Plan de Vuelo del Envío {{ modal.data.idEnvio }}</h2>
+    <div v-if="modal.data.ruta && modal.data.ruta.vuelos && modal.data.ruta.vuelos.length > 0">
+      <div v-for="(vuelo, index) in modal.data.ruta.vuelos" :key="vuelo.id">
+        <hr>
+        <h3>Vuelo #{{ index + 1 }}</h3>
+        <p><strong>id del vuelo</strong> {{ vuelo.id }}</p>
+        <p><strong>Aeropuerto de Salida:</strong> {{ getCiudadYPais(vuelo.ciudadOrigen) }}</p>
+        <p><strong>Aeropuerto de Llegada:</strong> {{ getCiudadYPais(vuelo.ciudadDestino) }}</p>
+        <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(vuelo.fechaHoraSalidaGMT0) }}</p>
+        <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(vuelo.fechaHoraLlegadaGMT0) }}</p>
       </div>
     </div>
-
-
-
-    <div class="map-search-container">
-
-
-      <input class="search-input" type="text" v-model="busquedaEnvio" @input="buscarEnvio" :disabled="!searchEnabled"
-        placeholder="Buscar envío">
-      <div v-if="resultadosBusquedaEnvio.length" class="search-results">
-        <div v-for="envio in resultadosBusquedaEnvio" :key="envio.id" class="search-result-card"
-          @click="abrirEnvioModal(envio)">
-          <p><strong>{{ envio.idEnvio }}</strong></p>
-          <p>Ciudad Actual: {{ envio.ciudadActual }}</p>
-          <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
-          <p>Estado: {{ envio.estadoEnvio }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaAeropuerto" @input="buscarAeropuerto"
-        :disabled="!searchEnabled" placeholder="Buscar aeropuerto">
-      <div v-if="resultadosBusqueda.length" class="search-results">
-        <div v-for="aeropuerto in resultadosBusqueda" :key="aeropuerto.id" class="search-result-card"
-          @click="abrirModal(aeropuerto)">
-          <p><strong>{{ aeropuerto.nombreCiudad }}, {{ aeropuerto.pais }}</strong></p>
-          <p>Capacidad: {{ aeropuerto.capacidadAlmacenamientoMaximo }}</p>
-        </div>
-      </div>
-
-      <input class="search-input" type="text" v-model="busquedaVuelo" @input="buscarVuelo" :disabled="!searchEnabled"
-        placeholder="Buscar vuelo">
-      <div v-if="resultadosBusquedaVuelo.length" class="search-results">
-        <div v-for="vuelo in resultadosBusquedaVuelo" :key="vuelo.id" class="search-result-card"
-          @click="abrirVueloModal(vuelo)">
-          <p><strong>Id Vuelo:</strong> {{ vuelo.id }}</p>
-          <p><strong>Capacidad Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
-          <p><strong>Capacidad Usada:</strong> {{ vuelo.capacidadCargaUsado }}</p>
-        </div>
-      </div>
-
+    <div v-else>
+      <p>No tiene plan de vuelo</p>
     </div>
-
-
-
-
-
+    <button class="modal-button-envio" @click="closeEnvioModal(modal.id)">Cerrar</button>
+  </div>
+</div>
 
 
     <div v-if="isVisibleResumen">
@@ -337,9 +490,21 @@ let urlBase = config.urlBase;// aquí guardamos la base de la URL
 
 let urlListarEnvios = '/api/paquete/';
 
-let saltoTemporalAux = config.saltoTemporalSimulacion;
+let saltoTemporalAux = config.saltoTemporalSimulacionIniciar;
 
 let delayAux = config.delaySimulacion;
+
+let NAux = config.NSimulacionIniciar;
+
+let fitnessAux = config.FitnessSimulacionIniciar;
+
+
+
+  let saltoTemporalAux2 = config.saltoTemporalSimulacionContinuar;
+
+  let NAux2 = config.NSimulacionContinuar;
+
+let fitnessAux2 = config.FitnessSimulacionContinuar;
 
 export default {
   props: ['title', 'content', 'isVisible', 'isVisibleResumen'],
@@ -350,9 +515,15 @@ export default {
   },
   data() {
     return {
+      isDownloadVisible: false, 
+      busquedasHabilitadas: false, // Variable para controlar el estado de habilitación
+      buscarPorId: false,
+    buscarPorCiudadOrigen: false,
+    buscarPorCiudadDestino: false,
+      detalle: null,
       capacidadAeropuertosUsadaTotal: 0,
       capacidadAeropuertosMaximaTotal: 1,
-      isInfoOpen: false,
+      isInfoOpen: true,
       cantidadVuelosMovimiento: 0,
     capacidadCargaUsadoTotal: 0,
     capacidadCargaMaximaTotal: 1,
@@ -374,7 +545,7 @@ export default {
       planificacionEnEsperaDetener:false,
       showFullscreenButton: false,
       isFullscreen: false,
-      isPlanningOpen: false,
+      isPlanningOpen: true,
       simulationStarted: false,
       filteredVuelos: [],
       allVuelos: [],
@@ -406,11 +577,20 @@ export default {
       isVisibleResumen: false,
       isVisible: false,
       collapseReason: "",
-      isLegendOpen: false,
+      isLegendOpen: true,
       isAnimating: false,
       envios: envios,
       calendarioVuelos: {},
       movingFlights: [],
+      currentDateTimeInfo: new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      }), // Convertir la fecha correctamente
       currentDateTime: new Date().toLocaleString('es-ES', {
         timeZone: 'America/Lima',
         year: 'numeric',
@@ -449,7 +629,7 @@ export default {
           },
           properties: {
             ...a,
-            'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo)
+            'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo),
           }
         }))
       },
@@ -463,7 +643,7 @@ export default {
             type: 'Feature',
             properties: {
               id: vuelo.id,
-              'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
+              'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
             },
             geometry: {
               type: 'Point',
@@ -480,7 +660,7 @@ export default {
             type: 'Feature',
             properties: {
               id: vuelo.id,
-              'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+              'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
               'icon-rotate': bearing
             },
             geometry: {
@@ -520,10 +700,345 @@ export default {
     });
   },
   destroyed() {
-    clearInterval(this.setInterval);
+   // clearInterval(this.setInterval);
   },
-  
+  beforeDestroy() {
+    this.cleanupBeforeExit();
+  },
   methods: {
+    toggleCheckbox(type) {
+    if (type === 'id') {
+      this.buscarPorCiudadOrigen = false;
+      this.buscarPorCiudadDestino = false;
+    } else if (type === 'origen') {
+      this.buscarPorId = false;
+      this.buscarPorCiudadDestino = false;
+    } else if (type === 'destino') {
+      this.buscarPorId = false; 
+      this.buscarPorCiudadOrigen = false;
+    }
+  },
+    mostrarEnvio(envio) {
+       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+        this.detalle = { tipo: 'envio', datos: envio };
+        if (envio && envio.ruta && envio.ruta.vuelos) {
+    envio.ruta.vuelos.forEach(vuelo => {
+      this.drawFlightRoute(vuelo);
+    });
+  }
+        if (envio.estadoEnvio === "En vuelo") {
+            // Find the flight the envio is on
+            const vuelo = envio.ruta.vuelos.find(v => `${v.ciudadOrigen}-${v.ciudadDestino}` === envio.ciudadActual);
+            if (vuelo) {
+                const isFlightVisible = this.map.queryRenderedFeatures({ layers: [`avion-${vuelo.id}`] }).length > 0;
+                
+                if (isFlightVisible) {
+                    // Change the flight icon
+                    this.map.setLayoutProperty(`avion-${vuelo.id}`, 'icon-image', 'flight-selected-icon');
+                    setTimeout(() => {
+                        this.resetFlightIcon(vuelo);
+                    }, 5000);
+                } else {
+                    // Highlight the departure airport
+                    const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === vuelo.ciudadOrigen);
+                    if (aeropuerto) {
+                        this.mostrarAeropuertoFlight(aeropuerto);
+                    }
+                }
+            }
+        } else {
+            // Highlight the current airport
+            const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === envio.ciudadActual);
+            if (aeropuerto) {
+                this.mostrarAeropuertoFlight(aeropuerto);
+            }
+        }
+    },
+    mostrarAeropuerto(aeropuerto) {
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      this.detalle = { tipo: 'aeropuerto', datos: aeropuerto };
+    
+    // Reset any previously selected airport icon
+    if (this.selectedAirport) {
+        this.map.setLayoutProperty('aeropuertosLayer', 'icon-image', [
+            'match',
+            ['get', 'codigoOACI'],
+            this.selectedAirport.codigoOACI,
+            this.selectedAirport['icon-image'], // Revert to the original icon
+            ['get', 'icon-image']
+        ]);
+    }
+
+    // Update the selected airport
+    this.selectedAirport = aeropuerto;
+
+    // Change the selected airport icon
+    this.map.setLayoutProperty('aeropuertosLayer', 'icon-image', [
+        'match',
+        ['get', 'codigoOACI'],
+        aeropuerto.codigoOACI,
+        'airport-selected-icon',
+        ['get', 'icon-image']
+    ]);
+
+    // Center the map on the selected airport
+    //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    // Show a popup with airport information (optional)
+    new mapboxgl.Popup({ closeOnClick: false })
+        .setLngLat(aeropuerto.coordinates)
+        .addTo(this.map);
+
+    // Reset the icon back to its original state after 5 seconds
+    setTimeout(() => {
+        this.resetAirportIcon(aeropuerto);
+    }, 5000);
+
+
+  },
+
+  resetAirportIcon(aeropuerto) {
+    this.map.setLayoutProperty('aeropuertosLayer', 'icon-image', [
+        'match',
+        ['get', 'codigoOACI'],
+        aeropuerto.codigoOACI,
+        this.calculateIcon(aeropuerto.capacidadDeAlmacenamientoUsado / aeropuerto.capacidadAlmacenamientoMaximo),
+        ['get', 'icon-image']
+    ]);
+
+    // Clear the selected airport reference
+    this.selectedAirport = null;
+},
+
+
+
+
+mostrarAeropuertoFlight(aeropuerto) {
+
+    
+    // Reset any previously selected airport icon
+    if (this.selectedAirport) {
+        this.map.setLayoutProperty('aeropuertosLayer', 'icon-image', [
+            'match',
+            ['get', 'codigoOACI'],
+            this.selectedAirport.codigoOACI,
+            this.selectedAirport['icon-image'], // Revert to the original icon
+            ['get', 'icon-image']
+        ]);
+    }
+
+    // Update the selected airport
+    this.selectedAirport = aeropuerto;
+
+    // Change the selected airport icon
+    this.map.setLayoutProperty('aeropuertosLayer', 'icon-image', [
+        'match',
+        ['get', 'codigoOACI'],
+        aeropuerto.codigoOACI,
+        'airport-selected-icon',
+        ['get', 'icon-image']
+    ]);
+
+    // Center the map on the selected airport
+    //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    // Show a popup with airport information (optional)
+    new mapboxgl.Popup({ closeOnClick: false })
+        .setLngLat(aeropuerto.coordinates)
+        .addTo(this.map);
+
+    // Reset the icon back to its original state after 5 seconds
+    setTimeout(() => {
+        this.resetAirportIcon(aeropuerto);
+    }, 5000);
+
+
+  },
+
+  convertToUTC(date) {
+        return new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    },
+  mostrarVuelo(vuelo) {
+    this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+        this.detalle = { tipo: 'vuelo', datos: vuelo };
+
+        const isFlightVisible = this.map.queryRenderedFeatures({ layers: [`avion-${vuelo.id}`] }).length > 0;
+
+        if (isFlightVisible) {
+            // Change the flight icon
+            this.map.setLayoutProperty(`avion-${vuelo.id}`, 'icon-image', 'flight-selected-icon');
+            this.drawFlightRoute(vuelo);
+            setTimeout(() => {
+                this.resetFlightIcon(vuelo);
+                this.removeFlightRoute(vuelo);
+            }, 5000);
+        } else {
+          const fechaHoraActual = this.convertToUTC(this.parseDateTime(this.currentDateTime)); // Convert the current date correctly
+            const arrivalTime = new Date(vuelo.fechaHoraLlegadaGMT0);
+
+            const currentTime = fechaHoraActual.getTime();
+            const arrivalTimeInMs = arrivalTime.getTime();
+
+            this.drawFlightRoute(vuelo);
+
+setTimeout(() => {
+  this.removeFlightRoute(vuelo);
+}, 5000);
+
+            console.log("FECHAAAA ", fechaHoraActual, "----", vuelo.fechaHoraLlegadaGMT0, "----", currentTime, "----", arrivalTimeInMs);
+            const hasArrived = vuelo.fechaHoraLlegadaGMT0 < currentTime;
+            if (currentTime >= arrivalTimeInMs) {
+                // Highlight the arrival airport
+                const aeropuertoDestino = this.aeropuertos.find(a => a.codigoOACI === vuelo.ciudadDestino);
+                if (aeropuertoDestino) {
+                    this.mostrarAeropuertoFlight(aeropuertoDestino);
+                }
+            } else {
+                // Highlight the departure airport
+                const aeropuertoOrigen = this.aeropuertos.find(a => a.codigoOACI === vuelo.ciudadOrigen);
+                if (aeropuertoOrigen) {
+                    this.mostrarAeropuertoFlight(aeropuertoOrigen);
+                }
+            }
+            }
+          },
+            drawFlightRoute(vuelo) {
+  const routeSourceId = `route-${vuelo.id}`;
+  const arrowHeadSourceId = `arrow-head-${vuelo.id}`;
+
+  if (this.map.getSource(routeSourceId)) {
+    this.map.removeLayer(routeSourceId);
+    this.map.removeSource(routeSourceId);
+  }
+
+  if (this.map.getSource(arrowHeadSourceId)) {
+    this.map.removeLayer(arrowHeadSourceId);
+    this.map.removeSource(arrowHeadSourceId);
+  }
+
+  this.map.addSource(routeSourceId, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'LineString',
+        coordinates: [vuelo.origen, vuelo.destino]
+      }
+    }
+  });
+
+  this.map.addLayer({
+    id: routeSourceId,
+    type: 'line',
+    source: routeSourceId,
+    layout: {
+      'line-join': 'round',
+      'line-cap': 'round'
+    },
+    paint: {
+      'line-color': '#FF0000',
+      'line-width': 2
+    }
+  });
+
+  // Calcula el ángulo para la rotación del triángulo
+  const bearing = this.calculateBearing(vuelo.origen, vuelo.destino);
+
+  this.map.addSource(arrowHeadSourceId, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Point',
+        coordinates: vuelo.destino
+      }
+    }
+  });
+
+  this.map.addLayer({
+    id: arrowHeadSourceId,
+    type: 'symbol',
+    source: arrowHeadSourceId,
+    layout: {
+      'text-field': '▲', // Carácter Unicode para triángulo
+      'text-size': 30,
+      'text-rotate': bearing,
+      'text-allow-overlap': true
+    },
+    paint: {
+      'text-color': '#FF0000'
+    }
+  });
+
+  setTimeout(() => {
+    this.removeFlightRoute(vuelo);
+  }, 5000);
+            },
+
+removeFlightRoute(vuelo) {
+  const routeSourceId = `route-${vuelo.id}`;
+  const arrowHeadSourceId = `arrow-head-${vuelo.id}`;
+
+  if (this.map.getSource(routeSourceId)) {
+    this.map.removeLayer(routeSourceId);
+    this.map.removeSource(routeSourceId);
+  }
+
+  if (this.map.getSource(arrowHeadSourceId)) {
+    this.map.removeLayer(arrowHeadSourceId);
+    this.map.removeSource(arrowHeadSourceId);
+  }
+},
+
+
+calculateArrowHead(origin, destination) {
+  const angle = this.calculateBearing(origin, destination);
+  const length = 0.05; // longitud de la cabeza de la flecha
+
+  const arrowPoint1 = this.destinationPoint(destination, angle - 135, length);
+  const arrowPoint2 = this.destinationPoint(destination, angle + 135, length);
+
+  return [arrowPoint1, destination, arrowPoint2];
+},
+
+destinationPoint(point, angle, distance) {
+  const radians = angle * (Math.PI / 180);
+  const newLat = point[1] + distance * Math.sin(radians);
+  const newLng = point[0] + distance * Math.cos(radians);
+  return [newLng, newLat];
+},
+
+    resetFlightIcon(vuelo) {
+    this.map.setLayoutProperty(`avion-${vuelo.id}`, 'icon-image', this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima));
+},
+    formatCoordinates(coordinates) {
+    return coordinates.map(coord => coord.toFixed(2)).join(', ');
+  },
+    async cleanupBeforeExit() {
+      // Ensure simulation is finalized before exit
+      try {
+        await this.finalizarSimulacionSolo();
+        console.log("Simulación finalizada antes de salir.");
+      } catch (error) {
+        console.error("Error finalizando la simulación antes de salir:", error);
+      }
+
+      // Additional cleanup actions if needed
+      clearInterval(this.simulationInterval);
+      this.simulationInterval = null;
+      this.isSimulating = false;
+      // Any other cleanup code you need...
+    },
+    async finalizarSimulacionSolo() {
+      try {
+        const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
+        console.log("Simulación finalizada:", response.data);
+        
+        // Any other finalization code if needed...
+      } catch (error) {
+        console.error("Error finalizando la simulación:", error);
+      }
+    },
     toggleInfo() {
       this.isInfoOpen = !this.isInfoOpen;
     },
@@ -567,36 +1082,66 @@ export default {
     togglePlanning() {
       this.isPlanningOpen = !this.isPlanningOpen;
     },
-    fetchAeropuertos() {
-      console.log(urlBase+'/api/aeropuertos' );
-      axios.get(urlBase + '/api/aeropuertos')
-        .then(response => {
-          this.aeropuertos = response.data;
-          this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: a.coordinates
-            },
-            properties: {
-              ...a,
-              'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo)
-            }
-          }));
-          if (this.map && this.map.getSource('aeropuertos')) {
-            this.map.getSource('aeropuertos').setData(this.geojsonAeropuertos);
+
+    getCiudadYPais(codigoOACI) {
+    if (codigoOACI.includes('-')) {
+      // Caso de vuelo, obtener ciudades y países de origen y destino
+      const [codigoOrigen, codigoDestino] = codigoOACI.split('-');
+      const aeropuertoOrigen = this.mapaAeropuertos[codigoOrigen];
+      const aeropuertoDestino = this.mapaAeropuertos[codigoDestino];
+      if (aeropuertoOrigen && aeropuertoDestino) {
+        return `${aeropuertoOrigen.nombreCiudad}, ${aeropuertoOrigen.pais} - ${aeropuertoDestino.nombreCiudad}, ${aeropuertoDestino.pais}`;
+      } else {
+        return 'Datos de aeropuertos no encontrados';
+      }
+    } else {
+      // Caso de un solo aeropuerto
+      const aeropuerto = this.mapaAeropuertos[codigoOACI];
+      if (aeropuerto) {
+        return `${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`;
+      } else {
+        return 'Aeropuerto no encontrado';
+      }
+    }
+  },
+  fetchAeropuertos() {
+    console.log(urlBase + '/api/aeropuertos');
+    axios.get(urlBase + '/api/aeropuertos')
+      .then(response => {
+        this.aeropuertos = response.data;
+
+        // Llenar el mapa de aeropuertos indexado por codigoOACI
+        this.mapaAeropuertos = this.aeropuertos.reduce((map, aeropuerto) => {
+          map[aeropuerto.codigoOACI] = aeropuerto;
+          return map;
+        }, {});
+
+        this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: a.coordinates
+          },
+          properties: {
+            ...a,
+            'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo),
           }
-        })
-        .catch(error => {
-          console.error("Error fetching aeropuertos:", error);
-        });
-    },
+        }));
+        if (this.map && this.map.getSource('aeropuertos')) {
+          this.map.getSource('aeropuertos').setData(this.geojsonAeropuertos);
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching aeropuertos:", error);
+      });
+  },
 
 
 
     updateAirportData() {
-      const fecha = this.simulationDateTime.toISOString().split('T')[0];
-      const hora = this.simulationDateTime.toTimeString().split(' ')[0].substring(0, 5);
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
 
       axios.get(urlBase +`/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
@@ -609,7 +1154,7 @@ export default {
             },
             properties: {
               ...a,
-              'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo)
+              'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo),
             }
           }));
           this.capacidadAeropuertosUsadaTotal = this.aeropuertos.reduce((sum, a) => sum + a.capacidadDeAlmacenamientoUsado, 0);
@@ -636,12 +1181,14 @@ export default {
 
 
 
-    calculateFlightIcon(capacidadCargaUsado, capacidadCargaMaxima) {
-      const ratio = capacidadCargaUsado / capacidadCargaMaxima;
-      if (ratio < 0.50) return 'flight-green';  // Ensure these icons exist in your Mapbox style
-      else if (ratio < 0.80) return 'flight-orange';
-      else return 'flight-red';
-    },
+  calculateFlightIconForFlights(capacidadCargaUsado, capacidadCargaMaxima) {
+    const ratio = capacidadCargaUsado / capacidadCargaMaxima;
+    if (ratio < 0.10) return 'flight-green';  // Asegúrate de que estos iconos existen en tu estilo Mapbox
+    else if (ratio < 0.30) return 'flight-orange';
+    else return 'flight-red';
+  },
+
+
 
 
 
@@ -656,7 +1203,7 @@ export default {
           },
           properties: {
             ...a,
-            'icon-image': this.calculateIcon(usageRatio) // Asegúrate de que la propiedad se llama 'icon-image'
+            'icon-image': this.calculateIcon(usageRatio), // Asegúrate de que la propiedad se llama 'icon-image'
           }
         };
       });
@@ -691,7 +1238,7 @@ export default {
           type: 'Feature',
           properties: {
             id: vuelo.id,
-            'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
+            'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
           },
           geometry: {
             type: 'Point',
@@ -751,7 +1298,7 @@ export default {
     console.log(`Tiempo de simulación actual Check VUELO: ${new Date(vueloStartTime).toISOString()}`, currentTime ,'-', vueloStartTime );
     if (currentTime >= vueloStartTime && !vuelo.animated) {
       vuelo.animated = true; // Marcar el vuelo como animado
-      console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
+     // console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
       vuelo.isActive = false;
 
       this.animateFlight(vuelo);
@@ -775,34 +1322,62 @@ export default {
         timeZoneName: 'short'
       });
     },
-
     loadImages(callback) {
-      let imagesToLoad = ['airport-green', 'airport-orange', 'airport-red', 'flight-green', 'flight-orange', 'flight-red'];
-      let loadedImages = 0;
-      const totalImages = imagesToLoad.length;
-      const imageLoaded = () => {
-        loadedImages++;
-        if (loadedImages === imagesToLoad.length) {
-          callback();
-        }
-      };
-      imagesToLoad.forEach(icon => {
-        this.map.loadImage(`/img/${icon}.png`, (error, image) => {
-          if (error) {
-            console.error(`Error loading image: /img/${icon}.png`, error);
-            return;
-          }
-          this.map.addImage(icon, image);
-          loadedImages++;
-          imageLoaded();
-        });
-      });
-    },
+  let imagesToLoad = [
+    'airport-green',
+    'airport-orange',
+    'airport-red',
+    'flight-green',
+    'flight-orange',
+    'flight-red'
+  ];
+  let loadedImages = 0;
+  const totalImages = imagesToLoad.length + 1; // +1 para la imagen adicional
+  const imageLoaded = () => {
+    loadedImages++;
+    console.log(`Image loaded: ${loadedImages}/${totalImages}`);
+    if (loadedImages === totalImages) {
+      callback();
+    }
+  };
+  imagesToLoad.forEach(icon => {
+    this.map.loadImage(`/img/${icon}.png`, (error, image) => {
+      if (error) {
+        console.error(`Error loading image: /img/${icon}.png`, error);
+        return;
+      }
+      this.map.addImage(icon, image);
+      imageLoaded();
+    });
+  });
+
+  // Cargar la imagen seleccionada por separado
+  this.map.loadImage('/img/airport-selected-icon.png', (error, image) => {
+    if (error) {
+      console.error('Error loading image: /img/airport-selected-icon.png', error);
+      return;
+    }
+    this.map.addImage('airport-selected-icon', image);
+    imageLoaded();
+  });
+
+
+  this.map.loadImage('/img/flight-selected-icon.png', (error, image) => {
+    if (error) {
+      console.error('Error loading image: /img/flight-selected-icon.png', error);
+      return;
+    }
+    this.map.addImage('flight-selected-icon', image);
+    imageLoaded();
+  });
+  
+},
     onAirportMouseEnter(event) {
     const feature = event.features[0];
     const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === feature.properties.codigoOACI);
     if (aeropuerto) {
-      this.currentAirportCode = aeropuerto.codigoOACI;
+      
+      this.currentAirportCode = this.getCiudadYPais( aeropuerto.codigoOACI);
       this.showPopup = true;
       const coordinates = feature.geometry.coordinates.slice();
       const popupCoordinates = this.map.project([coordinates[0], coordinates[1]]);
@@ -842,26 +1417,26 @@ export default {
 
 
     setupAirportLayer() {
-      if (!this.map.getSource('aeropuertos')) {
-        this.map.addSource('aeropuertos', {
-          type: 'geojson',
-          data: this.geojsonAeropuertos
-        });
-      }
+  if (!this.map.getSource('aeropuertos')) {
+    this.map.addSource('aeropuertos', {
+      type: 'geojson',
+      data: this.geojsonAeropuertos
+    });
+  }
 
-      if (!this.map.getLayer('aeropuertosLayer')) {
-        this.map.addLayer({
-          id: 'aeropuertosLayer',
-          type: 'symbol',
-          source: 'aeropuertos',
-          layout: {
-            'icon-image': ['get', 'icon-image'],
-            'icon-size': 1.0,
-            'icon-allow-overlap': true
-          }
-        });
+  if (!this.map.getLayer('aeropuertosLayer')) {
+    this.map.addLayer({
+      id: 'aeropuertosLayer',
+      type: 'symbol',
+      source: 'aeropuertos',
+      layout: {
+        'icon-image': ['get', 'icon-image'], // Usar la propiedad 'icon-image' de las características
+        'icon-size': 1.0,
+        'icon-allow-overlap': true
       }
-    },
+    });
+  }
+},
 
 
     iniciarSimulacion() {
@@ -897,9 +1472,9 @@ export default {
       
     }
     else if (now > nuevoVueloStartTimeLlegada){
-      console.log(`ENTRO CONDICIONAL ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
+   //   console.log(`ENTRO CONDICIONAL ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
       if (vuelo.fechaSalida.length === 5) { // Si está en movimiento
-                console.log(`ENTRO MOVIMIENTO NEGATIVO ${new Date(now).toISOString()}`);
+     //           console.log(`ENTRO MOVIMIENTO NEGATIVO ${new Date(now).toISOString()}`);
                 vuelo.fechaSalida = "LISTOLISTO";
             this.cantidadVuelosMovimiento--;
             this.capacidadCargaUsadoTotal -= vuelo.capacidadCargaUsado;
@@ -929,6 +1504,7 @@ export default {
         const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
         const separarPaquetesCont = this.separarPaquetes === 'true';
         const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
+
         cont = 1;
         const response = await axios.get(urlBase +'/api/simulacion/semanal/iniciarST', {
           params: {
@@ -936,7 +1512,9 @@ export default {
             hora: fechaInicioHora,
             separarPaquetes: separarPaquetesCont,
             tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: saltoTemporalAux
+            saltoTemporal: saltoTemporalAux,
+            N: NAux,
+            fitnessObjetivo: fitnessAux
           }
         });
 
@@ -977,13 +1555,13 @@ let progressInterval = setInterval(async () => {
       }
     },
 
-
+ 
     startSimulationLoop(fechaInicio, fechaInicioHora) {
-
-
+      this.isDownloadVisible = true;
+      this.busquedasHabilitadas = true;
       this.updateCurrentDateTimeDisplay();
       if (this.simulationInterval) {
-        clearInterval(this.simulationInterval);
+       // clearInterval(this.simulationInterval);
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
@@ -1030,7 +1608,7 @@ let progressInterval = setInterval(async () => {
     }
             
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
-            this.updateCurrentDateTimeDisplay();
+            this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
             this.actualizarContadoresVuelos();
@@ -1068,6 +1646,8 @@ let progressInterval = setInterval(async () => {
       const separarPaquetesCont = this.separarPaquetes === 'true';
       const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
 
+
+
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/continuarST', {
           params: {
@@ -1075,7 +1655,9 @@ let progressInterval = setInterval(async () => {
             hora: hora,
             separarPaquetes: separarPaquetesCont,
             tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: saltoTemporalAux
+            saltoTemporal: saltoTemporalAux2,
+            N: NAux2,
+            fitnessObjetivo: fitnessAux2
           }
         });
         console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
@@ -1130,7 +1712,7 @@ closeFinalizationModal() {
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
         console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
-        let filteredVuelos = [];
+        this.filteredVuelos = [];
         this.pendingFlights = [];
         this.allVuelos = [];
         let count = 0;
@@ -1139,7 +1721,7 @@ closeFinalizationModal() {
         fetchedVuelos.forEach(vuelo => {
           vuelo.animated = false; // Agregar propiedad animated
           vuelo.movimiento = false;
-          filteredVuelos.push(vuelo);
+          this.filteredVuelos.push(vuelo);
           
           this.pendingFlights.push(vuelo);
           this.allVuelos.push(vuelo); // Acumular vuelos
@@ -1148,13 +1730,13 @@ closeFinalizationModal() {
         });
 
         // Ordenar los vuelos por fecha y hora de salida
-        filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
+        this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
         console.log("CUENTA ACTUALIZADOS:" + count);
-        this.vuelosOrdenadoGMT0 = filteredVuelos;
+        this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
-        this.$set(this, 'filteredVuelos', filteredVuelos);
-        console.log("Vuelos disponibles ACTUALIZADOS:", filteredVuelos);
+        this.$set(this, 'filteredVuelos', this.filteredVuelos);
+        console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
        
         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
@@ -1212,7 +1794,7 @@ closeFinalizationModal() {
         const nuevoVueloStartTime = new Date(vueloStartTime - cincoHorasEnMilisegundos);
         if (currentTime >= nuevoVueloStartTime && !vuelo.animated) {
           vuelo.animated = true; // Marcar el vuelo como animado
-          console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
+          //console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
           vuelo.isActive = false;
           this.animateFlight(vuelo);
         }
@@ -1259,14 +1841,14 @@ closeFinalizationModal() {
       const sourceId = `vuelo-${vuelo.id}`;
       const bearing = this.calculateBearing(vuelo.origen, vuelo.destino, vuelo.id);
       if (!this.map.getSource(sourceId)) {
-        console.log(`Updating source ${sourceId}`);
+      //  console.log(`Updating source ${sourceId}`);
         this.map.addSource(sourceId, {
           type: 'geojson',
           data: {
             type: 'Feature',
             properties: {
               id: vuelo.id,
-              'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+              'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
               'icon-rotate': bearing // Calculate bearing and set icon rotation
 
             },
@@ -1297,10 +1879,10 @@ closeFinalizationModal() {
       const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 2160 simulated seconds = 1 real second
 
 
-      console.log(flightDurationMinutes)
+     // console.log(flightDurationMinutes)
       const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
-      console.log(steps)
+      //console.log(steps)
       // let steps =336;
       let currentStep = vuelo.pausedAtStep || 0; // Usa pausedAtStep si existe
       let currentPos = vuelo.pausedAtPos || [...vuelo.origen];
@@ -1329,7 +1911,7 @@ closeFinalizationModal() {
               },
               properties: {
                 id: vuelo.id,
-                'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+                'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
                 'icon-rotate': bearing // Update rotation dynamically
               }
             });
@@ -1348,7 +1930,7 @@ closeFinalizationModal() {
               },
               properties: {
                 id: vuelo.id,
-                'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+                'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
                 'icon-rotate': bearing
               }
             });
@@ -1374,9 +1956,9 @@ closeFinalizationModal() {
       const aeropuerto = aeropuertos.find(a => a.codigoOACI === codigoOACI);
       if (aeropuerto) {
         aeropuerto.capacidadDeAlmacenamientoUsado += paquetes;
-        console.log(`New storage used: ${aeropuerto.capacidadDeAlmacenamientoUsado}/${aeropuerto.capacidadAlmacenamientoMaximo}`);
+      //  console.log(`New storage used: ${aeropuerto.capacidadDeAlmacenamientoUsado}/${aeropuerto.capacidadAlmacenamientoMaximo}`);
         if (aeropuerto.capacidadDeAlmacenamientoUsado > aeropuerto.capacidadAlmacenamientoMaximo) {
-          console.log("Airport collapse detected!");
+        //  console.log("Airport collapse detected!");
           const collapseReason = 'Exceso de paquetes';
           const collapseDetails = {
             location: 'Lima, Perú - SMTP',
@@ -1451,7 +2033,7 @@ closeFinalizationModal() {
       vue.toggleIniciarDetener = false;
       vue.toggleReanudar = true;
       this.isAnimating = false;
-
+      this.searchEnabled = true;
       this.pendingFlights.forEach(vuelo => {
         if (vuelo.animated && !vuelo.paused) {
           vuelo.paused = true;
@@ -1505,7 +2087,7 @@ closeFinalizationModal() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'simulacion_reporte.doc';
+    link.download = 'Simulacion_Reporte.doc';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1563,6 +2145,7 @@ closeFinalizationModal() {
     },
 
     onAirportClick(event) {
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const feature = event.features[0];
 
       const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === feature.properties.codigoOACI);
@@ -1575,11 +2158,13 @@ closeFinalizationModal() {
       }
     },
     closeAirportModal(id) {
+
+ 
       this.openModals = this.openModals.filter(modal => modal.id !== id);
     },
 
     onFlightClick(event, vuelo) {
-
+      this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const vueloId = event.features[0].properties.id;
       console.log(event.features[0].properties.id)
   // Combina both pendingFlights and filteredVuelos into one array
@@ -1620,73 +2205,95 @@ closeFinalizationModal() {
     },
 
 
-    buscarAeropuerto() {
-      if (this.busquedaAeropuerto.trim() !== '') {
-        const cadena = this.busquedaAeropuerto;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
-
-        axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`)
-          .then(response => {
-            this.resultadosBusqueda = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching aeropuertos:", error);
-          });
-      } else {
-        this.resultadosBusqueda = [];
+ 
+    async buscarAeropuerto() {
+    if (this.busquedaAeropuerto.trim() !== '') {
+      const cadena = this.busquedaAeropuerto;
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+      try {
+        console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+        const response = await axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`);
+        this.resultadosBusqueda = response.data;
+        
+      } catch (error) {
+        console.error("Error fetching aeropuertos:", error);
+         this.resultadosBusqueda = []; // Ensure results are cleared on error
       }
-    },
-    abrirModal(aeropuerto) {
+    } else {
+        this.resultadosBusqueda = [];
+    }
+  },
+
+  parseDateTime(dateTimeStr) {
+    const [datePart, timePart] = dateTimeStr.split(', ');
+    const [day, month, year] = datePart.split('/');
+    const date = `${year}-${month}-${day}`;
+    const time = timePart.replace(' UTC', '');
+    return new Date(`${date}T${time}Z`);
+  },
+
+  async buscarEnvio() {
+    if (this.busquedaEnvio.trim() !== '') {
+      const cadena = this.busquedaEnvio;
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+
+      try {
+        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+        const response = await axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`);
+        this.resultadosBusquedaEnvio = response.data;
+      } catch (error) {
+        console.error("Error fetching envios:", error);
+          this.resultadosBusquedaEnvio = []; // Ensure results are cleared on error
+      }
+    } else {
+        this.resultadosBusquedaEnvio = [];
+    }
+  },
+
+  async buscarVuelo() {
+    if (this.busquedaVuelo.trim() !== '') {
+      const cadena = this.busquedaVuelo;
+      const fechaHora = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
+      const fecha = fechaHora.toISOString().split('T')[0];
+      const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+      
+      let tipo = '';
+      if (this.buscarPorId) {
+        tipo = 'por_id';
+      } else if (this.buscarPorCiudadOrigen) {
+        tipo = 'por_ciudad_origen';
+      } else if (this.buscarPorCiudadDestino) {
+        tipo = 'por_ciudad_destino';
+      }
+
+      if (tipo) {
+        try {
+          const response = await axios.get(urlBase + '/api/simulacion/semanal/vuelo', {
+            params: {
+              cadena: cadena,
+              tipo: tipo,
+              fecha: fecha
+            }
+          });
+          this.resultadosBusquedaVuelo = response.data;
+        } catch (error) {
+          console.error("Error fetching vuelos:", error);
+          this.resultadosBusquedaVuelo = []; // Ensure results are cleared on error
+        }
+      }
+    } else {
+      this.resultadosBusquedaVuelo = [];
+    }
+  },
+  abrirModal(aeropuerto) {
       this.openModals.push({
         id: aeropuerto.id,
         data: aeropuerto
       });
-    },
-
-
-    buscarEnvio() {
-      if (this.busquedaEnvio.trim() !== '') {
-        const cadena = this.busquedaEnvio;
-        const fechaHora = new Date(this.currentDateTime);
-        const fecha = fechaHora.toISOString().split('T')[0];
-        const hora = fechaHora.toTimeString().split(' ')[0].substring(0, 5);
-
-        axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`)
-          .then(response => {
-            this.resultadosBusquedaEnvio = response.data;
-          })
-          .catch(error => {
-            console.error("Error fetching envios:", error);
-          });
-      } else {
-        this.resultadosBusquedaEnvio = [];
-      }
-    },
-    buscarVuelo() {
-
-      if (this.busquedaVuelo.trim() !== '') {
-        const cadena = this.busquedaVuelo;
-
-        axios.get(urlBase + `/api/simulacion/semanal/vuelo`, {
-          params: {
-            cadena: cadena
-          }
-        })
-          .then(response => {
-            if (response.data) {
-              this.resultadosBusquedaVuelo = [response.data]; // Assuming response.data is a single flight object
-            } else {
-              this.resultadosBusquedaVuelo = [];
-            }
-          })
-          .catch(error => {
-            console.error("Error fetching vuelos:", error);
-          });
-      } else {
-        this.resultadosBusquedaVuelo = [];
-      }
     },
     abrirEnvioModal(envio) {
       this.openEnvioModals.push({
@@ -1702,12 +2309,111 @@ closeFinalizationModal() {
     },
     closeEnvioModal(id) {
       this.openEnvioModals = this.openEnvioModals.filter(modal => modal.id !== id);
+    },
+    downloadDetails(type) {
+   
+      let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
+      let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+     
+    let content = '';
+    if (type === 'vuelo' && this.detalle.tipo === 'vuelo') {
+      content = `
+        Información del Vuelo (Descargado con fecha ${fecha} y hora ${hora}):
+        Id: ${this.detalle.datos.id}
+        Aeropuerto de Salida: ${this.getCiudadYPais(this.detalle.datos.ciudadOrigen)}
+        Aeropuerto de Llegada: ${this.getCiudadYPais(this.detalle.datos.ciudadDestino)}
+        Fecha y Hora de Salida: ${this.formatDateTime(this.detalle.datos.fechaHoraSalidaGMT0)}
+        Fecha y Hora de Llegada: ${this.formatDateTime(this.detalle.datos.fechaHoraLlegadaGMT0)}
+        Tiempo Estimado de Vuelo: ${this.formatDuration(this.detalle.datos.tiempoEstimadoVuelo)}
+        Paquetes: ${this.detalle.datos.paquetesAlmacenados.length === 0 ? 'No hay paquetes' : ''}
+        ${this.detalle.datos.paquetesAlmacenados.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'aeropuerto' && this.detalle.tipo === 'aeropuerto') {
+      content = `
+        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Ciudad y País: ${this.detalle.datos.nombreCiudad}, ${this.detalle.datos.pais}
+        Coordenadas: ${this.formatCoordinates(this.detalle.datos.coordinates)}
+        Paquetes almacenados: ${this.detalle.datos.paquetes.length === 0 ? 'No hay paquetes' : ''}
+        ${this.detalle.datos.paquetes.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'envio' && this.detalle.tipo === 'envio') {
+      content = `
+        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} (Descargado  con fecha ${fecha} y hora ${hora}):
+        ${this.detalle.datos.ruta.vuelos.length === 0 ? 'No tiene plan de vuelo' : ''}
+        ${this.detalle.datos.ruta.vuelos.map((vuelo, index) => `
+          Vuelo #${index + 1}:
+          id del vuelo: ${vuelo.id}
+          Aeropuerto de Salida: ${this.getCiudadYPais(vuelo.ciudadOrigen)}
+          Aeropuerto de Llegada: ${this.getCiudadYPais(vuelo.ciudadDestino)}
+          Fecha y Hora de Salida: ${this.formatDateTime(vuelo.fechaHoraSalidaGMT0)}
+          Fecha y Hora de Llegada: ${this.formatDateTime(vuelo.fechaHoraLlegadaGMT0)}
+        `).join('\n')}
+      `;
     }
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalles_${type}.doc`;
+    link.click();
+  },
+  downloadDetailsModal(type, data) {
+  console.log("EEEEEEEEE");
+      let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
+      let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
+      console.log("EEEEEEEEEAQQQ");
+    let content = '';
 
-
+    if (type === 'vuelo') {
+      content = `
+        Información del Vuelo (Descargado  con fecha ${fecha} y hora ${hora}):
+        Id: ${data.id}
+        Aeropuerto de Salida: ${this.getCiudadYPais(data.ciudadOrigen)}
+        Aeropuerto de Llegada: ${this.getCiudadYPais(data.ciudadDestino)}
+        Capacidad de Carga Máxima: ${data.capacidadCargaMaxima}
+        Capacidad de Carga Usado: ${data.capacidadCargaUsado}
+        Fecha y Hora de Salida: ${this.formatDateTime(data.fechaHoraSalidaGMT0)}
+        Fecha y Hora de Llegada: ${this.formatDateTime(data.fechaHoraLlegadaGMT0)}
+        Tiempo Estimado de Vuelo: ${this.formatDuration(data.tiempoEstimadoVuelo)}
+        Paquetes: ${data.paquetesAlmacenados.length === 0 ? 'No hay paquetes' : ''}
+        ${data.paquetesAlmacenados.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    } else if (type === 'aeropuerto') {
+      content = `
+        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Ciudad: ${data.nombreCiudad}
+        País: ${data.pais}
+        Capacidad de Almacenamiento Máximo: ${data.capacidadAlmacenamientoMaximo}
+        Capacidad de Almacenamiento Usado: ${data.capacidadDeAlmacenamientoUsado}
+        Coordenadas: ${this.formatCoordinates(data.coordinates)}
+        Paquetes almacenados: ${data.paquetes.length === 0 ? 'No hay paquetes' : ''}
+        ${data.paquetes.map(paquete => `
+          ID del Paquete: ${paquete.id}
+          ID del Envío: ${paquete.idEnvio}
+          Cantidad de Paquetes: ${paquete.cantidadPaquetes}
+        `).join('\n')}
+      `;
+    }
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `Detalles_${type}.doc`;
+    link.click();
+  },
   },
   computed: {
-
+/*
     filteredVuelos() {
       const filtered = [];
 
@@ -1719,7 +2425,7 @@ closeFinalizationModal() {
       });
 
       return filtered;
-    }
+    }*/
   }
 
 }
@@ -1778,7 +2484,18 @@ closeFinalizationModal() {
   padding: 10px;
   border: none;
   border-radius: 5px;
+  
 }
+
+.checkbox-label {
+  color: #e0e0e0; /* Un color claro */
+} 
+
+.checkbox-title {
+  color: #e0e0e0; /* Un color claro */
+  font-weight: bold;
+  font-size: 1rem;
+} 
 
 .main-map {
   width: 100% !important;
@@ -2067,6 +2784,7 @@ closeFinalizationModal() {
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+  width: 40%;
   /* Espaciado superior para separarlo del contenido */
   font-weight: bold;
   align-self: center;
@@ -2104,7 +2822,33 @@ closeFinalizationModal() {
   /* Alto z-index para asegurar que está sobre otros elementos */
 }
 
+.paquetes-list {
+  max-height: 200px; /* Ajusta esta altura según tus necesidades */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  padding: 10px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.paquetes-title {
+  color: #00B074; /* Color azul para el título de "Paquetes" */
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+}
 
+.paquete-item {
+  background: #ffffff;
+  border: 1px solid #00B074;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.paquete-item p {
+  margin: 5px 0;
+}
 
 .modal-content-flight {
   background: white;
@@ -2146,7 +2890,12 @@ closeFinalizationModal() {
   margin-top: 10px;
   font-weight: bold;
   align-self: center;
+  width: 40%;
 }
+
+
+
+
 
 .modal-button-flight:hover {
   background-color: darkgreen;
@@ -2198,6 +2947,7 @@ button[disabled] {
   align-items: flex-start;
   margin-bottom: 15px;
   box-sizing: border-box;
+  
   /* Añadido para asegurar que padding se considere en el ancho total */
 }
 
@@ -2216,6 +2966,7 @@ button[disabled] {
 
 .search-results {
   width: 100%;
+  max-width: 230px;
   /* Coincidir con el ancho del campo de búsqueda */
   max-height: 200px;
   overflow-y: auto;
@@ -2236,10 +2987,10 @@ button[disabled] {
   padding: 10px;
   border-bottom: 1px solid #eee;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
   color: black !important;
   /* Cambia el color de la letra a negro */
-  background-color: rgb(155, 152, 152) !important;
+  background-color: rgb(110, 110, 110) !important;
   /* Fondo rojo para el card */
   font-weight: bold !important;
   /* Letra en negrita */
@@ -2247,7 +2998,7 @@ button[disabled] {
 
 
 .search-result-card:hover {
-  background-color: #757373 !important;
+  background-color: #929292 !important;
 }
 
 
@@ -2298,6 +3049,7 @@ button[disabled] {
   margin-top: 10px;
   font-weight: bold;
   align-self: center;
+  width: 40%;
 }
 
 
@@ -2387,14 +3139,14 @@ button[disabled] {
   left: 50%;
   transform: translateX(-50%);
  
-  background: rgba(255, 255, 255, 0.8);
+  background: black;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 800px;
 
-  color: black;
+  color: white;
   z-index: 1000;
   overflow: hidden;
   transition: height 0.3s ease;
@@ -2434,7 +3186,7 @@ button[disabled] {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: black;
+  color: white;
 }
 
 .planning-controls input[type="radio"] {
@@ -2680,8 +3432,8 @@ margin: 0 auto;
   position: absolute;
   top: 70px; /* Ajusta este valor para moverlo más abajo */
   right: 10px;
-  color: white;
-  background-color: rgba(0, 0, 0, 0.7);
+  color: black; /* Cambiar el color de texto a negro */
+  background-color: white; /* Fondo blanco */
   padding: 5px 10px;
   border-radius: 5px;
   z-index: 1001;
@@ -2716,7 +3468,7 @@ margin: 0 auto;
 
 .carga-bar {
   width: 100%;
-  background-color: #ddd;
+  background-color: #817e7e;
   border-radius: 5px;
   overflow: hidden;
 }
@@ -2726,6 +3478,44 @@ margin: 0 auto;
   background-color: #4caf50;
   width: 0;
 }
+
+
+
+
+.detail-container {
+  position: absolute;
+  top: 180px;
+  left: 255px;
+  width: 400px;
+  max-height: 100px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+  /* Alto z-index para asegurar que está sobre otros elementos */
+
+}
+
+
+.custom-input {
+
+
+font-weight: bold;
+
+padding: 5px;
+border-radius: 3px;
+width: 100%;
+box-sizing: border-box;
+}
+
+.custom-input::placeholder {
+color: #aaa; /* Color del placeholder */
+}
+
+
+
+
 
 .airplane-icon {
   background-image: url('/img/avion.png');
@@ -2757,5 +3547,12 @@ margin: 0 auto;
 
 .flight-red {
   background-image: url('/img/flight-red.png');
+}
+.flight-selected-icon {
+  background-image: url('/img/flight-selected-icon.png');
+}
+
+.airport-selected-icon{
+  background-image: url('/img/airport-selected-icon.png');
 }
 </style>
