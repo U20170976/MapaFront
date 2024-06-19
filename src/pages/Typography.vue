@@ -2049,7 +2049,7 @@ toGMT0Inicio(date) {
 
       if (tipo) {
         try {
-          const response = await axios.get(urlBase + '/api/simulacion/semanal/vuelo', {
+          const response = await axios.get(urlBase + '/api/diaDia/vuelo', {
             params: {
               cadena: cadena,
               tipo: tipo,
