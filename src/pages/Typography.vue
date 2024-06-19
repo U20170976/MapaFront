@@ -10,7 +10,7 @@
   @load="onMapLoaded"
 >
       />
-      <button v-if="showFullscreenButton" class="fullscreen-toggle" @click="toggleFullscreen">
+      <button  class="fullscreen-toggle" @click="toggleFullscreen">
   {{ isFullscreen ? 'Salir Pantalla Completa' : 'Pantalla Completa' }}
 </button>
   
