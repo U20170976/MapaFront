@@ -14,6 +14,7 @@ import Maps from "@/pages/Maps.vue";
 import Monitoreo from "@/pages/Typography.vue";
 import TableList from "@/pages/TableList.vue";
 import listadoPaquetes from "@/pages/Operario/listadoPaquetes.vue";
+import DetalleEnvio from "@/pages/Operario/DetalleEnvio.vue";
 import ResumenEnvio from "@/pages/Operario/ResumenEnvio.vue";
 import Package from "@/pages/Package.vue";
 import ModificarSede from "@/pages/Administrador/ModificarSede.vue";
@@ -36,7 +37,6 @@ import MainNavbar from '@/layout/MainNavbar.vue';
 import MainFooter from '@/layout/MainFooter.vue';
 import Aeropuertos from '../pages/Administrador/Aeropuertos.vue';
 import Aviones from "@/pages/Administrador/Aviones.vue";
-
 
 //const Dashboard = () => import(/* webpackChunkName: "dashboard" */"@/pages/Dashboard.vue");
 //const Profile = () => import(/* webpackChunkName: "common" */ "@/pages/Profile.vue");
@@ -159,13 +159,11 @@ export default ([
         name: "Gestión de Envíos",
         component: listadoPaquetes
       },
-      /*
       {
-        path: "operario/listadoPaquetes/detalle",
-        name: "Detalle del Envío",
-        component: DetalleEnvio
+        path: '/detalle-envio/:id',
+        name: 'Detalle del Envío',
+        component: DetalleEnvio,
       },
-      */
       {
         path: "/operario/ResumenEnvio",
         name: "Resumen de Envío",

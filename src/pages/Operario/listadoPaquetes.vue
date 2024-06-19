@@ -1,22 +1,17 @@
 <template>
   <div class="listado-paquetes">
-    <!-- <h1>GESTIÓN DE PAQUETES</h1> -->
     <div class="search-and-actions">
       <input type="text" placeholder="Buscar" v-model="searchword" />
       <button @click="anadirPaquete">+ Registrar Envío</button>
-      <!-- Botón para abrir el popup -->
       <button @click="openModal" class="upload-button">
         <i class="fa fa-upload"></i>
       </button>
       <FileUploadModal v-if="isModalOpen" :isVisible="isModalOpen" @close="closeModal" 
-                  :handleSuccessMessage="handleSuccessMessage" :handleErrorMessage="handleErrorMessage" />
-      
+                       :handleSuccessMessage="handleSuccessMessage" :handleErrorMessage="handleErrorMessage" />
     </div>
-    
-    
     <base-table-envios
       :columns="tableColumns"
-      :data="filteredData"
+      :data="paginatedData"
       :searchword="searchword"
       thead-classes="thead-custom-class"
       tbody-classes="tbody-custom-class"
@@ -27,28 +22,24 @@
       :total-pages="totalPages"
       @page-changed="handlePageChange"
     />
-    <!-- Ajustar la posición de los mensajes de éxito y error -->
     <div v-if="successMessage" class="success-message right-message">
       <i class="fas fa-check-circle"></i> {{ successMessage }}
     </div>
     <div v-if="errorMessage" class="error-message right-message">
       <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
     </div>
-    
   </div>
 </template>
 
 <script>
-
 import BaseTableEnvios from '@/components/BaseTableEnvios.vue';
 import Pagination from '@/components/Pagination.vue';
-import axios from 'axios'; // Importa axios para realizar solicitudes HTTP
+import axios from 'axios';
 import config from "../../config";
 import FileUploadModal from '@/components/FileUploadModal.vue';
 
-//Definimos las variables globales
-let urlBase = config.urlBase,// aquí guardamos la base de la URL
-    urlListarEnvios = '/api/paquete/'; 
+const urlBase = config.urlBase;
+const urlListarEnvios = '/api/paquete/';
 
 export default {
   name: 'listadoPaquetes',
@@ -66,11 +57,11 @@ export default {
         { text: 'Origen', value: 'ciudadOrigen' },
         { text: 'Destino', value: 'ciudadDestino' },
         { text: 'Fecha y hora envío', value: 'fechaEnvio' },
-        { text: 'Detalles', value: 'details', sortable: false } // Nueva columna para los detalles
+        { text: 'Detalles', value: 'details', sortable: false }
       ],
       tableData: [],
       currentPage: 1,
-      totalPages: 10,
+      itemsPerPage: 10,
       isModalOpen: false,
       successMessage: null,
       errorMessage: null,
@@ -86,41 +77,38 @@ export default {
         item.ciudadOrigen.toLowerCase().includes(searchwordLower) ||
         item.ciudadDestino.toLowerCase().includes(searchwordLower)
       );
+    },
+    paginatedData() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredData.slice(start, end);
+    },
+    totalPages() {
+      return Math.ceil(this.filteredData.length / this.itemsPerPage);
     }
   },
   methods: {
     anadirPaquete() {
       this.$router.push('RegisterPackage');
-      console.log('Añadir Nuevo Paquete');
     },
     handlePageChange(page) {
       this.currentPage = page;
-      console.log('Página actual:', page);
     },
-    // Método para manejar el mensaje de éxito
     handleSuccessMessage(message) {
-      //window.location.reload(); // Refrescar la página completa
       this.successMessage = message;
-      this.loadTableData(); // Llamar a la función para recargar los datos de la tabla
+      this.loadTableData();
       setTimeout(() => {
-        this.successMessage = null; // Ocultar el mensaje después de unos segundos
-        
+        this.successMessage = null;
       }, 10000);
     },
-    // Método para manejar el mensaje de error
     handleErrorMessage(message) {
-      //window.location.reload(); // Refrescar la página completa
       this.errorMessage = message;
-      this.loadTableData(); // Llamar a la función para recargar los datos de la tabla
+      this.loadTableData();
       setTimeout(() => {
-        this.errorMessage = null; // Ocultar el mensaje después de unos segundos
+        this.errorMessage = null;
       }, 10000);
     },
-    // Método para recargar los datos de la tabla
     loadTableData() {
-      // Lógica para recargar los datos de la tabla
-      // Esto puede ser una llamada a una API, o cualquier otra lógica para obtener los datos
-      // Ejemplo:
       this.$http.get(urlBase + urlListarEnvios)
         .then(response => {
           this.tableData = response.data;
@@ -145,18 +133,20 @@ export default {
       this.isModalOpen = false;
     },
     viewDetails(id) {
-      // Aquí puedes manejar la lógica para mostrar los detalles del envío
-      console.log('Ver detalles para el envío con ID:', id);
-      // Podrías abrir un modal o navegar a una página de detalles, por ejemplo:
-      this.$router.push({ name: 'DetalleEnvio', params: { id } });
+      const envio = this.tableData.find(item => item.id === id);
+      this.$router.push({ 
+        name: 'Detalle del Envío',
+        params: { id },
+        query: { envio: JSON.stringify(envio) }
+      });
     }
   },
   mounted() {
     this.fetchDataListaEnvios();
   },
 };
-
 </script>
+
 <style scoped>
 .listado-paquetes {
   background-color: #2c2f48;
@@ -220,35 +210,9 @@ export default {
 .success-message,
 .error-message {
   position: fixed;
-  top: 1000px;
-  left: 80%;
-  transform: translateX(15%);
-  background-color: rgba(40, 167, 69, 0.9); /* Cambiar el color de fondo para el mensaje de éxito */
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.error-message {
-  background-color: rgba(220, 53, 69, 0.9); /* Cambiar el color de fondo para el mensaje de error */
-}
-
-.success-message i,
-.error-message i {
-  margin-right: 10px;
-}
-
-/* Otros estilos... */
-/* Ajustar los estilos para los mensajes de éxito y error */
-.right-message {
-  position: fixed;
   top: 20px;
-  right: 20px; /* Ajusta esta propiedad para mover los mensajes hacia la derecha */
-  max-width: 300px; /* Ajusta esta propiedad para controlar el ancho máximo del mensaje */
+  right: 20px;
+  max-width: 300px;
   background-color: rgba(40, 167, 69, 0.9);
   color: white;
   padding: 10px 20px;
@@ -261,12 +225,7 @@ export default {
   z-index: 9000;
 }
 
-.error-message.right-message {
-  background-color: rgba(220, 53, 69, 0.9); /* Cambiar el color de fondo para el mensaje de error */
+.error-message {
+  background-color: rgba(220, 53, 69, 0.9);
 }
-
-.contendor-notificacion{
-  position: relative;
-}
-
 </style>

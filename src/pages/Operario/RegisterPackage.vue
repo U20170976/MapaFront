@@ -354,6 +354,7 @@
       },
       obtenerFechaHoraActual() {
         const currentDate = new Date();
+        currentDate.setHours(currentDate.getHours() + 5);
 
         const year = currentDate.getFullYear();
         const month = String(currentDate.getMonth() + 1).padStart(2, '0');
@@ -385,7 +386,11 @@
     justify-content: space-between;
     width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
     padding: 0 10px; /* Opcional: Añade un poco de padding si deseas espacio a los lados */
+    
   }
+
+
+
   /* Asegúrate de que el texto dentro de las opciones del select sea negro */
   .form-control option {
     color: black

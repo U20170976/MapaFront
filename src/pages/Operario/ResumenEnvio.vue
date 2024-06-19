@@ -84,7 +84,7 @@ export default {
 
 <style scoped>
 .container {
-  background-color: #2A2A40;
+  background-color: #2c2f48;
   color: #ffffff;
   padding: 20px;
   border-radius: 10px;
