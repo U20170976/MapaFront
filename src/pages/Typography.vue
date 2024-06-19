@@ -1606,15 +1606,15 @@ onAirportMouseEnter(event) {
 
 
     actualizarContadoresVuelos() {
-   //   console.log("hola");
+  //    console.log("hola");
 
 const now = this.simulationDateTime.getTime();
 
-//  console.log(`Tiempo de simulación actual actualizar vuelos: ${new Date(now).toISOString()}`);
+  //console.log(`Tiempo de simulación actual actualizar vuelos: ${new Date(now).toISOString()}`);
 const allFlightsVuelos = [...this.pendingFlights, ...this.filteredVuelos, ...this.allVuelos, ...this.primerosVuelos];
 //console.log("hola2");
  allFlightsVuelos.forEach(vuelo => {
- // console.log("hola3");
+  //console.log("hola3");
   const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
   const vueloEndTime = new Date(vuelo.fechaHoraLlegadaGMT0).getTime();
   const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas convertidas a milisegundos
@@ -1672,7 +1672,7 @@ toGMT0Inicio(date) {
     let currentTime = performance.now();
     let elapsedTime = (currentTime - startTime) / 1000;
     startTime = currentTime;
-    this.startAutoUpdatePaquetes(); 
+    //this.startAutoUpdatePaquetes(); 
     // Actualiza simulationDateTime basado en el tiempo transcurrido real
     this.simulationDateTime = new Date(this.simulationDateTime.getTime() + elapsedTime * 1000);
     //console.log("Tiempo actual de simulación start loop:", this.simulationDateTime.toISOString());
@@ -1939,7 +1939,7 @@ toGMT0Inicio(date) {
 
     onFlightClick(event, vuelo) {
       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
-     // console.log(this.currentDateTimeInfo);
+      console.log(this.currentDateTimeInfo);
   const vueloId = event.features[0].properties.id;
   //console.log(event.features[0].properties.id);
   const allFlights = [...this.pendingFlights, ...this.filteredVuelos, ...this.allVuelos, ...this.primerosVuelos];
