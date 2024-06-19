@@ -693,7 +693,6 @@ export default {
 
         setInterval(() => {
           this.updateAirportCapacities();
-          this.updateFlightCapacities();
           this.checkForCollapse();
         }, 1000);  // Actualiza cada segundo
       });
@@ -885,7 +884,7 @@ setTimeout(() => {
   this.removeFlightRoute(vuelo);
 }, 5000);
 
-            console.log("FECHAAAA ", fechaHoraActual, "----", vuelo.fechaHoraLlegadaGMT0, "----", currentTime, "----", arrivalTimeInMs);
+         //   console.log("FECHAAAA ", fechaHoraActual, "----", vuelo.fechaHoraLlegadaGMT0, "----", currentTime, "----", arrivalTimeInMs);
             const hasArrived = vuelo.fechaHoraLlegadaGMT0 < currentTime;
             if (currentTime >= arrivalTimeInMs) {
                 // Highlight the arrival airport
@@ -1215,45 +1214,6 @@ destinationPoint(point, angle, distance) {
 
 
 
-    updateFlightCapacities() {
-      this.envios.forEach(envio => {
-        envio.ruta.vuelos.forEach(vuelo => {
-          // Aquí podrías actualizar la capacidad usada basado en alguna lógica o simulación
-          vuelo.capacidadCargaUsado = Math.max(0, Math.min(vuelo.capacidadCargaMaxima, vuelo.capacidadCargaUsado + (Math.random() * 20 - 10)));
-          this.updateFlightOnMap(vuelo, envio.id);
-        });
-      });
-    },
-
-
-
-    updateFlightOnMap(vuelo, envioId) {
-      if (vuelo.capacidadCargaUsado > vuelo.capacidadCargaMaxima) {
-        console.log("Collapse detected!");
-        this.showModal();
-      }
-      const sourceId = `envio-${envioId}`;
-      if (this.map.getSource(sourceId)) {
-        this.map.getSource(sourceId).setData({
-          type: 'Feature',
-          properties: {
-            id: vuelo.id,
-            'icon-image': this.calculateFlightIconForFlights(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: vuelo.origen
-          }
-        });
-      } else {
-        console.error(`Source ${sourceId} not found!`);
-      }
-
-
-    },
-
-
-
 
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
@@ -1265,8 +1225,8 @@ destinationPoint(point, angle, distance) {
       this.currentDate = this.currentDateTimeAux.toISOString().split('T')[0];
       this.currentHour = this.currentDateTimeAux.toISOString().split('T')[1].substring(0, 5);
 
-      console.log("Fecha current Simular ", this.currentDate);
-      console.log("Hora current Simular ", this.currentHour);
+     // console.log("Fecha current Simular ", this.currentDate);
+     // console.log("Hora current Simular ", this.currentHour);
 
       await this.continuarSimulacion(this.currentDate, this.currentHour);
       // Añadir un retraso antes de obtener los resultados de la simulación
@@ -1292,10 +1252,10 @@ destinationPoint(point, angle, distance) {
     checkAndAnimateFlights() {
       this.actualizarContadoresVuelos();
       const currentTime = this.simulationDateTime.getTime();
-      console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
+   //   console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
       this.pendingFlights.forEach(vuelo => {
     const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
-    console.log(`Tiempo de simulación actual Check VUELO: ${new Date(vueloStartTime).toISOString()}`, currentTime ,'-', vueloStartTime );
+   // console.log(`Tiempo de simulación actual Check VUELO: ${new Date(vueloStartTime).toISOString()}`, currentTime ,'-', vueloStartTime );
     if (currentTime >= vueloStartTime && !vuelo.animated) {
       vuelo.animated = true; // Marcar el vuelo como animado
      // console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
@@ -1335,7 +1295,7 @@ destinationPoint(point, angle, distance) {
   const totalImages = imagesToLoad.length + 1; // +1 para la imagen adicional
   const imageLoaded = () => {
     loadedImages++;
-    console.log(`Image loaded: ${loadedImages}/${totalImages}`);
+   // console.log(`Image loaded: ${loadedImages}/${totalImages}`);
     if (loadedImages === totalImages) {
       callback();
     }
@@ -1708,10 +1668,10 @@ closeFinalizationModal() {
     async fetchSimulationResults(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-        console.log("Resultados de la simulación:", response.data);
+     //   console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
-        console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
+    //    console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
         this.filteredVuelos = [];
         this.pendingFlights = [];
         this.allVuelos = [];
@@ -1732,13 +1692,13 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS:" + count);
+      //  console.log("CUENTA ACTUALIZADOS:" + count);
         this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
-        console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
+       // console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
        
-        console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+       // console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1749,10 +1709,10 @@ closeFinalizationModal() {
     async fetchSimulationResultsContinuar(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-        console.log("Resultados de la simulación:", response.data);
+     //   console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
-        console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
+     //   console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
         //  let filteredVuelos = [];
         //   this.pendingFlights = [];
         let count = 0;
@@ -1771,9 +1731,9 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS:" + count);
-        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
-        console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
+       // console.log("CUENTA ACTUALIZADOS:" + count);
+       // console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+       // console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1785,7 +1745,7 @@ closeFinalizationModal() {
 
       
       const currentTime = this.simulationDateTime.getTime();
-      console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
+    //  console.log(`Tiempo de simulación actual: ${new Date(currentTime).toISOString()}`);
 
       this.allVuelos.forEach(vuelo => {
         const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
@@ -1826,6 +1786,8 @@ closeFinalizationModal() {
   return -1;
 },
     animateFlight(vuelo) {
+
+      /*
       if (vuelo.capacidadCargaUsado > vuelo.capacidadCargaMaxima) {
 
         this.collapseReason = 'EXCESO DE PAQUETES EN VUELOS';
@@ -1837,7 +1799,7 @@ closeFinalizationModal() {
       // console.log(`Updating capacities for ${vuelo.ciudadDestino} with ${cantidadPaquetes} packages`);
 
       //this.updateAirportCapacitiesColapse(vuelo.ciudadDestino, vuelo.cantidadPaquetes);
-
+*/
       const sourceId = `vuelo-${vuelo.id}`;
       const bearing = this.calculateBearing(vuelo.origen, vuelo.destino, vuelo.id);
       if (!this.map.getSource(sourceId)) {
@@ -2166,7 +2128,7 @@ closeFinalizationModal() {
     onFlightClick(event, vuelo) {
       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
       const vueloId = event.features[0].properties.id;
-      console.log(event.features[0].properties.id)
+    //  console.log(event.features[0].properties.id)
   // Combina both pendingFlights and filteredVuelos into one array
   const allFlights = [...this.pendingFlights, ...this.filteredVuelos];
   
@@ -2213,7 +2175,7 @@ closeFinalizationModal() {
       const fecha = fechaHora.toISOString().split('T')[0];
       const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
       try {
-        console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+    //    console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(urlBase + `/api/simulacion/semanal/aeropuerto?cadena=${cadena}&fecha=${fecha}&hora=${hora}`);
         this.resultadosBusqueda = response.data;
         
@@ -2242,7 +2204,7 @@ closeFinalizationModal() {
       const hora = fechaHora.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
 
       try {
-        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+    //    console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(urlBase + `/api/simulacion/semanal/paquete?fecha=${fecha}&hora=${hora}&cadena=${cadena}`);
         this.resultadosBusquedaEnvio = response.data;
       } catch (error) {
@@ -2318,7 +2280,7 @@ closeFinalizationModal() {
     let content = '';
     if (type === 'vuelo' && this.detalle.tipo === 'vuelo') {
       content = `
-        Información del Vuelo (Descargado con fecha ${fecha} y hora ${hora}):
+        Información del Vuelo con fecha ${fecha} y hora ${hora}:
         Id: ${this.detalle.datos.id}
         Aeropuerto de Salida: ${this.getCiudadYPais(this.detalle.datos.ciudadOrigen)}
         Aeropuerto de Llegada: ${this.getCiudadYPais(this.detalle.datos.ciudadDestino)}
@@ -2334,7 +2296,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'aeropuerto' && this.detalle.tipo === 'aeropuerto') {
       content = `
-        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
         Ciudad y País: ${this.detalle.datos.nombreCiudad}, ${this.detalle.datos.pais}
         Coordenadas: ${this.formatCoordinates(this.detalle.datos.coordinates)}
         Paquetes almacenados: ${this.detalle.datos.paquetes.length === 0 ? 'No hay paquetes' : ''}
@@ -2346,7 +2308,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'envio' && this.detalle.tipo === 'envio') {
       content = `
-        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} (Descargado  con fecha ${fecha} y hora ${hora}):
+        Plan de Vuelo del Envío ${this.detalle.datos.idEnvio} con fecha ${fecha} y hora ${hora}:
         ${this.detalle.datos.ruta.vuelos.length === 0 ? 'No tiene plan de vuelo' : ''}
         ${this.detalle.datos.ruta.vuelos.map((vuelo, index) => `
           Vuelo #${index + 1}:
@@ -2365,15 +2327,15 @@ closeFinalizationModal() {
     link.click();
   },
   downloadDetailsModal(type, data) {
-  console.log("EEEEEEEEE");
+ // console.log("EEEEEEEEE");
       let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
       let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
-      console.log("EEEEEEEEEAQQQ");
+   //   console.log("EEEEEEEEEAQQQ");
     let content = '';
 
     if (type === 'vuelo') {
       content = `
-        Información del Vuelo (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Vuelo con fecha ${fecha} y hora ${hora}:
         Id: ${data.id}
         Aeropuerto de Salida: ${this.getCiudadYPais(data.ciudadOrigen)}
         Aeropuerto de Llegada: ${this.getCiudadYPais(data.ciudadDestino)}
@@ -2391,7 +2353,7 @@ closeFinalizationModal() {
       `;
     } else if (type === 'aeropuerto') {
       content = `
-        Información del Aeropuerto (Descargado  con fecha ${fecha} y hora ${hora}):
+        Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
         Ciudad: ${data.nombreCiudad}
         País: ${data.pais}
         Capacidad de Almacenamiento Máximo: ${data.capacidadAlmacenamientoMaximo}
