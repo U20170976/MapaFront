@@ -556,7 +556,7 @@ export default {
 
         setInterval(() => {
           this.updateAirportCapacities();
-          this.updateFlightCapacities();
+  
         }, 1000);  // Actualiza cada segundo
       });
     });
@@ -739,7 +739,7 @@ mostrarAeropuertoFlight(aeropuerto) {
         this.detalle = { tipo: 'vuelo', datos: vuelo };
 
         const isFlightVisible = this.map.queryRenderedFeatures({ layers: [`avion-${vuelo.id}`] }).length > 0;
-
+           console.log("gaaaaa");
         if (isFlightVisible) {
             // Change the flight icon
             this.map.setLayoutProperty(`avion-${vuelo.id}`, 'icon-image', 'flight-selected-icon');
@@ -749,24 +749,30 @@ mostrarAeropuertoFlight(aeropuerto) {
                 this.removeFlightRoute(vuelo);
             }, 5000);
         } else {
+
           const currentTimeAux = this.simulationDateTime.getTime();
+
           const fechaHora = new Date();
+
           const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+
           const fechaHoraActual = this.convertToUTC(this.parseDateTime(this.currentDateTime)); // Convert the current date correctly
+
             const arrivalTime = new Date(vuelo.fechaHoraLlegadaGMT0);
+   
+          //  const currentTime = currentTimeAux.getTime();
 
-            const currentTime = currentTimeAux.getTime();
             const arrivalTimeInMs = arrivalTime.getTime();
-
+   
             this.drawFlightRoute(vuelo);
-
+            console.log("gaaaaadaasasdwa8");
 setTimeout(() => {
   this.removeFlightRoute(vuelo);
 }, 5000);
 
-            console.log("FECHAAAA ", fechaHoraActual, "----", vuelo.fechaHoraLlegadaGMT0, "----", currentTime, "----", arrivalTimeInMs);
-            const hasArrived = vuelo.fechaHoraLlegadaGMT0 < currentTime;
-            if (currentTime >= arrivalTimeInMs) {
+     //       console.log("FECHAAAA ", fechaHoraActual, "----", vuelo.fechaHoraLlegadaGMT0, "----", currentTime, "----", arrivalTimeInMs);
+            const hasArrived = vuelo.fechaHoraLlegadaGMT0 < currentTimeAux;
+            if (currentTimeAux >= arrivalTimeInMs) {
                 // Highlight the arrival airport
                 const aeropuertoDestino = this.aeropuertos.find(a => a.codigoOACI === vuelo.ciudadDestino);
                 if (aeropuertoDestino) {
@@ -965,7 +971,7 @@ destinationPoint(point, angle, distance) {
       // Caso de un solo aeropuerto
       const aeropuerto = this.mapaAeropuertos[codigoOACI];
       if (aeropuerto) {
-        console.log(`${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`);
+      //  console.log(`${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`);
         return `${aeropuerto.nombreCiudad}, ${aeropuerto.pais}`;
       } else {
         return 'Aeropuerto no encontrado';
@@ -1082,47 +1088,6 @@ destinationPoint(point, angle, distance) {
 
 
 
-
-    updateFlightCapacities() {
-      this.envios.forEach(envio => {
-        envio.ruta.vuelos.forEach(vuelo => {
-          // Aquí podrías actualizar la capacidad usada basado en alguna lógica o simulación
-          vuelo.capacidadCargaUsado = Math.max(0, Math.min(vuelo.capacidadCargaMaxima, vuelo.capacidadCargaUsado + (Math.random() * 20 - 10)));
-          this.updateFlightOnMap(vuelo, envio.id);
-        });
-      });
-    },
-
-
-
-    updateFlightOnMap(vuelo, envioId) {
-      if (vuelo.capacidadCargaUsado > vuelo.capacidadCargaMaxima) {
-        console.log("Collapse detected!");
-        this.showModal();
-      }
-      const sourceId = `envio-${envioId}`;
-      if (this.map.getSource(sourceId)) {
-        this.map.getSource(sourceId).setData({
-          type: 'Feature',
-          properties: {
-            id: vuelo.id,
-            'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima)
-          },
-          geometry: {
-            type: 'Point',
-            coordinates: vuelo.origen
-          }
-        });
-      } else {
-        console.error(`Source ${sourceId} not found!`);
-      }
-
-
-    },
-
-
-
-
     delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
@@ -1206,7 +1171,7 @@ destinationPoint(point, angle, distance) {
   const totalImages = imagesToLoad.length + 1; // +1 para la imagen adicional
   const imageLoaded = () => {
     loadedImages++;
-    console.log(`Image loaded: ${loadedImages}/${totalImages}`);
+  //  console.log(`Image loaded: ${loadedImages}/${totalImages}`);
     if (loadedImages === totalImages) {
       callback();
     }
@@ -1276,7 +1241,7 @@ onAirportMouseEnter(event) {
     const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
     console.log('Fecha y hora en GMT 0:', fechaInicio + ' ' + fechaInicioHora);
 
- console.log("HOLA", currentDateTimeGMT0.toISOString()); 
+ //console.log("HOLA", currentDateTimeGMT0.toISOString()); 
  this.simulationDateTime = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
 
 
@@ -1545,7 +1510,7 @@ onAirportMouseEnter(event) {
           hora: hora
         }
       });
-      console.log("Vuelos en camino:", response.data);
+    //  console.log("Vuelos en camino:", response.data);
       this.primerosVuelos = response.data;
       return response.data;
     } catch (error) {
@@ -1729,7 +1694,7 @@ toGMT0Inicio(date) {
       const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
       const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
 
-      console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
+    //  console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
       await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
     }
     
@@ -1739,39 +1704,10 @@ toGMT0Inicio(date) {
 },
 
 
-    async continuarSimulacion(fecha, hora) {
-
-      const separarPaquetesCont = this.separarPaquetes === 'true';
-      const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
-
-      try {
-        const response = await axios.get(urlBase + '/api/simulacion/semanal/continuarST', {
-          params: {
-            fecha: fecha,
-            hora: hora,
-            separarPaquetes: separarPaquetesCont,
-            tamanoGrupo: tamanoGrupoCont,
-            saltoTemporal: saltoTemporalAux
-          }
-        });
-        console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
-
-      } catch (error) {
-        console.error(`Error continuando simulación para ${fecha} ${hora}:`, error);
-      }
-
-
-
-    },
-
-
-
-
-
 
 
     async fetchSimulationResults(fecha, hora) {
-      console.log(fecha + hora);
+      //console.log(fecha + hora);
       try {
         const saltoTemporal = 5; // Define el salto temporal según tus necesidades
       const response = await axios.get(`${urlBase}/api/diaDia/resultados`, {
@@ -1781,10 +1717,10 @@ toGMT0Inicio(date) {
           saltoTemporal: saltoTemporal
         }
       });
-        console.log("Resultados de la simulación:", response.data);
+       // console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
-        console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
+        //console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
         let filteredVuelos = [];
 
         let count = 0;
@@ -1801,12 +1737,12 @@ toGMT0Inicio(date) {
         // Ordenar los vuelos por fecha y hora de salida
         filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS:" + count);
+       // console.log("CUENTA ACTUALIZADOS:" + count);
         //this.vuelosOrdenadoGMT0 = filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', [...this.pendingFlights]); 
-        console.log("Vuelos disponibles ACTUALIZADOS:", filteredVuelos);
-        console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+       // console.log("Vuelos disponibles ACTUALIZADOS:", filteredVuelos);
+       // console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1873,10 +1809,10 @@ toGMT0Inicio(date) {
     const flightDurationSimulationSeconds = flightDurationMinutes * 60;
     const realTimeSeconds = flightDurationSimulationSeconds / 1;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
 
-    console.log(flightDurationMinutes);
+   // console.log(flightDurationMinutes);
     const steps = 10000; // MEJORA VISUALIZACIÓN PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RÁPIDO
     const interval = (realTimeSeconds * 1000) / steps;  // DEBE HABER SUFICIENTES SALTOS POR SEGUNDO O X TIEMPO PARA QUE SE VISUALICE EN TIEMPO REAL
-    console.log(steps);
+   // console.log(steps);
 
     const startLatLng = vuelo.origen;
     const endLatLng = vuelo.destino;
@@ -1984,7 +1920,7 @@ toGMT0Inicio(date) {
 
     onAirportClick(event) {
       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
-      console.log(this.currentDateTimeInfo);
+     // console.log(this.currentDateTimeInfo);
       const feature = event.features[0];
 
       const aeropuerto = this.aeropuertos.find(a => a.codigoOACI === feature.properties.codigoOACI);
@@ -2003,9 +1939,9 @@ toGMT0Inicio(date) {
 
     onFlightClick(event, vuelo) {
       this.currentDateTimeInfo = this.parseDateTime(this.currentDateTime); // Convertir la fecha correctamente
-      console.log(this.currentDateTimeInfo);
+     // console.log(this.currentDateTimeInfo);
   const vueloId = event.features[0].properties.id;
-  console.log(event.features[0].properties.id);
+  //console.log(event.features[0].properties.id);
   const allFlights = [...this.pendingFlights, ...this.filteredVuelos, ...this.allVuelos, ...this.primerosVuelos];
   const clickedVuelo = allFlights.find(v => v.id === vueloId);
   if (clickedVuelo) {
@@ -2050,7 +1986,7 @@ toGMT0Inicio(date) {
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
     try {
-      console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+    //  console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
       const response = await axios.get(`${urlBase}/api/diaDia/aeropuerto`, {
         params: {
           cadena: cadena,
@@ -2058,7 +1994,7 @@ toGMT0Inicio(date) {
           hora: hora
         }
       });
-      console.log("Resultados de la búsqueda:", response.data);
+   //   console.log("Resultados de la búsqueda:", response.data);
       this.resultadosBusqueda = response.data;
     } catch (error) {
       console.error("Error fetching aeropuertos:", error);
@@ -2077,7 +2013,7 @@ toGMT0Inicio(date) {
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
       try {
-        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+    //    console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(`${urlBase}/api/diaDia/paquete`, {
           params: {
             cadena: cadena,
@@ -2086,7 +2022,7 @@ toGMT0Inicio(date) {
           }
         });
         this.resultadosBusquedaEnvio = response.data;
-        console.log(response.data);
+      //  console.log(response.data);
       } catch (error) {
         console.error("Error fetching envios:", error);
       }
@@ -2098,20 +2034,33 @@ toGMT0Inicio(date) {
   async buscarVuelo() {
     if (this.busquedaVuelo.trim() !== '') {
       const cadena = this.busquedaVuelo;
+      const fechaHora = new Date();
+    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+    const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
+    let tipo = '';
+      if (this.buscarPorId) {
+        tipo = 'por_id';
+      } else if (this.buscarPorCiudadOrigen) {
+        tipo = 'por_ciudad_origen';
+      } else if (this.buscarPorCiudadDestino) {
+        tipo = 'por_ciudad_destino';
+      }
 
-      try {
-        const response = await axios.get(urlBase + `/api/diaDia/vuelo`, {
-          params: {
-            cadena: cadena
-          }
-        });
-        if (response.data) {
-          this.resultadosBusquedaVuelo = [response.data]; // Assuming response.data is a single flight object
-        } else {
-          this.resultadosBusquedaVuelo = [];
+      if (tipo) {
+        try {
+          const response = await axios.get(urlBase + '/api/simulacion/semanal/vuelo', {
+            params: {
+              cadena: cadena,
+              tipo: tipo,
+              fecha: fecha
+            }
+          });
+          this.resultadosBusquedaVuelo = response.data;
+        } catch (error) {
+          console.error("Error fetching vuelos:", error);
+          this.resultadosBusquedaVuelo = []; // Ensure results are cleared on error
         }
-      } catch (error) {
-        console.error("Error fetching vuelos:", error);
       }
     } else {
       this.resultadosBusquedaVuelo = [];
@@ -2198,14 +2147,14 @@ toGMT0Inicio(date) {
  link.click();
 },
 downloadDetailsModal(type, data) {
-console.log("EEEEEEEEE");
+//console.log("EEEEEEEEE");
    let fecha = this.currentDateTimeInfo.toISOString().split('T')[0];
    let hora = this.currentDateTimeInfo.toISOString().substr(11, 5); // Extraer la hora correctamente en formato HH:mm
   
  let content = '';
 
  if (type === 'vuelo') {
-  console.log("fecha", fecha, " ",hora );
+ // console.log("fecha", fecha, " ",hora );
    content = `
      Información del Vuelo con fecha ${fecha} y hora ${hora}:
      Id: ${data.id}
@@ -2224,7 +2173,7 @@ console.log("EEEEEEEEE");
      `).join('\n')}
    `;
  } else if (type === 'aeropuerto') {
-  console.log("fecha", fecha, " ",hora );
+  //console.log("fecha", fecha, " ",hora );
    content = `
      Información del Aeropuerto con fecha ${fecha} y hora ${hora}:
      Ciudad: ${data.nombreCiudad}
