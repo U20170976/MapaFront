@@ -1528,7 +1528,8 @@ this.progressInterval = setInterval(async () => {
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
-
+        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+        console.log("Estado de la simulación:", statusResponse.data);
 
           //clearInterval(this.simulationInterval);
           this.planificacionBotonTexto = 'Iniciar Planificación';
