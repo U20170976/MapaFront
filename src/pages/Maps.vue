@@ -570,6 +570,7 @@ export default {
       isDateInputDisabled: false,
       simulationDateTime: null,
       simulationInterval: null,
+      progressInterval: null,
       realTimePerSimulatedSecond: 1000 / (60 * 6), // 1 second real time = 6 minutes simulated time
       openModals: [],
       openFlightModals: [],
@@ -1024,6 +1025,8 @@ destinationPoint(point, angle, distance) {
 
       // Additional cleanup actions if needed
       clearInterval(this.simulationInterval);
+      clearInterval(this.progressInterval);
+      this.progressInterval = null,
       this.simulationInterval = null;
       this.isSimulating = false;
       // Any other cleanup code you need...
@@ -1495,14 +1498,14 @@ destinationPoint(point, angle, distance) {
         this.simulationDateTime = new Date(`${fechaInicio}T${fechaInicioHora}:00Z`);
 
 
-let progressInterval = setInterval(async () => {
+this.progressInterval = setInterval(async () => {
   const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
   console.log("Estado de la simulación:", statusResponse.data);
   this.progresoPlanificacion = statusResponse.data.progreso;
   this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
 
   if (statusResponse.data.progreso === 1.0 || statusResponse.data.estado.includes("Terminado")) {
-    clearInterval(progressInterval); // Detener el reloj de progreso una vez que la planificación esté completa
+    clearInterval(this.progressInterval); // Detener el reloj de progreso una vez que la planificación esté completa
     this.startSimulationLoop(fechaInicio, fechaInicioHora); // Iniciar el loop de simulación
   }
 }, 1000); // Actualizar cada segundo
@@ -2080,6 +2083,8 @@ closeFinalizationModal() {
       await this.finalizarSimulacion();
       clearInterval(this.simulationInterval);
       this.simulationInterval = null;
+      clearInterval(this.progressInterval);
+      this.progressInterval = null,
       this.isSimulating = false;
       Simulation.stopSimulation();
       console.log(vue.fecha_fin_simulacion);
