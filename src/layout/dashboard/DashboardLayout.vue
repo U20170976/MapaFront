@@ -6,8 +6,9 @@
         <sidebar-link v-if="toggle.icono" to="/icons" :name="$t('sidebar.icons')" icon="tim-icons icon-atom"/>
         <sidebar-link v-if="toggle.simulacion" to="/maps" :name="$t('sidebar.maps')" icon="tim-icons icon-world"/>
         <!--sidebar-link to="/notifications" :name="$t('sidebar.notifications')" icon="tim-icons icon-bell-55"/-->
+        <sidebar-link to="/table-list" :name="$t('sidebar.Colapso')" icon="tim-icons icon-world"/>
         <sidebar-link v-if="toggle.perfil" to="/profile" :name="$t('sidebar.userProfile')" icon="tim-icons icon-single-02"/>
-        <!--sidebar-link to="/table-list" :name="$t('sidebar.tableList')" icon="tim-icons icon-puzzle-10"/-->
+        
         
         <!--sidebar-link to="/dashboard?enableRTL=true" :name="$t('sidebar.rtlSupport')" icon="tim-icons icon-world"/-->
         <!--<sidebar-link v-if="toggle.gestionRutas" to="/admin/aviones" :name="$t('Aviones')" icon="tim-icons icon-send"/>-->

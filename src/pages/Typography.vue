@@ -71,12 +71,12 @@
     <li><span class="icon airport-green"></span>Menor a 50%</li>
     <li><span class="icon airport-orange"></span>Entre 50% y 80%</li>
     <li><span class="icon airport-red"></span>Mayor a 80%</li>
-    <li><span class="icon airport-selected-icon"></span>Vuelo seleccionado</li>
+    <li><span class="icon airport-selected-icon"></span>Aeropuerto seleccionado</li>
     <li><strong>Información de Vuelos</strong></li>
     <li><span class="icon flight-green"></span>Menor a 10%</li>
     <li><span class="icon flight-orange"></span>Entre 10% y 30%</li>
     <li><span class="icon flight-red"></span>Mayor a 30%</li>
-    <li><span class="icon flight-selected-icon"></span>Aeropuerto seleccionado</li>
+    <li><span class="icon flight-selected-icon"></span>Vuelo seleccionado</li>
   </ul>
 </div>
 

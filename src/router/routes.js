@@ -136,7 +136,7 @@ export default ([
       },
       {
         path: "maps",
-        name: "Simulación",
+        name: "Simulación Semanal",
         component: Maps
       },
       {
@@ -146,7 +146,7 @@ export default ([
       },
       {
         path: "table-list",
-        name: "table-list",
+        name: "Simulación Colapso",
         component: TableList
       },
       {

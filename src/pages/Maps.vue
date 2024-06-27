@@ -166,12 +166,12 @@
     <li><span class="icon airport-green"></span>Menor a 50%</li>
     <li><span class="icon airport-orange"></span>Entre 50% y 80%</li>
     <li><span class="icon airport-red"></span>Mayor a 80%</li>
-    <li><span class="icon airport-selected-icon"></span>Vuelo seleccionado</li>
+    <li><span class="icon airport-selected-icon"></span>Aeropuerto seleccionado</li>
     <li><strong>Información de Vuelos</strong></li>
     <li><span class="icon flight-green"></span>Menor a 10%</li>
     <li><span class="icon flight-orange"></span>Entre 10% y 30%</li>
     <li><span class="icon flight-red"></span>Mayor a 30%</li>
-    <li><span class="icon flight-selected-icon"></span>Aeropuerto seleccionado</li>
+    <li><span class="icon flight-selected-icon"></span>Vuelo seleccionado</li>
   </ul>
 </div>
       <div class="map-search-container">
@@ -1590,8 +1590,9 @@ let progressInterval = setInterval(async () => {
               clearInterval(this.simulationInterval);
             }
             else if(this.simulationDateTime>= endDate){
-              await this.finalizarSimulacion();
               await this.cancelarSimulacion();
+              await this.finalizarSimulacion();
+             
             }
             
           }
@@ -1838,7 +1839,7 @@ closeFinalizationModal() {
 
       const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
       const flightDurationSimulationSeconds = flightDurationMinutes * 60;
-      const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 2160 simulated seconds = 1 real second
+      const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
 
 
      // console.log(flightDurationMinutes)
@@ -3516,5 +3517,5 @@ color: #aaa; /* Color del placeholder */
 
 .airport-selected-icon{
   background-image: url('/img/airport-selected-icon.png');
-}
+} 
 </style>
