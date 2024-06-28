@@ -1528,8 +1528,8 @@ this.progressInterval = setInterval(async () => {
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
-        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-        console.log("Estado de la simulación:", statusResponse.data);
+     //   const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+    //    console.log("Estado de la simulación:", statusResponse.data);
 
           //clearInterval(this.simulationInterval);
           this.planificacionBotonTexto = 'Iniciar Planificación';
@@ -1625,7 +1625,7 @@ this.progressInterval = setInterval(async () => {
             fitnessObjetivo: fitnessAux2
           }
         });
-        console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
+       // console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
 
       } catch (error) {
         console.error(`Error continuando simulación para ${fecha} ${hora}:`, error);
