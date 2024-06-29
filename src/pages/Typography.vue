@@ -45,7 +45,7 @@
       <MglGeojsonLayer :sourceId="'aeropuertos'" :layerId="'aeropuertosLayer'" :type="'symbol'"
         :source="geojsonAeropuertos" :layout="{
           'icon-image': ['get', 'icon-image'],
-          'icon-size': 1.0,
+          'icon-size': 0.5,
           'icon-allow-overlap': true
         }" @click="onAirportClick" />
 
@@ -467,7 +467,7 @@ export default {
       accessToken: this.$store.state.map.token, // your access token. Needed if you using Mapbox maps
       mapStyle: 'mapbox://styles/mapbox/dark-v10',
       center: [5, 15],
-      zoom: 2,
+      zoom: 2.5,
 
 
       myInterval: null,
@@ -652,7 +652,7 @@ export default {
 
     // Center the map on the selected airport
     //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
-    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2.5 });
     // Show a popup with airport information (optional)
     new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(aeropuerto.coordinates)
@@ -717,7 +717,7 @@ mostrarAeropuertoFlight(aeropuerto) {
 
     // Center the map on the selected airport
     //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
-    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2.5 });
     // Show a popup with airport information (optional)
     new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(aeropuerto.coordinates)
@@ -1535,7 +1535,7 @@ onAirportMouseEnter(event) {
       source: 'aeropuertos',
       layout: {
         'icon-image': ['get', 'icon-image'], // Usar la propiedad 'icon-image' de las características
-        'icon-size': 1.0,
+        'icon-size': 0.5,
         'icon-allow-overlap': true
       }
     });

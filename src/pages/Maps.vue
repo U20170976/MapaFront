@@ -606,7 +606,7 @@ export default {
       accessToken: this.$store.state.map.token, // your access token. Needed if you using Mapbox maps
       mapStyle: 'mapbox://styles/mapbox/dark-v10',
       center: [5, 15],
-      zoom: 2,
+      zoom: 2.5,
 
 
       myInterval: null,
@@ -783,7 +783,7 @@ export default {
 
     // Center the map on the selected airport
     //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
-    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2.5 });
     // Show a popup with airport information (optional)
     new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(aeropuerto.coordinates)
@@ -841,7 +841,7 @@ mostrarAeropuertoFlight(aeropuerto) {
 
     // Center the map on the selected airport
     //this.map.flyTo({ center: aeropuerto.coordinates, zoom: 12 }); para ponerlo mas grande
-    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2 });
+    this.map.flyTo({ center: aeropuerto.coordinates, zoom: 2.5 });
     // Show a popup with airport information (optional)
     new mapboxgl.Popup({ closeOnClick: false })
         .setLngLat(aeropuerto.coordinates)
@@ -1499,8 +1499,8 @@ destinationPoint(point, angle, distance) {
 
 
 this.progressInterval = setInterval(async () => {
-  const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-  console.log("Estado de la simulación:", statusResponse.data);
+  //const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+  //console.log("Estado de la simulación:", statusResponse.data);
   this.progresoPlanificacion = statusResponse.data.progreso;
   this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
 
@@ -1625,7 +1625,7 @@ this.progressInterval = setInterval(async () => {
             fitnessObjetivo: fitnessAux2
           } 
         });
-        console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
+       // console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
 
       } catch (error) {
         console.error(`Error continuando simulación para ${fecha} ${hora}:`, error);
@@ -3524,4 +3524,4 @@ color: #aaa; /* Color del placeholder */
 .airport-selected-icon{
   background-image: url('/img/airport-selected-icon.png');
 } 
-</style>
+</style> 
