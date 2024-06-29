@@ -140,7 +140,7 @@
       <MglGeojsonLayer :sourceId="'aeropuertos'" :layerId="'aeropuertosLayer'" :type="'symbol'"
         :source="geojsonAeropuertos" :layout="{
           'icon-image': ['get', 'icon-image'],
-          'icon-size': 1.0,
+          'icon-size': 0.5,
           'icon-allow-overlap': true
         }" @click="onAirportClick" />
 
@@ -1394,7 +1394,7 @@ destinationPoint(point, angle, distance) {
       source: 'aeropuertos',
       layout: {
         'icon-image': ['get', 'icon-image'], // Usar la propiedad 'icon-image' de las características
-        'icon-size': 1.0,
+        'icon-size': 0.5,
         'icon-allow-overlap': true
       }
     });
@@ -1528,8 +1528,8 @@ this.progressInterval = setInterval(async () => {
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
-     //   const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-    //    console.log("Estado de la simulación:", statusResponse.data);
+        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+        console.log("Estado de la simulación:", statusResponse.data);
 
           //clearInterval(this.simulationInterval);
           this.planificacionBotonTexto = 'Iniciar Planificación';
@@ -1571,7 +1571,7 @@ this.progressInterval = setInterval(async () => {
       initialExecution = false; // Asegura que solo se ejecute una vez
     }
             
-            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
+            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
@@ -1623,9 +1623,9 @@ this.progressInterval = setInterval(async () => {
             saltoTemporal: saltoTemporalAux2,
             N: NAux2,
             fitnessObjetivo: fitnessAux2
-          }
+          } 
         });
-       // console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
+        console.log(`Simulación continuada para ${fecha} ${hora}:`, response.data);
 
       } catch (error) {
         console.error(`Error continuando simulación para ${fecha} ${hora}:`, error);
@@ -1697,13 +1697,13 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-      //  console.log("CUENTA ACTUALIZADOS:" + count);
+//        console.log("CUENTA ACTUALIZADOS:" + count);
         this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
-       // console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
+  //*      console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
        
-       // console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+     //   console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1736,9 +1736,9 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-       // console.log("CUENTA ACTUALIZADOS:" + count);
-       // console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
-       // console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
+   //     console.log("CUENTA ACTUALIZADOS:" + count);
+    //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+     //   console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1843,7 +1843,7 @@ closeFinalizationModal() {
 
       const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
       const flightDurationSimulationSeconds = flightDurationMinutes * 60;
-      const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
+      const realTimeSeconds = flightDurationSimulationSeconds / 240;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
 
 
      // console.log(flightDurationMinutes)
