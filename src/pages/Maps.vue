@@ -1499,8 +1499,8 @@ destinationPoint(point, angle, distance) {
 
 
 this.progressInterval = setInterval(async () => {
-  //const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-  //console.log("Estado de la simulación:", statusResponse.data);
+  const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+  console.log("Estado de la simulación:", statusResponse.data);
   this.progresoPlanificacion = statusResponse.data.progreso;
   this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
 
@@ -1528,8 +1528,8 @@ this.progressInterval = setInterval(async () => {
       }
       let initialExecution = true; // Variable de control
       this.simulationInterval = setInterval(async () => {
-        const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-        console.log("Estado de la simulación:", statusResponse.data);
+    //    const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+    //    console.log("Estado de la simulación:", statusResponse.data);
 
           //clearInterval(this.simulationInterval);
           this.planificacionBotonTexto = 'Iniciar Planificación';
@@ -3523,5 +3523,5 @@ color: #aaa; /* Color del placeholder */
 
 .airport-selected-icon{
   background-image: url('/img/airport-selected-icon.png');
-} 
-</style> 
+}  
+</style>  
