@@ -1225,7 +1225,7 @@ destinationPoint(point, angle, distance) {
 
     async updateSimulationHourly() {
       // Esta función se ejecuta cada hora en tiempo simulado
-      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 1);
+      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 2);
       this.currentDate = this.currentDateTimeAux.toISOString().split('T')[0];
       this.currentHour = this.currentDateTimeAux.toISOString().split('T')[1].substring(0, 5);
 
@@ -1540,8 +1540,7 @@ this.progressInterval = setInterval(async () => {
           this.validarFechaIniciarPlanificacion = false;
           this.isButtonDisabled = false;
           this.showFullscreenButton = true;
-          const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
-          console.log("Estado de la simulación:", statusResponse.data);
+
           // AQUI COMIENZA LA SIMULACION
           let vue = this;
           //vue.toggleIniciarDetener = false;
@@ -1565,7 +1564,7 @@ this.progressInterval = setInterval(async () => {
           } else {
      
             if (initialExecution) {
-      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 1);
+      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 2);
       this.currentDate = this.currentDateTimeAux.toISOString().split('T')[0];
       this.currentHour = this.currentDateTimeAux.toISOString().split('T')[1].substring(0, 5);
       await this.continuarSimulacion(this.currentDate, this.currentHour);
@@ -1582,9 +1581,12 @@ this.progressInterval = setInterval(async () => {
             const endDateAux = new Date(this.fecha_inicio_simulacion);
             endDateAux.setDate(endDateAux.getDate() + 9);
             if (this.simulationDateTime < endDate) {
-              if (this.simulationDateTime.getMinutes() % 60 === 0) {
+
+              if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
+              // if (this.simulationDateTime.getMinutes() % 60 === 0) {
                 const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
                 this.progresoPlanificacion = statusResponse.data.progreso;
+                console.log("Estado de la simulación:", statusResponse.data);
                 if (statusResponse.data.progreso === 1.0 || statusResponse.data.estado.includes("Terminado")) {
                   console.log("Estado de la simulación:", statusResponse.data);
                 await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
