@@ -515,6 +515,7 @@ export default {
   },
   data() {
     return {
+      simulationProgress: 0,
       isDownloadVisible: false, 
       busquedasHabilitadas: false, // Variable para controlar el estado de habilitación
       buscarPorId: false,
@@ -1505,6 +1506,7 @@ this.progressInterval = setInterval(async () => {
   this.planificacionBotonTexto = `Esperando ... ${(this.progresoPlanificacion * 100).toFixed(2)}%`;
 
   if (statusResponse.data.progreso === 1.0 || statusResponse.data.estado.includes("Terminado")) {
+    this.simulationProgress = 1.0;
     clearInterval(this.progressInterval); // Detener el reloj de progreso una vez que la planificación esté completa
     this.startSimulationLoop(fechaInicio, fechaInicioHora); // Iniciar el loop de simulación
   }
@@ -1538,7 +1540,8 @@ this.progressInterval = setInterval(async () => {
           this.validarFechaIniciarPlanificacion = false;
           this.isButtonDisabled = false;
           this.showFullscreenButton = true;
-
+          const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+          console.log("Estado de la simulación:", statusResponse.data);
           // AQUI COMIENZA LA SIMULACION
           let vue = this;
           //vue.toggleIniciarDetener = false;
@@ -1581,6 +1584,7 @@ this.progressInterval = setInterval(async () => {
             if (this.simulationDateTime < endDate) {
               if (this.simulationDateTime.getMinutes() % 60 === 0) {
                 const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+                this.progresoPlanificacion = statusResponse.data.progreso;
                 if (statusResponse.data.progreso === 1.0 || statusResponse.data.estado.includes("Terminado")) {
                   console.log("Estado de la simulación:", statusResponse.data);
                 await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
@@ -1588,7 +1592,9 @@ this.progressInterval = setInterval(async () => {
                 await this.updateSimulationHourly();
                 }
               }
+              if (this.progresoPlanificacion === 1.0) {
               this.checkAndAnimateFlightsContinuar();
+              }
             }
             
             else if (this.simulationDateTime >= endDateAux) {
@@ -1701,13 +1707,13 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-      //  console.log("CUENTA ACTUALIZADOS 1:" + count);
+        console.log("CUENTA ACTUALIZADOS 1:" + count);
         this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
       
-       // console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+        console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1744,8 +1750,8 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-      //  console.log("CUENTA ACTUALIZADOS:" + count);
-    //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+        console.log("CUENTA ACTUALIZADOS:" + count);
+        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
     //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
@@ -1911,7 +1917,7 @@ closeFinalizationModal() {
               }
             });
           }
-          setTimeout(() => {
+       //   setTimeout(() => {
             if (this.map.getLayer(`avion-${vuelo.id}`)) {
               this.map.removeLayer(`avion-${vuelo.id}`);
             }
@@ -1923,7 +1929,7 @@ closeFinalizationModal() {
         this.filteredVuelos = this.filteredVuelos.filter(v => v.id !== vuelo.id);
         this.allVuelos = this.allVuelos.filter(v => v.id !== vuelo.id);
         this.pendingFlights = this.pendingFlights.filter(v => v.id !== vuelo.id);
-          }, 500); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
+   //       }, 500); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
         }
  
 
