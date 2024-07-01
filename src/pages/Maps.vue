@@ -1569,7 +1569,7 @@ this.progressInterval = setInterval(async () => {
       initialExecution = false; // Asegura que solo se ejecute una vez
     }
             
-            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
+            this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
@@ -1685,8 +1685,8 @@ closeFinalizationModal() {
 
         // Procesar los vuelos en vuelosOrdenadoGMT0
         fetchedVuelos.forEach(vuelo => {
-          if(vuelo.capacidadCargaUsado>0){
-            if(count<60){
+      //    if(vuelo.capacidadCargaUsado>0){
+     //       if(count<60){
           vuelo.animated = false; // Agregar propiedad animated
           vuelo.movimiento = false;
           this.filteredVuelos.push(vuelo);
@@ -1694,20 +1694,20 @@ closeFinalizationModal() {
           this.pendingFlights.push(vuelo);
           this.allVuelos.push(vuelo); // Acumular vuelos
           
-          count++;}
-          }
+          count++;//}
+       //   }
         });
 
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS 1:" + count);
+      //  console.log("CUENTA ACTUALIZADOS 1:" + count);
         this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
-  //*      console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
-       
-     //   console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+    ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
+      
+       // console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1725,11 +1725,11 @@ closeFinalizationModal() {
         //  let filteredVuelos = [];
         //   this.pendingFlights = [];
         let count = 0;
-  
+   //     this.allVuelos = fetchedVuelos;
         // Procesar los vuelos en vuelosOrdenadoGMT0
         fetchedVuelos.forEach(vuelo => {
           if(vuelo.capacidadCargaUsado>0){
-            if(count<60){
+      //      if(count<60){
           vuelo.animated = false; // Agregar propiedad animated
           vuelo.movimiento = false;
           //  filteredVuelos.push(vuelo);
@@ -1737,16 +1737,16 @@ closeFinalizationModal() {
           this.allVuelos.push(vuelo); // Acumular vuelos
         
           count++;
-            }
+        //    }
         }
         });
 
         // Ordenar los vuelos por fecha y hora de salida
         this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS:" + count);
+      //  console.log("CUENTA ACTUALIZADOS:" + count);
     //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
-     //   console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
+    //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1851,12 +1851,13 @@ closeFinalizationModal() {
 
       const flightDurationMinutes = this.parseDurationToMinutes(vuelo.tiempoEstimadoVuelo);
       const flightDurationSimulationSeconds = flightDurationMinutes * 60;
-      const realTimeSeconds = flightDurationSimulationSeconds / 360;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
+      const realTimeSeconds = flightDurationSimulationSeconds / 240;  // Convert to real time seconds based on 360 simulated seconds = 1 real second
 
 
      // console.log(flightDurationMinutes)
       const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
+      //const interval = 4000; // Update interval to 3 seconds
       //console.log(steps)
       // let steps =336;
       let currentStep = vuelo.pausedAtStep || 0; // Usa pausedAtStep si existe
@@ -1917,9 +1918,14 @@ closeFinalizationModal() {
             if (this.map.getSource(sourceId)) {
               this.map.removeSource(sourceId);
             }
-          }, 1000); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
-        }
 
+                    // Eliminar vuelos terminados
+        this.filteredVuelos = this.filteredVuelos.filter(v => v.id !== vuelo.id);
+        this.allVuelos = this.allVuelos.filter(v => v.id !== vuelo.id);
+        this.pendingFlights = this.pendingFlights.filter(v => v.id !== vuelo.id);
+          }, 500); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
+        }
+ 
 
 
       };
