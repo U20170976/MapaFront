@@ -515,6 +515,7 @@ export default {
   },
   data() {
     return {
+      vuelosActivos: [], // Lista global para vuelos activos
       cache: {}, // Definir la caché aquí
       simulationProgress: 0,
       isDownloadVisible: false, 
@@ -1416,44 +1417,45 @@ destinationPoint(point, angle, distance) {
     this.iniciarPlanificacion();
   },
   actualizarContadoresVuelos() {
+  const now = this.simulationDateTime.getTime();
+  const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas en milisegundos
 
-    const now = this.simulationDateTime.getTime();
-  //  console.log(`Tiempo de simulación actual actualizar vuelos: ${new Date(now).toISOString()}`);
-
+  // Manejo de vuelos pendientes
   this.pendingFlights.forEach(vuelo => {
-      const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
-      const vueloEndTime = new Date(vuelo.fechaHoraLlegadaGMT0).getTime();
-      const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas convertidas a milisegundos
-      const nuevoVueloStartTimeSalida = new Date(vueloStartTime - cincoHorasEnMilisegundos);
-      const nuevoVueloStartTimeLlegada = new Date(vueloEndTime - cincoHorasEnMilisegundos);
-   //   console.log(`Tiempo de simulación actual actualizar vuelos SALIDA: ${new Date(nuevoVueloStartTimeSalida).toISOString()}`);
-  //    console.log(`Tiempo de simulación actual actualizar vuelos LLEGADA: ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
-      if (now >= nuevoVueloStartTimeSalida && now <= nuevoVueloStartTimeLlegada) {
-        
-        if (vuelo.fechaSalida.length === 10) { // Inicialización
-          vuelo.fechaSalida = "LISTO";
-          this.cantidadVuelosMovimiento++;
-          this.capacidadCargaUsadoTotal += vuelo.capacidadCargaUsado;
-          this.capacidadCargaMaximaTotal += vuelo.capacidadCargaMaxima;
-       
+    const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
+    const vueloEndTime = new Date(vuelo.fechaHoraLlegadaGMT0).getTime();
+    const nuevoVueloStartTimeSalida = vueloStartTime - cincoHorasEnMilisegundos;
+    const nuevoVueloStartTimeLlegada = vueloEndTime - cincoHorasEnMilisegundos;
+
+    if (now >= nuevoVueloStartTimeSalida && now <= nuevoVueloStartTimeLlegada) {
+      if (!this.vuelosActivos.includes(vuelo)) { // Verificar si el vuelo no está ya en la lista
+        vuelo.fechaSalida = "LISTO";
+        this.cantidadVuelosMovimiento++;
+        this.capacidadCargaUsadoTotal += vuelo.capacidadCargaUsado;
+        this.capacidadCargaMaximaTotal += vuelo.capacidadCargaMaxima;
+        this.vuelosActivos.push(vuelo); // Agregar vuelo a la lista de activos
       }
-      
     }
-    else if (now > nuevoVueloStartTimeLlegada){
-   //   console.log(`ENTRO CONDICIONAL ${new Date(nuevoVueloStartTimeLlegada).toISOString()}`);
-      if (vuelo.fechaSalida.length === 5) { // Si está en movimiento
-     //           console.log(`ENTRO MOVIMIENTO NEGATIVO ${new Date(now).toISOString()}`);
-                vuelo.fechaSalida = "LISTOLISTO";
-            this.cantidadVuelosMovimiento--;
-            this.capacidadCargaUsadoTotal -= vuelo.capacidadCargaUsado;
-            this.capacidadCargaMaximaTotal -= vuelo.capacidadCargaMaxima;
+  });
+
+  // Manejo de vuelos activos
+
+  this.vuelosActivos.forEach(vuelo => {
+    const vueloEndTime = new Date(vuelo.fechaHoraLlegadaGMT0).getTime();
+    const nuevoVueloStartTimeLlegada = vueloEndTime - cincoHorasEnMilisegundos;
+
+    if (now > nuevoVueloStartTimeLlegada) {
+      if (vuelo.fechaSalida === "LISTO") { // Si está en movimiento
+        vuelo.fechaSalida = "LISTOLISTO";
+        this.cantidadVuelosMovimiento--;
+        this.capacidadCargaUsadoTotal -= vuelo.capacidadCargaUsado;
+        this.capacidadCargaMaximaTotal -= vuelo.capacidadCargaMaxima;
+        this.vuelosActivos = this.vuelosActivos.filter(id => id !== vuelo.id); // Remover vuelo de la lista de activos
       }
-      }
-
-    });
-
-  },
-
+    }
+  });
+ 
+},
 
 
   async fetchWithCache(url, params) {
@@ -1924,7 +1926,7 @@ closeFinalizationModal() {
 
 
      // console.log(flightDurationMinutes)
-      const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
+      const steps = 35; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
       //const interval = 4000; // Update interval to 3 seconds
       //console.log(steps)
