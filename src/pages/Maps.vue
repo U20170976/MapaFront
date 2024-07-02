@@ -1838,7 +1838,7 @@ closeFinalizationModal() {
           vuelo.animated = true; // Marcar el vuelo como animado
           //console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
           vuelo.isActive = false;
-          this.animateFlight(vuelo);
+          this.animateFlight(vuelo); 
         }
       });
       this.allVuelos = this.allVuelos.filter(vuelo => !vuelo.animated); // Remover los vuelos animados
@@ -1945,9 +1945,11 @@ closeFinalizationModal() {
         vuelo.currentStep = currentStep;
         vuelo.currentPos = currentPos;
         if (currentStep <= steps) {
-          currentPos[0] += incrementLng;
-          currentPos[1] += incrementLat;
-          if (this.map.getSource(sourceId)) {
+      //    currentPos[0] += incrementLng;
+        //  currentPos[1] += incrementLat;
+        currentPos[0] = vuelo.origen[0] + (incrementLng * currentStep);
+        currentPos[1] = vuelo.origen[1] + (incrementLat * currentStep); 
+        if (this.map.getSource(sourceId)) {
             this.map.getSource(sourceId).setData({
               type: 'Feature',
               geometry: {
