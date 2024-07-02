@@ -38,7 +38,7 @@
       <div class="col-md-4 pr-md-1" v-if="separarPaquetes === 'true'">
         <base-input label="Tamaño del Grupo" type="number" placeholder="Tamaño del Grupo" v-model="tamanoGrupo"
           :disabled="isButtonDisabledSeparar" class="custom-input">
-        </base-input>
+        </base-input> 
       </div>
     </div> 
     <div class="row">
@@ -352,12 +352,51 @@
 
     <p><strong>Cantidad de vuelos:</strong> <span>{{ totalVuelos }} vuelos</span></p>
 
- 
+    <p><strong>Razón:</strong> <span>{{ razonFinalizacion }}</span></p>
 </div>
 <button class="modal-button-reporte" @click="downloadWord">Descargar Reporte</button>
     <button class="modal-button-reporte" @click="reloadPage">Cerrar</button>
   </div>
 </div>
+
+
+
+
+
+<div v-if="showFinalizationModalColapso" class="modal-overlay" @click="closeFinalizationModalColapso">
+  <div class="modal-content-reporte" @click.stop>
+    <img src="/img/Redex.png" alt="Simulación Exitosa" class="modal-image">
+    <img src="/img/caption.png" alt="Simulación Exitosa 2" class="modal-image2">
+    <h3>Simulación Finalizada</h3>
+
+    <div class="modal-details">
+      <h4 class="subtitle">Detalles Generales:</h4>
+      <p><strong>Total de Envíos:</strong> <span>{{ totalEnviosColapso }} envíos</span></p>
+      <p><strong>Total de Paquetes:</strong> <span>{{ totalPaquetesColapso }} paquetes</span></p>
+      <p><strong>Fecha y Hora de Inicio:</strong> <span class="datetime">{{ formatDateTime(fechaHoraInicioColapso) }} UTC</span></p>
+      <p><strong>Fecha y Hora Fin:</strong> <span class="datetime">{{ formatDateTimeGMT0(currentDateTime) }}</span></p>
+      <p><strong>Cantidad de vuelos:</strong> <span>{{ totalVuelosColapso }} vuelos</span></p>
+      <p><strong>Razón:</strong> <span> COLPASO LOGÍSTICO</span></p>
+      <!-- Collapsed Package Details -->
+      <div v-if="paqueteColapso">
+        <h4 class="subtitle">Detalles del Paquete Colapsado:</h4>
+        <p><strong>ID del Paquete:</strong> {{ paqueteColapso.id }}</p>
+        <p><strong>ID del Envío:</strong> {{ paqueteColapso.idEnvio }}</p>
+        <p><strong>Aeropuerto de Origen:</strong> {{ getCiudadYPais(paqueteColapso.ciudadOrigen) }}</p>
+        <p><strong>Aeropuerto de Destino:</strong> {{ getCiudadYPais(paqueteColapso.ciudadDestino) }}</p>
+        <p><strong>Fecha y Hora de Envío:</strong>  <span class="datetime">{{ formatDateTime(paqueteColapso.fechaHoraEncioGMT0) }} UTC</span></p>
+        <p><strong>Cantidad de Paquetes:</strong> {{ paqueteColapso.cantidadPaquetes }}</p>
+      </div>
+    </div>
+    <button class="modal-button-reporte" @click="downloadWordColapso">Descargar Reporte</button>
+    <button class="modal-button-reporte" @click="reloadPage">Cerrar</button>
+  </div>
+</div>
+
+
+
+
+
 
 
 
@@ -506,6 +545,13 @@ let fitnessAux = config.FitnessSimulacionIniciar;
 
 let fitnessAux2 = config.FitnessSimulacionContinuar;
 
+const currentDateAux = new Date();
+  const yearAux  = currentDateAux.getUTCFullYear();
+  const monthAux  = String(currentDateAux.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const dayAux  = String(currentDateAux.getUTCDate()).padStart(2, '0');
+  const gmt0Date = `${yearAux}-${monthAux}-${dayAux}`;
+
+
 export default {
   props: ['title', 'content', 'isVisible', 'isVisibleResumen'],
   components: {
@@ -515,6 +561,9 @@ export default {
   },
   data() {
     return {
+      razonFinalizacion: '',
+      showFinalizationModalColapso: false,
+      fecha_inicio_simulacion: gmt0Date, 
       vuelosActivos: [], // Lista global para vuelos activos
       cache: {}, // Definir la caché aquí
       simulationProgress: 0,
@@ -586,6 +635,8 @@ export default {
       envios: envios,
       calendarioVuelos: {},
       movingFlights: [],
+
+      
       currentDateTimeInfo: new Date().toLocaleString('es-ES', {
         timeZone: 'America/Lima',
         year: 'numeric',
@@ -615,7 +666,7 @@ export default {
       myInterval: null,
       myIntervalReplan: null,
 
-      fecha_inicio_simulacion: '',
+     // fecha_inicio_simulacion: '',
       fecha_fin_simulacion: null,
 
       type: ["", "info", "success", "warning", "danger"],
@@ -709,6 +760,13 @@ export default {
     this.cleanupBeforeExit();
   },
   methods: {
+
+
+    closeFinalizationModalColapso() {
+      this.showFinalizationModalColapso = false;
+    },
+
+
     toggleCheckbox(type) {
     if (type === 'id') {
       this.buscarPorCiudadOrigen = false;
@@ -1628,6 +1686,7 @@ this.progressInterval = setInterval(async () => {
                 await this.updateSimulationHourly();
                 }
                 else{
+                  this.razonFinalizacion = 'COLPASO DEBIDO AL QUE TIEMPO DE EJECUCCION ALCANZO AL SALTO DE TIEMPO';
                   console.log("CANCCELADO POR NO SOPORTAR");
                   await this.cancelarSimulacion();
                   await this.finalizarSimulacion();
@@ -1642,6 +1701,7 @@ this.progressInterval = setInterval(async () => {
               clearInterval(this.simulationInterval);
             }
             else if(this.simulationDateTime>= endDate){
+              this.razonFinalizacion = 'FIN DE LA SIMULACION SEMANAL';
               await this.cancelarSimulacion();
               await this.finalizarSimulacion();
              
@@ -1744,6 +1804,32 @@ closeFinalizationModal() {
     async fetchSimulationResults(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
+
+
+        if (response.data.colapso) {
+          await this.cancelarSimulacionColapso();
+          try {
+    const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
+    console.log("Simulación finalizada:", response.data);
+
+ 
+      this.totalEnviosColapso = response.data.totalEnvios;
+      this.totalPaquetesColapso = response.data.totalPaquetes;
+      this.fechaHoraInicioColapso = response.data.fechaHoraInicio;
+      this.fechaHoraFinColapso = response.data.fechaHoraFin;
+      this.totalVuelosColapso = response.data.totalVuelos;
+
+      // Assign the collapsed package details
+      this.paqueteColapso = response.data.paqueteColapso;
+      this.showFinalizationModalColapso = true;
+
+      return;
+    } catch (error) {
+    console.error("Error finalizando la simulación:", error);
+  }
+ 
+    }
+
      //   console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
@@ -1789,6 +1875,33 @@ closeFinalizationModal() {
     async fetchSimulationResultsContinuar(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
+
+
+        
+        if (response.data.colapso) {
+          await this.cancelarSimulacionColapso();
+          try {
+
+    const response = await axios.get(urlBase + '/api/simulacion/semanal/finalizarST');
+    console.log("Simulación finalizada:", response.data);
+
+ 
+      this.totalEnviosColapso = response.data.totalEnvios;
+      this.totalPaquetesColapso = response.data.totalPaquetes;
+      this.fechaHoraInicioColapso = response.data.fechaHoraInicio;
+      this.fechaHoraFinColapso = response.data.fechaHoraFin;
+      this.totalVuelosColapso = response.data.totalVuelos;
+
+      // Assign the collapsed package details
+      this.paqueteColapso = response.data.paqueteColapso;
+      this.showFinalizationModalColapso = true;
+
+      return;
+    } catch (error) {
+    console.error("Error finalizando la simulación:", error);
+  }
+
+    }
 
        //   console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
@@ -2468,6 +2581,43 @@ closeFinalizationModal() {
     link.download = `Detalles_${type}.doc`;
     link.click();
   },
+
+  
+  downloadWordColapso() {
+    const content = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="utf-8"><title>Simulación Reporte</title></head><body>
+      <h1>Simulación Finalizada</h1>
+      <h2>Detalles Generales:</h2>
+      <p><strong>Total de Envíos:</strong> ${this.totalEnviosColapso} envíos</p>
+      <p><strong>Total de Paquetes:</strong> ${this.totalPaquetesColapso} paquetes</p>
+      <p><strong>Fecha y Hora de Inicio:</strong> ${this.formatDateTime(this.fechaHoraInicioColapso)} UTC</p>
+      <p><strong>Fecha y Hora Fin:</strong> ${this.formatDateTimeGMT0(this.currentDateTime)}</p>
+      <p><strong>Cantidad de vuelos:</strong> ${this.totalVuelosColapso} vuelos</p>
+      
+      <!-- Collapsed Package Details -->
+      ${this.paqueteColapso ? `
+      <h2>Detalles del Paquete Colapsado:</h2>
+      <p><strong>ID del Paquete:</strong> ${this.paqueteColapso.id}</p>
+      <p><strong>ID del Envío:</strong> ${this.paqueteColapso.idEnvio}</p>
+      <p><strong>Aeropuerto de Origen:</strong> ${this.getCiudadYPais(this.paqueteColapso.ciudadOrigen)}</p>
+      <p><strong>Aeropuerto de Destino:</strong> ${this.getCiudadYPais(this.paqueteColapso.ciudadDestino)}</p>
+      <p><strong>Fecha y Hora de Envío:</strong> ${this.formatDateTime(this.paqueteColapso.fechaHoraEncioGMT0)} UTC</p>
+      <p><strong>Cantidad de Paquetes:</strong> ${this.paqueteColapso.cantidadPaquetes}</p>
+      ` : ''}
+      </body></html>`;
+      
+    const blob = new Blob(['\ufeff', content], {
+      type: 'application/msword'
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'Simulacion_Reporte_Colapso.doc';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
   },
   computed: {
 /*
@@ -2951,6 +3101,12 @@ closeFinalizationModal() {
 }
 
 
+.subtitle {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 
 
