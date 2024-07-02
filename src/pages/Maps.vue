@@ -1610,12 +1610,13 @@ this.progressInterval = setInterval(async () => {
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay(); 
 
-            this.updateAirportData();
+          
            this.actualizarContadoresVuelos();
 
             if (this.simulationDateTime < endDate) {
 
               if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
+                this.updateAirportData();
               // if (this.simulationDateTime.getMinutes() % 60 === 0) {
                 const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
                 this.progresoPlanificacion = statusResponse.data.progreso;
