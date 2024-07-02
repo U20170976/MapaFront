@@ -1420,7 +1420,7 @@ destinationPoint(point, angle, distance) {
     const now = this.simulationDateTime.getTime();
   //  console.log(`Tiempo de simulación actual actualizar vuelos: ${new Date(now).toISOString()}`);
 
-    this.pendingFlights.forEach(vuelo => {
+  this.pendingFlights.forEach(vuelo => {
       const vueloStartTime = new Date(vuelo.fechaHoraSalidaGMT0).getTime();
       const vueloEndTime = new Date(vuelo.fechaHoraLlegadaGMT0).getTime();
       const cincoHorasEnMilisegundos = 5 * 60 * 60 * 1000; // 5 horas convertidas a milisegundos
@@ -1552,7 +1552,8 @@ this.progressInterval = setInterval(async () => {
        // clearInterval(this.simulationInterval);
       }
       let initialExecution = true; // Variable de control
-      this.simulationInterval = setInterval(async () => {
+
+
 
           //clearInterval(this.simulationInterval);
           this.planificacionBotonTexto = 'Iniciar Planificación';
@@ -1563,9 +1564,9 @@ this.progressInterval = setInterval(async () => {
           this.validarFechaIniciarPlanificacion = false;
           this.isButtonDisabled = false;
           this.showFullscreenButton = true;
-          const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+     //     const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
       
-                console.log("Estado de la simulación:", statusResponse.data);
+       //         console.log("Estado de la simulación:", statusResponse.data);
           // AQUI COMIENZA LA SIMULACION
           let vue = this;
           //vue.toggleIniciarDetener = false;
@@ -1573,6 +1574,14 @@ this.progressInterval = setInterval(async () => {
           vue.toggleReanudar = false;
           this.isAnimating = true;
           this.searchEnabled = true;
+          const endDate = new Date(this.fecha_inicio_simulacion);
+            endDate.setDate(endDate.getDate() + 7);
+            const endDateAux = new Date(this.fecha_inicio_simulacion);
+            endDateAux.setDate(endDateAux.getDate() + 9);
+      
+      this.simulationInterval = setInterval(async () => {
+
+
           if (!this.isSimulating) {
             await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
             this.isSimulating = true;
@@ -1600,11 +1609,8 @@ this.progressInterval = setInterval(async () => {
             this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
-            this.actualizarContadoresVuelos();
-            const endDate = new Date(this.fecha_inicio_simulacion);
-            endDate.setDate(endDate.getDate() + 7);
-            const endDateAux = new Date(this.fecha_inicio_simulacion);
-            endDateAux.setDate(endDateAux.getDate() + 9);
+      //      this.actualizarContadoresVuelos();
+
             if (this.simulationDateTime < endDate) {
 
               if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
@@ -1763,7 +1769,7 @@ closeFinalizationModal() {
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
     //     console.log("CUENTA ACTUALIZADOS 1:" + count);
-        this.vuelosOrdenadoGMT0 = this.filteredVuelos;
+    //    this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
@@ -1804,7 +1810,7 @@ closeFinalizationModal() {
         });
 
         // Ordenar los vuelos por fecha y hora de salida
-        this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
+      //  this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
     //     console.log("CUENTA ACTUALIZADOS:" + count);
      //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
