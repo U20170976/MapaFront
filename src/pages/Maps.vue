@@ -1563,7 +1563,9 @@ this.progressInterval = setInterval(async () => {
           this.validarFechaIniciarPlanificacion = false;
           this.isButtonDisabled = false;
           this.showFullscreenButton = true;
-
+          const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
+      
+                console.log("Estado de la simulación:", statusResponse.data);
           // AQUI COMIENZA LA SIMULACION
           let vue = this;
           //vue.toggleIniciarDetener = false;
@@ -1915,7 +1917,7 @@ closeFinalizationModal() {
 
 
      // console.log(flightDurationMinutes)
-      const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
+      const steps = 30; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
       //const interval = 4000; // Update interval to 3 seconds
       //console.log(steps)
