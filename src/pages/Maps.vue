@@ -515,6 +515,7 @@ export default {
   },
   data() {
     return {
+      cache: {}, // Definir la caché aquí
       simulationProgress: 0,
       isDownloadVisible: false, 
       busquedasHabilitadas: false, // Variable para controlar el estado de habilitación
@@ -1223,6 +1224,7 @@ destinationPoint(point, angle, distance) {
       return new Promise(resolve => setTimeout(resolve, ms));
     },
 
+ 
     async updateSimulationHourly() {
       // Esta función se ejecuta cada hora en tiempo simulado
       this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 2);
@@ -1239,6 +1241,8 @@ destinationPoint(point, angle, distance) {
       
 
     },
+
+
 
 
     // Add a method to animate only visible flights
@@ -1449,6 +1453,25 @@ destinationPoint(point, angle, distance) {
     });
 
   },
+
+
+
+  async fetchWithCache(url, params) {
+      const key = JSON.stringify({ url, params });
+      if (this.cache[key]) {
+        return this.cache[key];
+      }
+
+      try {
+        const response = await axios.get(url, { params });
+        this.cache[key] = response.data;
+        return response.data;
+      } catch (error) {
+        throw error;
+      }
+    },
+
+
     async iniciarPlanificacion() {
 
       this.isDateInputDisabled = true;
@@ -1588,10 +1611,15 @@ this.progressInterval = setInterval(async () => {
                 this.progresoPlanificacion = statusResponse.data.progreso;
                 console.log("Estado de la simulación:", statusResponse.data);
                 if (statusResponse.data.progreso === 1.0 || statusResponse.data.estado.includes("Terminado")) {
-                  console.log("Estado de la simulación:", statusResponse.data);
+               //   console.log("Estado de la simulación:", statusResponse.data);
                 await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
 
                 await this.updateSimulationHourly();
+                }
+                else{
+                  console.log("CANCCELADO POR NO SOPORTAR");
+                  await this.cancelarSimulacion();
+                  await this.finalizarSimulacion();
                 }
               }
               if (this.progresoPlanificacion === 1.0) {
@@ -1614,7 +1642,7 @@ this.progressInterval = setInterval(async () => {
     },
 
 
-
+/*
     async continuarSimulacion(fecha, hora) {
 
       const separarPaquetesCont = this.separarPaquetes === 'true';
@@ -1643,7 +1671,30 @@ this.progressInterval = setInterval(async () => {
 
 
     },
+*/
 
+
+async continuarSimulacion(fecha, hora) {
+      const separarPaquetesCont = this.separarPaquetes === 'true';
+      const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
+
+      const params = {
+        fecha: fecha,
+        hora: hora,
+        separarPaquetes: separarPaquetesCont,
+        tamanoGrupo: tamanoGrupoCont,
+        saltoTemporal: saltoTemporalAux2,
+        N: NAux2,
+        fitnessObjetivo: fitnessAux2
+      };
+
+      try {
+        const response = await this.fetchWithCache(urlBase + '/api/simulacion/semanal/continuarST', params);
+        console.log(`Simulación continuada para ${fecha} ${hora}:`, response);
+      } catch (error) {
+        console.error(`Error continuando simulación para ${fecha} ${hora}:`, error);
+      }
+    },
 
 
 
@@ -1709,13 +1760,13 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS 1:" + count);
+    //     console.log("CUENTA ACTUALIZADOS 1:" + count);
         this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
       
-        console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+ //        console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -1726,7 +1777,8 @@ closeFinalizationModal() {
     async fetchSimulationResultsContinuar(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-     //   console.log("Resultados de la simulación:", response.data);
+
+       //   console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
      //   console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
@@ -1752,8 +1804,8 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-        console.log("CUENTA ACTUALIZADOS:" + count);
-        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+    //     console.log("CUENTA ACTUALIZADOS:" + count);
+     //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
     //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
