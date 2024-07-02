@@ -1609,7 +1609,7 @@ this.progressInterval = setInterval(async () => {
             this.updateCurrentDateTimeDisplay(); 
 
             this.updateAirportData();
-      //      this.actualizarContadoresVuelos();
+           this.actualizarContadoresVuelos();
 
             if (this.simulationDateTime < endDate) {
 
@@ -1752,7 +1752,7 @@ closeFinalizationModal() {
 
         // Procesar los vuelos en vuelosOrdenadoGMT0
         fetchedVuelos.forEach(vuelo => {
-      //    if(vuelo.capacidadCargaUsado>0){
+          if(vuelo.capacidadCargaUsado>0){
      //       if(count<60){
           vuelo.animated = false; // Agregar propiedad animated
           vuelo.movimiento = false;
@@ -1761,7 +1761,8 @@ closeFinalizationModal() {
           this.pendingFlights.push(vuelo);
           this.allVuelos.push(vuelo); // Acumular vuelos
           
-          count++;//}
+          count++;
+        }
        //   }
         });
 
@@ -1923,7 +1924,7 @@ closeFinalizationModal() {
 
 
      // console.log(flightDurationMinutes)
-      const steps = 30; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
+      const steps = 50; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
       //const interval = 4000; // Update interval to 3 seconds
       //console.log(steps)
