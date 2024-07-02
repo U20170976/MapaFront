@@ -1926,7 +1926,7 @@ closeFinalizationModal() {
 
 
      // console.log(flightDurationMinutes)
-      const steps = 35; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
+      const steps = 25; // MEJORA VISULAZCION PERO SE DESFASA ALGO EL TIEMPO PERO SE VE MAS RAPIDO
       const interval = (realTimeSeconds * 1000) / steps;
       //const interval = 4000; // Update interval to 3 seconds
       //console.log(steps)
