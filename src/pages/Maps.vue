@@ -205,6 +205,7 @@
       <p>Ciudad Actual: {{ getCiudadYPais(envio.ciudadActual) }}</p>
       <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
       <p>Estado: {{ envio.estadoEnvio }}</p>
+      <p>Fecha de Envío: {{ formatDateTime(envio.fechaHoraEncioGMT0) }}</p>
     </div>
   </div>
   <div>
@@ -1753,13 +1754,13 @@ this.progressInterval = setInterval(async () => {
                 await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
 
                 await this.updateSimulationHourly();
-                }/*
+                }
                 else{
                   this.razonFinalizacion = 'COLPASO DEBIDO AL QUE TIEMPO DE EJECUCCION ALCANZO AL SALTO DE TIEMPO';
                   console.log("CANCCELADO POR NO SOPORTAR");
                   await this.cancelarSimulacion();
                   await this.finalizarSimulacion();
-                }*/
+                }
               }
               if (this.progresoPlanificacion === 1.0) {
               this.checkAndAnimateFlightsContinuar();

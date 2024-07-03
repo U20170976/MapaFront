@@ -355,6 +355,7 @@
       obtenerFechaHoraActual() {
         const currentDate = new Date();
         currentDate.setHours(currentDate.getHours() + 5);
+        console.log(currentDate);
 
         const year = currentDate.getFullYear();
         const month = String(currentDate.getMonth() + 1).padStart(2, '0');

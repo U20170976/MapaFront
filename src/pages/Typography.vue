@@ -103,6 +103,7 @@
             <p>Ciudad Actual: {{ getCiudadYPais(envio.ciudadActual) }}</p>
             <p>Cantidad Paquetes: {{ envio.cantidadPaquetes }}</p>
             <p>Estado: {{ envio.estadoEnvio }}</p>
+            <p>Fecha de Envío: {{ formatDateTime(envio.fechaHoraEncioGMT0) }}</p>
           </div>
         </div>
         <div>
@@ -157,6 +158,7 @@
           <div class="modal-content-flight">
           <h2>Información del Vuelo</h2>
           <p><strong>Id:</strong> {{ detalle.datos.id }}</p>
+         
           <p><strong>Aeropuerto de Salida:</strong> {{ getCiudadYPais(detalle.datos.ciudadOrigen) }}</p>
           <p><strong>Aeropuerto de Llegada:</strong> {{ getCiudadYPais(detalle.datos.ciudadDestino) }}</p>
           <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(detalle.datos.fechaHoraSalidaGMT0) }}</p>
