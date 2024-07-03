@@ -316,13 +316,6 @@
         console.log('listadoPaquetes llamado');
         this.$router.push('listadoPaquetes');
       },
-<<<<<<< Updated upstream
-      obtenerFechaHoraActual() {
-        const currentDate = new Date();
-        currentDate.setHours(currentDate.getHours() + 5);
-        console.log(currentDate);
-=======
->>>>>>> Stashed changes
 
       async obtenerFechaHoraActual() {
         const currentDate = new Date();
