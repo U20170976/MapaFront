@@ -1384,7 +1384,7 @@ destinationPoint(point, angle, distance) {
       this.animateVisibleFlights();
 
     },  updateCurrentDateTimeDisplay() {
-    if (this.simulationDateTime) {
+
       this.currentDateTime = this.simulationDateTime.toLocaleString('es-ES', {
         timeZone: 'UTC',
         year: 'numeric',
@@ -1394,10 +1394,7 @@ destinationPoint(point, angle, distance) {
         minute: '2-digit',
         timeZoneName: 'short'
       });
-    } else {
-      console.warn('simulationDateTime no está definido.');
-      this.currentDateTime = 'Fecha no disponible'; // Valor predeterminado o mensaje de error
-    }
+
 
     if (this.map) {
       const source = this.map.getSource('aeropuertos');
