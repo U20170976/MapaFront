@@ -1067,21 +1067,15 @@ destinationPoint(point, angle, distance) {
 
 
     updateAirportCapacities() {
-      this.geojsonAeropuertos.features = this.aeropuertos.map(a => {
-        let usageRatio = a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo;
-        return {
+      if (this.map.getSource('aeropuertos') && this.geojsonAeropuertos) {
+        this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
           type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: a.coordinates
-          },
+          geometry: { type: 'Point', coordinates: a.coordinates },
           properties: {
             ...a,
-            'icon-image': this.calculateIcon(usageRatio) // Asegúrate de que la propiedad se llama 'icon-image'
+            'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo)
           }
-        };
-      });
-      if (this.map && this.map.getSource('aeropuertos')) {
+        }));
         this.map.getSource('aeropuertos').setData(this.geojsonAeropuertos);
       }
     },
@@ -1096,14 +1090,23 @@ destinationPoint(point, angle, distance) {
 
     // Add a method to animate only visible flights
     animateVisibleFlights() {
-      const bounds = this.map.getBounds();
-      const visibleFlights = this.filteredVuelos.filter(vuelo => {
-        const [lng, lat] = vuelo.origen;
-        return bounds.contains([lng, lat]);
-      });
+    // Ensure that bounds is a LngLatBounds object
+    const bounds = this.map.getBounds();
+   // console.log('Bounds:', bounds);
 
-      visibleFlights.forEach(vuelo => this.animateFlight(vuelo));
-    },
+    // Manually check if a point is within the bounds
+    const visibleFlights = this.filteredVuelos.filter(vuelo => {
+        const [lng, lat] = vuelo.origen;
+        return (
+            lng >= bounds.getWest() &&
+            lng <= bounds.getEast() &&
+            lat >= bounds.getSouth() &&
+            lat <= bounds.getNorth()
+        );
+    });
+
+    visibleFlights.forEach(vuelo => this.animateFlight(vuelo));
+},
 
     // Modify checkAndAnimateFlights to use animateVisibleFlights
 
@@ -1140,7 +1143,7 @@ destinationPoint(point, angle, distance) {
 
       // Call animateVisibleFlights periodically
 
-      this.animateVisibleFlights();
+     // this.animateVisibleFlights();
 
     },
     updateCurrentDateTimeDisplay() {
@@ -1511,8 +1514,19 @@ onAirportMouseEnter(event) {
         }
       });
     //  console.log("Vuelos en camino:", response.data);
-      this.primerosVuelos = response.data;
-      return response.data;
+        const vuelosConPaquetes = response.data.filter(vuelo => vuelo.paquetesAlmacenados && vuelo.paquetesAlmacenados.length > 0);
+        let vuelosSinPaquetes = response.data.filter(vuelo => !vuelo.paquetesAlmacenados || vuelo.paquetesAlmacenados.length === 0);
+
+        // Limit vuelosSinPaquetes to a maximum of 600 flights
+        if (vuelosSinPaquetes.length > 600) {
+            vuelosSinPaquetes = vuelosSinPaquetes.slice(0, 600);
+        }
+
+        // Combine the lists, with all vuelosConPaquetes and limited vuelosSinPaquetes
+        const combinedVuelos = [...vuelosConPaquetes, ...vuelosSinPaquetes];
+
+        this.primerosVuelos = combinedVuelos;
+        return combinedVuelos;
     } catch (error) {
       console.error("Error fetching vuelos en camino:", error);
       throw error;
@@ -1668,6 +1682,15 @@ toGMT0Inicio(date) {
   let realSecondsElapsed = 0; 
   let startTime = performance.now();
 
+
+  this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
+    this.planificacionEnEsperaDetener = true;
+    this.toggleIniciarDetener = true; // Mostrar el botón de "Iniciar Simulación"
+    this.validarFechaIniciarPlanificacion = false;
+    this.isButtonDisabled = false;
+    this.showFullscreenButton = true;
+   
+
   this.simulationInterval = setInterval(async () => {
     let currentTime = performance.now();
     let elapsedTime = (currentTime - startTime) / 1000;
@@ -1678,21 +1701,15 @@ toGMT0Inicio(date) {
     //console.log("Tiempo actual de simulación start loop:", this.simulationDateTime.toISOString());
     //console.log("Segundos", realSecondsElapsed);
     this.updateCurrentDateTimeDisplay();
-    this.updateAirportData();
-
-    this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
-    this.planificacionEnEsperaDetener = true;
-    this.toggleIniciarDetener = true; // Mostrar el botón de "Iniciar Simulación"
-    this.validarFechaIniciarPlanificacion = false;
-    this.isButtonDisabled = false;
-    this.showFullscreenButton = true;
     this.actualizarContadoresVuelos();
+
     realSecondsElapsed += elapsedTime;
 
     if (realSecondsElapsed >= 300) {
       realSecondsElapsed = 0;
       const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
       const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
+      this.updateAirportData();
 
     //  console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
       await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
@@ -1717,10 +1734,10 @@ toGMT0Inicio(date) {
           saltoTemporal: saltoTemporal
         }
       });
-       // console.log("Resultados de la simulación:", response.data);
+       console.log("Resultados de la simulación:", response.data);
         const fetchedVuelos = response.data.vuelosOrdenadoGMT0;
 
-        //console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
+        console.log("Vuelos disponibles SACADOS:", fetchedVuelos);
         let filteredVuelos = [];
 
         let count = 0;
@@ -1828,18 +1845,21 @@ toGMT0Inicio(date) {
 
         //    console.log(`Updating position to: [${currentLng}, ${currentLat}]`);
 
-            this.map.getSource(sourceId).setData({
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: [currentLng, currentLat]
-                },
-                properties: {
-                    id: vuelo.id,
-                    'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
-                    'icon-rotate': bearing
-                }
-            });
+            if (this.map.getSource(sourceId)) {
+                this.map.getSource(sourceId).setData({
+                    type: 'Feature',
+                    geometry: {
+                        type: 'Point',
+                        coordinates: [currentLng, currentLat]
+                    },
+                    properties: {
+                        id: vuelo.id,
+                        'icon-image': this.calculateFlightIcon(vuelo.capacidadCargaUsado, vuelo.capacidadCargaMaxima),
+                        'icon-rotate': bearing
+                    }
+                });
+            }
+
 
             currentStep++;
             setTimeout(move, interval);

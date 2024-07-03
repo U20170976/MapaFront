@@ -35,6 +35,15 @@
           <label for="separarPaquetesNo">No</label>
         </div>
       </div>
+      <div class="col-md-4 pr-md-1">
+  <label class="custom-label">¿Simulacion con colapso?</label>
+  <div>
+    <input type="radio" id="simulacionConColapsoSi" value="true" v-model="simulacionConColapso" :disabled="isButtonDisabledSeparar">
+    <label for="simulacionConColapsoSi">Sí</label>
+    <input type="radio" id="simulacionConColapsoNo" value="false" v-model="simulacionConColapso" :disabled="isButtonDisabledSeparar">
+    <label for="simulacionConColapsoNo">No</label>
+  </div>
+</div>
       <div class="col-md-4 pr-md-1" v-if="separarPaquetes === 'true'">
         <base-input label="Tamaño del Grupo" type="number" placeholder="Tamaño del Grupo" v-model="tamanoGrupo"
           :disabled="isButtonDisabledSeparar" class="custom-input">
@@ -137,7 +146,7 @@
         </div>
       </div>
     </div>
-      <MglGeojsonLayer :sourceId="'aeropuertos'" :layerId="'aeropuertosLayer'" :type="'symbol'"
+      <MglGeojsonLayer  :sourceId="'aeropuertos'" :layerId="'aeropuertosLayer'" :type="'symbol'"
         :source="geojsonAeropuertos" :layout="{
           'icon-image': ['get', 'icon-image'],
           'icon-size': 0.5,
@@ -561,7 +570,8 @@ export default {
   },
   data() {
     return {
-      razonFinalizacion: '',
+      simulacionConColapso: 'false',
+      razonFinalizacion: 'SIMULACIÓN TERMINADA FORZADA',
       showFinalizationModalColapso: false,
       fecha_inicio_simulacion: gmt0Date, 
       vuelosActivos: [], // Lista global para vuelos activos
@@ -759,9 +769,36 @@ export default {
   beforeDestroy() {
     this.cleanupBeforeExit();
   },
+  created() {
+  this.updateCurrentDateTimeDisplay();
+  this.updateGeojsonAeropuertos();
+},
+watch: {
+  'source.data': function(newData) {
+    if (this.map) {
+      const source = this.map.getSource('aeropuertos');
+      if (source && typeof source.setData === 'function') {
+        source.setData(newData);
+      } else {
+        console.warn('Source "aeropuertos" no está definido o no tiene setData en el mapa.');
+      }
+    }
+  }
+},
   methods: {
-
-
+    updateGeojsonAeropuertos() {
+    if (this.map) {
+      const source = this.map.getSource('aeropuertos');
+      if (source) {
+        source.setData(this.geojsonAeropuertos);
+      } else {
+        this.map.addSource('aeropuertos', {
+          type: 'geojson',
+          data: this.geojsonAeropuertos
+        });
+      }
+    }
+  },
     closeFinalizationModalColapso() {
       this.showFinalizationModalColapso = false;
     },
@@ -1220,11 +1257,20 @@ destinationPoint(point, angle, distance) {
               'icon-image': this.calculateIcon(a.capacidadDeAlmacenamientoUsado / a.capacidadAlmacenamientoMaximo),
             }
           }));
+          if (this.map) {
+          const source = this.map.getSource('aeropuertos');
+          if (source) {
+            source.setData(this.geojsonAeropuertos);
+          } else {
+            this.map.addSource('aeropuertos', {
+              type: 'geojson',
+              data: this.geojsonAeropuertos
+            });
+          }
+        }
           this.capacidadAeropuertosUsadaTotal = this.aeropuertos.reduce((sum, a) => sum + a.capacidadDeAlmacenamientoUsado, 0);
           this.capacidadAeropuertosMaximaTotal = this.aeropuertos.reduce((sum, a) => sum + a.capacidadAlmacenamientoMaximo, 0);
-          if (this.map && this.map.getSource('aeropuertos')) {
-            this.map.getSource('aeropuertos').setData(this.geojsonAeropuertos);
-          }
+
         })
         .catch(error => {
           console.error("Error fetching aeropuertos:", error);
@@ -1337,8 +1383,8 @@ destinationPoint(point, angle, distance) {
 
       this.animateVisibleFlights();
 
-    },
-    updateCurrentDateTimeDisplay() {
+    },  updateCurrentDateTimeDisplay() {
+    if (this.simulationDateTime) {
       this.currentDateTime = this.simulationDateTime.toLocaleString('es-ES', {
         timeZone: 'UTC',
         year: 'numeric',
@@ -1348,7 +1394,26 @@ destinationPoint(point, angle, distance) {
         minute: '2-digit',
         timeZoneName: 'short'
       });
-    },
+    } else {
+      console.warn('simulationDateTime no está definido.');
+      this.currentDateTime = 'Fecha no disponible'; // Valor predeterminado o mensaje de error
+    }
+
+    if (this.map) {
+      const source = this.map.getSource('aeropuertos');
+      if (source && typeof source.setData === 'function') {
+        source.setData(this.geojsonAeropuertos);
+      } else {
+        console.warn('Source "aeropuertos" no está definido o no tiene setData en el mapa.');
+        if (!this.map.getSource('aeropuertos')) {
+          this.map.addSource('aeropuertos', {
+            type: 'geojson',
+            data: this.geojsonAeropuertos
+          });
+        }
+      }
+    }
+  },
     loadImages(callback) {
   let imagesToLoad = [
     'airport-green',
@@ -1635,9 +1700,14 @@ this.progressInterval = setInterval(async () => {
           this.isAnimating = true;
           this.searchEnabled = true;
           const endDate = new Date(this.fecha_inicio_simulacion);
-            endDate.setDate(endDate.getDate() + 7);
-            const endDateAux = new Date(this.fecha_inicio_simulacion);
-            endDateAux.setDate(endDateAux.getDate() + 9);
+          if (this.simulacionConColapso === 'true') {
+    endDate.setDate(endDate.getDate() + 1000);
+  } else {
+    endDate.setDate(endDate.getDate() + 7);
+    const endDateAux = new Date(this.fecha_inicio_simulacion);
+    endDateAux.setDate(endDateAux.getDate() + 9);
+  }
+
       
       this.simulationInterval = setInterval(async () => {
 
@@ -1961,7 +2031,7 @@ closeFinalizationModal() {
 
       // Call animateVisibleFlights periodically
 
-      this.animateVisibleFlights();
+     // this.animateVisibleFlights();
 
     },
 
@@ -2107,7 +2177,7 @@ closeFinalizationModal() {
             }
 
                     // Eliminar vuelos terminados
-        this.filteredVuelos = this.filteredVuelos.filter(v => v.id !== vuelo.id);
+       // this.filteredVuelos = this.filteredVuelos.filter(v => v.id !== vuelo.id);
         this.allVuelos = this.allVuelos.filter(v => v.id !== vuelo.id);
         this.pendingFlights = this.pendingFlights.filter(v => v.id !== vuelo.id);
    //       }, 500); // Add a delay to ensure the final position is updated before removing REMUEVE EL AVION 1 SEGUNDO DESPUES
