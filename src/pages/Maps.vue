@@ -1730,7 +1730,7 @@ this.progressInterval = setInterval(async () => {
           } else {
      
             if (initialExecution) {
-      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 2);
+      this.currentDateTimeAux.setUTCHours(this.currentDateTimeAux.getUTCHours() + 4);
       this.currentDate = this.currentDateTimeAux.toISOString().split('T')[0];
       this.currentHour = this.currentDateTimeAux.toISOString().split('T')[1].substring(0, 5);
       await this.continuarSimulacion(this.currentDate, this.currentHour);
@@ -1756,13 +1756,13 @@ this.progressInterval = setInterval(async () => {
                 await this.fetchSimulationResultsContinuar(this.currentDate, this.currentHour);
 
                 await this.updateSimulationHourly();
-                }
+                }/*
                 else{
                   this.razonFinalizacion = 'COLPASO DEBIDO AL QUE TIEMPO DE EJECUCCION ALCANZO AL SALTO DE TIEMPO';
                   console.log("CANCCELADO POR NO SOPORTAR");
                   await this.cancelarSimulacion();
                   await this.finalizarSimulacion();
-                }
+                }*/
               }
               if (this.progresoPlanificacion === 1.0) {
               this.checkAndAnimateFlightsContinuar();
