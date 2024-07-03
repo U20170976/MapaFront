@@ -148,8 +148,8 @@
 
   //Definimos las variables globales
   let urlBase = config.urlBase,// aquí guardamos la base de la URL
-      urlRegistrarEnvio = '/api/paquete/register/envio',
-      //urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
+      //urlRegistrarEnvio = '/api/paquete/register/envio',
+      urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
       urlListarAeropuertos = '/api/aeropuertos';
   export default {
     components: {
