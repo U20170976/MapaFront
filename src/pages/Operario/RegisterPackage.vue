@@ -148,9 +148,9 @@
 
   //Definimos las variables globales
   let urlBase = config.urlBase,// aquí guardamos la base de la URL
-      //urlRegistrarEnvio = '/api/paquete/register/envio',
-      urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
-      urlListarAeropuertos = '/api/aeropuertos/getall';
+      urlRegistrarEnvio = '/api/paquete/register/envio',
+      //urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
+      urlListarAeropuertos = '/api/aeropuertos';
   export default {
     components: {
       BaseTable,
@@ -163,7 +163,7 @@
         paquete: {
           ciudadOrigen: "SPIM",
           ciudadDestino: "",
-          ciudadActual: "SPIM",
+          ciudadActual: "",
           fechaEnvio: "",
           horaEnvio: "",
           cantidadPaquetes: '',
@@ -198,39 +198,25 @@
         type: ["", "info", "success", "warning", "danger"],
         notifications: {
           topCenter: false
-        }
-
+        },
+        codigoSeleccionado:"",
       };
+      
     },
     mounted(){
-      /*
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(this.obtenerUbicacionActual, this.handleLocationError);
-      } 
-      else {
-        this.paisOrigen = "Peru";
-        this.ciudadOrigen = "Lima";
-        this.error = "La geolocalización no está disponible en este navegador.";
-        this.loading = false;
-      }
-      */
       this.fetchPaisesDestino();
     },
     computed: {
-      /*filteredPaisesDestino() {
-        return this.lpaisesDestino.filter(paisDestino => {
-                                                          return `${paisDestino.codigoOACI}` !== `SPIM`;
-                                                         });
-      },*/
       filteredPaisesDestino() {
         return this.lpaisesDestino.filter(paisDestino => {
                                                           return `${paisDestino.codigoOACI}` !== this.paquete.ciudadOrigen;
                                                         });
       }
+      
     },
     methods:{
       async registrarEnvio() {
-        const dateTime = this.obtenerFechaHoraActual();
+        const dateTime = await this.obtenerFechaHoraActual();
         this.paquete.fechaEnvio = dateTime.fechaEnvio;
         this.paquete.horaEnvio = dateTime.horaEnvio;
         this.formSubmitted = true;
@@ -247,59 +233,26 @@
           //if (response.data.success) {
           if (response.data.id !== 0){
             console.log('Envío registrado exitosamente:', response.data);
-            //this.$toast.success('El envío se ha registrado exitosamente.');
-            // Muestra una notificación de éxito
-            /*
-            this.$notify({
-              component: NotificationTemplatePaqueteSuccess,
-              horizontalAlign: 'center',
-              verticalAlign: 'top',
-            });
-            */
-            // Navega a la página de resumen del envío
-            //this.$router.push({ name: 'Resumen de Envío', params: { idEnvio: response.data } });
-            /*
-            this.$router.push({ 
-                name: 'Resumen de Envío', 
-                props: { envio: response.data }
-            });*/
+
 
             this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
 
           } else {
             console.error('Error en la respuesta:', response.data);
-            // Muestra una notificación de error
-            //this.$toast.error('Hubo un error al registrar el envío.');
-            /*
-            this.$notify({
-              component: NotificationTemplatePaqueteError,
-              horizontalAlign: 'center',
-              verticalAlign: 'top',
-            });
-            */
+
           }
         } catch (error) {
           console.error('Error al registrar el envío: ', error);
-          // Muestra una notificación de error
-          //this.$toast.error('Hubo un error al registrar el envío.');
-          /*
-          this.$notify({
-            component: NotificationTemplatePaqueteError,
-            horizontalAlign: 'center',
-            verticalAlign: 'top',
-          });
-          */
+
         }
       },
       async fetchPaisesDestino() {
         try {
-          //const response = await axios.get('http://localhost/api/aeropuertos/getall');
-          console.log(urlBase);
+          //const response = await axios.get('http://localhost/api/aeropuertos');
+          console.log(urlBase + urlListarAeropuertos);
           const response = await axios.get(urlBase + urlListarAeropuertos);
       
-          //this.lpaisesDestino = response.data;
-          // Asumiendo que response.data es un arreglo de objetos con la estructura adecuada
-          
+
           this.lpaisesDestino = response.data.sort((a, b) => {
             // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
             if (a.pais < b.pais) return -1;
@@ -312,7 +265,18 @@
           console.error(error);
         }
       },
-
+      async obtenerHusoHorario(codigo) {
+        console.log("codigo seleccionado: ", codigo);
+        try {
+          const response = await axios.get(`http://localhost:8080/api/aeropuertos/getHuso/${codigo}`);
+          console.log('Datos recibidos:', response.data);
+          // Aquí asumimos que el servicio devuelve un valor numérico que necesitamos
+          return response.data;
+        } catch (error) {
+          console.error('Hubo un problema con la solicitud:', error);
+          return null; // O cualquier valor predeterminado que tenga sentido en tu aplicación
+        }
+      },
       obtenerUbicacionActual(position){
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
@@ -352,11 +316,27 @@
         console.log('listadoPaquetes llamado');
         this.$router.push('listadoPaquetes');
       },
+<<<<<<< Updated upstream
       obtenerFechaHoraActual() {
         const currentDate = new Date();
         currentDate.setHours(currentDate.getHours() + 5);
         console.log(currentDate);
+=======
+>>>>>>> Stashed changes
 
+      async obtenerFechaHoraActual() {
+        const currentDate = new Date();
+        
+        // Obtener el código seleccionado
+        this.codigoSeleccionado = this.paquete.ciudadOrigen;
+        console.log('Código de la ciudad de origen seleccionado:', this.codigoSeleccionado);
+      // Llamar al método obtenerHusoHorario con el código seleccionado
+        const husoNumerico = await this.obtenerHusoHorario(this.codigoSeleccionado);
+        console.log("el huso horaraio es: ", husoNumerico);
+        currentDate.setHours(currentDate.getHours() + 5 + husoNumerico);
+        //currentDate.setHours(currentDate.getHours() + 5 );
+
+        
         const year = currentDate.getFullYear();
         const month = String(currentDate.getMonth() + 1).padStart(2, '0');
         const day = String(currentDate.getDate()).padStart(2, '0');
@@ -373,9 +353,14 @@
           horaEnvio: formattedTime
         };
       },
+
+      
+
       updateDestinos() {
       // Limpiar la ciudad destino cuando se actualiza la ciudad origen
       this.paquete.ciudadDestino = '';
+      // Obtener el código seleccionado
+     
       }
     }
   }
