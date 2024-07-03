@@ -1700,11 +1700,13 @@ this.progressInterval = setInterval(async () => {
           this.isAnimating = true;
           this.searchEnabled = true;
           const endDate = new Date(this.fecha_inicio_simulacion);
+          const endDateAux = new Date(this.fecha_inicio_simulacion);
           if (this.simulacionConColapso === 'true') {
     endDate.setDate(endDate.getDate() + 1000);
+    endDateAux.setDate(endDateAux.getDate() + 1002);
   } else {
     endDate.setDate(endDate.getDate() + 7);
-    const endDateAux = new Date(this.fecha_inicio_simulacion);
+  
     endDateAux.setDate(endDateAux.getDate() + 9);
   }
 
