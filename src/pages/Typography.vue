@@ -1711,10 +1711,13 @@ toGMT0Inicio(date) {
       realSecondsElapsed = 0;
       const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
       const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
-      this.updateAirportData();
+     
 
     //  console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
       await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
+    }
+   if (realSecondsElapsed >= 15) {
+    this.updateAirportData();
     }
     
     this.checkAndAnimateFlights();
