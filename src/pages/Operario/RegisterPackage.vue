@@ -1,7 +1,9 @@
 <template>
   <card>
     <h2 slot="header" class="title">Registrar Envío</h2>
-   
+    <div v-if="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
+    </div>
     <div class="card mt-4">
       <div class="card-header">
         <h4 class="card-title">Datos del Envío</h4>
@@ -11,17 +13,22 @@
           <div class="col-md-6">
             <div class="form-group">
               <label>Ciudad, País - Origen</label>
-              <!--<input type="text" class="form-control" :value="`${ciudadOrigen} - ${paisOrigen}`" disabled>-->
               <select class="form-control" v-model="paquete.ciudadOrigen" required @change="updateDestinos">
                 <option value="" disabled selected hidden>Seleccione una ciudad y país</option>
                 <option v-for="paisOrigen in lpaisesDestino" :key="paisOrigen.id" :value="`${paisOrigen.codigoOACI}`">
                   {{ paisOrigen.nombreCiudad }} - {{ paisOrigen.pais }}
                 </option>
               </select>
+              <div v-if="!paquete.ciudadOrigen && formSubmitted" class="invalid-feedback">
+                Por favor, seleccione una ciudad y país de origen.
+              </div>
             </div>
             <div class="form-group">
               <label>Cantidad de Paquetes</label>
-              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="paquete.cantidadPaquetes">
+              <input type="text" class="form-control" placeholder="Cantidad de Paquetes" v-model="paquete.cantidadPaquetes" required>
+              <div v-if="!paquete.cantidadPaquetes && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese la cantidad de paquetes.
+              </div>
             </div>
           </div>
           <div class="col-md-6">
@@ -33,105 +40,102 @@
                   {{ paisDestino.nombreCiudad }} - {{ paisDestino.pais }}
                 </option>
               </select>
-               <!-- Mensaje de error -->
               <div v-if="!paquete.ciudadDestino && formSubmitted" class="invalid-feedback">
-                Por favor, seleccione una ciudad y país.
+                Por favor, seleccione una ciudad y país de destino.
               </div>
             </div>
-            <!--
-            <div class="form-group">
-              <label>Descripción(opcional)</label>
-              <input type="text" class="form-control" placeholder="Descripción" v-model="descripcionPaquete">
-            </div>
-            -->
           </div>
         </div>
       </div>
     </div>
 
     <div class="row">
-      <!-- Columna 1: Datos del contacto que va a entregar el paquete -->
       <div class="col-md-6">
         <div class="card">
           <div class="card-header">
             <h4 class="card-title">Datos del Contacto que Envía</h4>
           </div>
           <div class="card-body">
-            
             <div class="form-group">
               <label>DNI / RUC</label>
-              <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteOrigen.numDniRuc" @keypress.enter="filterClient(clienteOrigen.numDniRuc)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteManda.documentoIdentidad">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteManda.documentoIdentidad" required>
+              <div v-if="!clienteManda.documentoIdentidad && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese el DNI o RUC.
+              </div>
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteManda.nombres">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteManda.nombres" required>
+              <div v-if="!clienteManda.nombres && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese los nombres y apellidos.
+              </div>
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteManda.correo">
-              <!--
-              <div v-if="email && !isEmailValid" class="invalid-feedback">
+              <input type="email" class="form-control" placeholder="email@email.com" v-model="clienteManda.correo" required>
+              <div v-if="!clienteManda.correo && formSubmitted" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
               </div>
-              -->
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteManda.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteManda.telefono" required>
+              <div v-if="!clienteManda.telefono && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese un número de teléfono.
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Columna 2: Datos del contacto que va a recibir el paquete -->
       <div class="col-md-6">
-        
         <div class="card">
           <div class="card-header">
             <h4 class="card-title">Datos del Contacto que Recibe</h4>
           </div>
           <div class="card-body">
-            
             <div class="form-group">
               <label>DNI / RUC</label>
-              <!--<input type="text" class="form-control" placeholder="DNI o RUC" v-model="dniinput" @keypress.enter="filterClient(dniinput)">-->
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad">
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad" required>  
+              <div v-if="!clienteRecibe.documentoIdentidad && formSubmitted">
+                <div class="invalid-feedback">Por favor, ingrese el DNI o RUC.</div>
+                
+              </div>
             </div>
             <div class="form-group">
               <label>Nombres y Apellidos</label>
-              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteRecibe.nombres">
+              <input type="text" class="form-control" placeholder="Nombres y Apellidos" v-model="clienteRecibe.nombres" required>
+              <div v-if="!clienteRecibe.nombres && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese los nombres y apellidos.
+              </div>
             </div>
             <div class="form-group">
               <label>Correo Electrónico</label>
-              <input type="text" class="form-control" placeholder="Correo Electrónico" v-model="clienteRecibe.correo">
-              <!--
-              <div v-if="email && !isEmailValid" class="invalid-feedback">
+              <input type="email" class="form-control" placeholder="Correo Electrónico" v-model="clienteRecibe.correo" required>
+              <div v-if="!clienteRecibe.correo && formSubmitted" class="invalid-feedback">
                 Por favor, ingrese un correo electrónico válido.
               </div>
-              -->
             </div>
             <div class="form-group">
               <label>Número de Teléfono</label>
-              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteRecibe.telefono">
+              <input type="text" class="form-control" placeholder="Número de Teléfono" v-model="clienteRecibe.telefono" required>
+              <div v-if="!clienteRecibe.telefono && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese un número de teléfono.
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!--<div class="row mt-4">
-      <base-button slot="footer" type="primary" fill @click="enviarPaquete">Registrar Paquete</base-button>
-      <base-button slot="footer" type="primary" fill @click="registrarEnvio">Registrar Envío</base-button>
-      <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
-    </div>-->
-  
     <div class="button-container">
       <base-button slot="footer" fill @click="regresarAlListar">Regresar</base-button>
       <base-button slot="footer" type="primary" fill @click="registrarEnvio">Registrar Envío</base-button>
     </div>
   </card>
 </template>
+
+
 
 
 <script>
@@ -150,7 +154,8 @@
   let urlBase = config.urlBase,// aquí guardamos la base de la URL
       //urlRegistrarEnvio = '/api/paquete/register/envio',
       urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
-      urlListarAeropuertos = '/api/aeropuertos';
+      urlListarAeropuertos = '/api/aeropuertos',
+      urlGetHuso = '/api/aeropuertos/getHuso/';
   export default {
     components: {
       BaseTable,
@@ -173,7 +178,7 @@
         },
         clienteManda:{
           documentoIdentidad: "",
-          nombres: "",
+          nombres: null,
           correo:"",
           telefono:"",
           tipo:"1"
@@ -189,6 +194,7 @@
         paisOrigen: "",
         ciudadOrigen:"",
         loading: true,
+        errorMessage: "",
         error: '',
         selectedSede: "", // Inicializa como cadena vacía
     
@@ -216,34 +222,36 @@
     },
     methods:{
       async registrarEnvio() {
-        const dateTime = await this.obtenerFechaHoraActual();
-        this.paquete.fechaEnvio = dateTime.fechaEnvio;
-        this.paquete.horaEnvio = dateTime.horaEnvio;
         this.formSubmitted = true;
-        try {
-             const payload = {
-            paquete: this.paquete,
-            clienteManda: this.clienteManda,
-            clienteRecibe: this.clienteRecibe
-          };
-          // Llamada a la API
-          const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
-
-          // Suponiendo que la respuesta tiene un campo `success` para indicar éxito
-          //if (response.data.success) {
-          if (response.data.id !== 0){
-            console.log('Envío registrado exitosamente:', response.data);
-
-
-            this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
-
-          } else {
-            console.error('Error en la respuesta:', response.data);
-
+        console.log(this.clienteManda.nombres);
+        if (this.paquete.ciudadOrigen && this.paquete.cantidadPaquetes && this.paquete.ciudadDestino &&
+          this.clienteManda.documentoIdentidad && this.clienteManda.nombres && this.clienteManda.correo && this.clienteManda.telefono &&
+          this.clienteRecibe.documentoIdentidad && this.clienteRecibe.nombres && this.clienteRecibe.correo && this.clienteRecibe.telefono) {
+          const dateTime = await this.obtenerFechaHoraActual();
+          this.paquete.fechaEnvio = dateTime.fechaEnvio;
+          this.paquete.horaEnvio = dateTime.horaEnvio;
+          try {
+            const payload = {
+              paquete: this.paquete,
+              clienteManda: this.clienteManda,
+              clienteRecibe: this.clienteRecibe
+            };
+            const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
+            if (response.data.id !== 0) {
+              console.log('Envío registrado exitosamente:', response.data);
+              this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
+            } else {
+              console.error('Error en la respuesta:', response.data);
+              this.errorMessage = 'No se pudo registrar el envío';  // Establece el mensaje de error
+            }
+          } catch (error) {
+            this.errorMessage = 'No se pudo registrar el envío';  // Establece el mensaje de error
+            console.error('Error al registrar el envío: ', error);
           }
-        } catch (error) {
-          console.error('Error al registrar el envío: ', error);
-
+        }
+        else{
+          this.errorMessage = 'Por favor, complete todos los campos obligatorios.';  // Establece el mensaje de error
+          console.log("Ingresa los datos por favor");
         }
       },
       async fetchPaisesDestino() {
@@ -262,18 +270,22 @@
           
         } catch (error) {
           this.error = 'Error al cargar los datos';
+          this.errorMessage = 'Error al cargar los países';  // Establece el mensaje de error
           console.error(error);
         }
       },
       async obtenerHusoHorario(codigo) {
         console.log("codigo seleccionado: ", codigo);
+        //console.log("url del huso: ", urlBase + urlGetHuso + `${codigo}`);
         try {
-          const response = await axios.get(`http://localhost:8080/api/aeropuertos/getHuso/${codigo}`);
+          const response = await axios.get(urlBase + `/api/aeropuertos/getHuso/${codigo}`);
+          //const response = await axios.get(urlBase + urlGetHuso + `${codigo}`);
           console.log('Datos recibidos:', response.data);
           // Aquí asumimos que el servicio devuelve un valor numérico que necesitamos
           return response.data;
         } catch (error) {
           console.error('Hubo un problema con la solicitud:', error);
+          this.errorMessage = 'Error al registrar el envío';  // Establece el mensaje de error
           return null; // O cualquier valor predeterminado que tenga sentido en tu aplicación
         }
       },
@@ -291,7 +303,7 @@
           })
           .catch(error => {
             console.error("Error al obtener la información del país:", error);
-            this.error = "Error al obtener la información del país.";
+            //this.error = "Error al obtener la información del país.";
             this.loading = false;
           });
       },
@@ -347,8 +359,6 @@
         };
       },
 
-      
-
       updateDestinos() {
       // Limpiar la ciudad destino cuando se actualiza la ciudad origen
       this.paquete.ciudadDestino = '';
@@ -367,9 +377,6 @@
     padding: 0 10px; /* Opcional: Añade un poco de padding si deseas espacio a los lados */
     
   }
-
-
-
   /* Asegúrate de que el texto dentro de las opciones del select sea negro */
   .form-control option {
     color: black
@@ -386,7 +393,11 @@
   .has-error .form-control {
     border-color: #dc3545;
   }
+
   .invalid-feedback {
     color: #dc3545;
+    display: block; /* Asegúrate de que los mensajes se muestren como bloque */
+    font-size: 0.875em; /* Ajusta el tamaño de la fuente si es necesario */
+    margin-top: 0.25em; /* Añade margen superior para espaciar los mensajes */
   }
 </style>

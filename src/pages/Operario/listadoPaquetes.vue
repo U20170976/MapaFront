@@ -40,6 +40,7 @@ import FileUploadModal from '@/components/FileUploadModal.vue';
 
 const urlBase = config.urlBase;
 const urlListarEnvios = '/api/paquete/';
+const urlListarAeropuertos = '/api/aeropuertos';
 
 export default {
   name: 'listadoPaquetes',
@@ -65,7 +66,19 @@ export default {
       isModalOpen: false,
       successMessage: null,
       errorMessage: null,
+      lpaisesDestino: []
     };
+  },
+  async mounted() {
+    await this.fetchPaisesDestino();
+    await this.fetchDataListaEnvios();
+    for (let i = 0; i < this.tableData.length; i++) {
+      this.tableData[i].ciudadOrigen = this.getPaisByCodigo(this.tableData[i].ciudadOrigen);
+      this.tableData[i].ciudadDestino = this.getPaisByCodigo(this.tableData[i].ciudadDestino);
+    }
+    console.log("linea 78: ",this.lpaisesDestino[0].codigoOACI);
+    //console.log("linea 168: ",this.tableData[0].ciudadOrigen);
+
   },
   computed: {
     filteredData() {
@@ -108,23 +121,41 @@ export default {
         this.errorMessage = null;
       }, 10000);
     },
-    loadTableData() {
-      this.$http.get(urlBase + urlListarEnvios)
-        .then(response => {
-          this.tableData = response.data;
-        })
-        .catch(error => {
-          console.error('Error al obtener los datos: ', error);
-        });
+    async loadTableData() {
+      try {
+        const response = await axios.get(urlBase + urlListarEnvios);
+        this.tableData = response.data;  
+        
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }
     },
-    fetchDataListaEnvios() {
-      axios.get(urlBase + urlListarEnvios)
-        .then(response => {
-          this.tableData = response.data;
-        })
-        .catch(error => {
-          console.error('Error al obtener los datos:', error);
+    async fetchDataListaEnvios() {
+      try {
+        const response = await axios.get(urlBase + urlListarEnvios);
+        this.tableData = response.data;  
+        
+      } catch (error) {
+        console.error('Error al obtener los datos:', error);
+      }    
+    },
+    getPaisByCodigo(codigo) {
+      const aeropuerto = this.lpaisesDestino.find(paisMundo => paisMundo.codigoOACI === codigo);
+      return aeropuerto ? aeropuerto.nombreCiudad + ' - ' + aeropuerto.pais : 'Desconocido';
+    },
+    async fetchPaisesDestino() {
+      try {
+        const response = await axios.get(urlBase + urlListarAeropuertos);
+        this.lpaisesDestino = response.data.sort((a, b) => {
+          
+          // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
+          if (a.pais < b.pais) return -1;
+          if (a.pais >= b.pais) return 1;
+          return 0;
         });
+      } catch (error) {
+        console.error(error);
+      }
     },
     openModal() {
       this.isModalOpen = true;
@@ -140,10 +171,8 @@ export default {
         query: { envio: JSON.stringify(envio) }
       });
     }
-  },
-  mounted() {
-    this.fetchDataListaEnvios();
-  },
+  }
+  
 };
 </script>
 

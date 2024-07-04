@@ -15,8 +15,8 @@
       <div class="vuelos-info">
         <h3>Vuelos</h3>
         <div v-for="(vuelo, index) in paginatedVuelos" :key="vuelo.id" class="vuelo-card">
-          <p><strong>Ciudad Origen:</strong> {{ vuelo.ciudadOrigen }}</p>
-          <p><strong>Ciudad Destino:</strong> {{ vuelo.ciudadDestino }}</p>
+          <p><strong>Ciudad Origen:</strong> {{ getPaisByCodigo(vuelo.ciudadOrigen) }}</p>
+          <p><strong>Ciudad Destino:</strong> {{ getPaisByCodigo(vuelo.ciudadDestino) }}</p>
           <p><strong>Hora de Salida:</strong> {{ vuelo.horaSalida }}</p>
           <p><strong>Hora de Llegada:</strong> {{ vuelo.horaLlegada }}</p>
           <p><strong>Capacidad de Carga Máxima:</strong> {{ vuelo.capacidadCargaMaxima }}</p>
@@ -37,7 +37,12 @@
 </template>
 
 <script>
+import axios from 'axios';
 import Pagination from '@/components/Pagination.vue';
+import config from '../../config';
+
+let urlBase = config.urlBase,// aquí guardamos la base de la URL
+    urlListarAeropuertos = '/api/aeropuertos';
 
 export default {
   name: 'DetalleEnvio',
@@ -48,7 +53,10 @@ export default {
     return {
       envio: JSON.parse(this.$route.query.envio),
       currentPage: 1,
-      itemsPerPage: 1 // Cambia esto según el número de vuelos que deseas mostrar por página
+      itemsPerPage: 1, // Cambia esto según el número de vuelos que deseas mostrar por página
+      paisOrigen: '',
+      paisDestino: '',
+      lpaisesDestino: []
     };
   },
   computed: {
@@ -64,7 +72,31 @@ export default {
   methods: {
     handlePageChange(page) {
       this.currentPage = page;
+    },
+    async fetchPaisesDestino() {
+      try {
+        const response = await axios.get(urlBase + urlListarAeropuertos);
+        this.lpaisesDestino = response.data.sort((a, b) => {
+          
+          // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
+          if (a.pais < b.pais) return -1;
+          if (a.pais >= b.pais) return 1;
+          return 0;
+        });
+      } catch (error) {
+        console.log("Error al cargar los países");
+        this.error = 'Error al cargar los datos';
+        this.errorMessage = 'Error al cargar los países';  // Establece el mensaje de error
+        console.error(error);
+      }
+    },
+    getPaisByCodigo(codigo) {
+      const aeropuerto = this.lpaisesDestino.find(paisMundo => paisMundo.codigoOACI === codigo);
+      return aeropuerto ? aeropuerto.nombreCiudad + ' - ' + aeropuerto.pais : 'Desconocido';
     }
+  },
+  async mounted() {
+    await this.fetchPaisesDestino();
   }
 };
 </script>
