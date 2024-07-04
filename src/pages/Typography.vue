@@ -68,9 +68,9 @@
   </button>
   <ul :style="{ display: isLegendOpen ? 'block' : 'none' }" class="legend-content">
     <li><strong>Información de Aeropuertos</strong></li>
-    <li><span class="icon airport-green"></span>Menor a 50%</li>
-    <li><span class="icon airport-orange"></span>Entre 50% y 80%</li>
-    <li><span class="icon airport-red"></span>Mayor a 80%</li>
+    <li><span class="icon airport-green"></span>Menor a 10%</li>
+    <li><span class="icon airport-orange"></span>Entre 10% y 25%</li>
+    <li><span class="icon airport-red"></span>Mayor a 25%</li>
     <li><span class="icon airport-selected-icon"></span>Aeropuerto seleccionado</li>
     <li><strong>Información de Vuelos</strong></li>
     <li><span class="icon flight-green"></span>Menor a 10%</li>
@@ -1052,8 +1052,8 @@ destinationPoint(point, angle, distance) {
 
 
     calculateIcon(capacityRatio) {
-      if (capacityRatio < 0.50) return 'airport-green';
-      else if (capacityRatio < 0.80) return 'airport-orange';
+      if (capacityRatio < 0.10) return 'airport-green';
+      else if (capacityRatio < 0.25) return 'airport-orange';
       return 'airport-red';
     },
 
@@ -1516,8 +1516,8 @@ onAirportMouseEnter(event) {
         }
       });
     //  console.log("Vuelos en camino:", response.data);
-        const vuelosConPaquetes = response.data.filter(vuelo => vuelo.paquetesAlmacenados && vuelo.paquetesAlmacenados.length > 0);
-        let vuelosSinPaquetes = response.data.filter(vuelo => !vuelo.paquetesAlmacenados || vuelo.paquetesAlmacenados.length === 0);
+        const vuelosConPaquetes = response.data.filter(vuelo => vuelo.capacidadCargaUsado > 0);
+        let vuelosSinPaquetes = response.data.filter(vuelo => vuelo.capacidadCargaUsado === 0);
 
         // Limit vuelosSinPaquetes to a maximum of 600 flights
         if (vuelosSinPaquetes.length > 600) {
@@ -2035,7 +2035,7 @@ toGMT0Inicio(date) {
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
       try {
-    //    console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(`${urlBase}/api/diaDia/paquete`, {
           params: {
             cadena: cadena,
