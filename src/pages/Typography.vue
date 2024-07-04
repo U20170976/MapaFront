@@ -1040,7 +1040,10 @@ destinationPoint(point, angle, distance) {
           if (this.map && this.map.getSource('aeropuertos')) {
             this.map.getSource('aeropuertos').setData(this.geojsonAeropuertos);
           }
+          this.capacidadAeropuertosUsadaTotal = this.aeropuertos.reduce((sum, a) => sum + a.capacidadDeAlmacenamientoUsado, 0);
+          this.capacidadAeropuertosMaximaTotal = this.aeropuertos.reduce((sum, a) => sum + a.capacidadAlmacenamientoMaximo, 0);
         })
+        
         .catch(error => {
           console.error("Error fetching aeropuertos:", error);
         });
