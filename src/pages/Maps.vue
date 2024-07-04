@@ -1734,13 +1734,13 @@ this.progressInterval = setInterval(async () => {
       await this.continuarSimulacion(this.currentDate, this.currentHour);
       initialExecution = false; // Asegura que solo se ejecute una vez
     }
-            
+             
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay(); 
 
-           
+             
            this.actualizarContadoresVuelos();
-
+ 
             if (this.simulationDateTime < endDate) {
 
               if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
@@ -1934,7 +1934,7 @@ closeFinalizationModal() {
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
       
-         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+    //     console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -2000,7 +2000,7 @@ closeFinalizationModal() {
       //  this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
     //     console.log("CUENTA ACTUALIZADOS:" + count);
-         console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+     //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
     //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
