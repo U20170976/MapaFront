@@ -6,8 +6,8 @@
       <div class="section">
         <h2>Datos del Envío</h2>
         <p><span class="highlighted-code">Código de Envío:</span> <span class="highlighted-code"> {{ envio.paquete.idEnvio }}</span></p>
-        <p><strong>Ciudad, País - Origen:</strong> {{ envio.paquete.ciudadOrigen }}</p>
-        <p><strong>Ciudad, País - Destino:</strong> {{ envio.paquete.ciudadDestino }}</p>
+        <p><strong>Ciudad, País - Origen:</strong> {{ getPaisByCodigo(envio.paquete.ciudadOrigen)}}</p>
+        <p><strong>Ciudad, País - Destino:</strong> {{ getPaisByCodigo(envio.paquete.ciudadDestino) }}</p>
         <p><strong>Fecha de Envío:</strong> {{ formattedFechaEnvio }} </p>
         <p><strong>Hora de Envío:</strong> {{ envio.paquete.horaEnvio }}</p>
         <p><strong>Cantidad de Paquetes:</strong> {{ envio.paquete.cantidadPaquetes }} unidades</p>
@@ -43,6 +43,11 @@
 
 <script>
 import PopupConfirmation from "@/components/PopupConfirmation.vue"; // Asegúrate de tener la ruta correcta
+import axios from 'axios';
+import config from "../../config";
+
+const urlBase = config.urlBase;
+const urlListarAeropuertos = '/api/aeropuertos';
 
 export default {
   name: 'ResumenEnvio',
@@ -53,7 +58,15 @@ export default {
   data() {
     return {
       showModal: false,
+      lpaisesDestino: [],
+      paisOrigen: "",
+      paisDestino: ""
     }
+  },
+  async mounted(){
+    await this.fetchPaisesDestino();
+    //paisOrigen = this.getPaisByCodigo(this.envio.paquete.ciudadOrigen);
+    //paisDestino = this.getPaisByCodigo(this.envio.paquete.ciudadDestino);
   },
   computed: {
     formattedFechaEnvio: function() {
@@ -62,6 +75,7 @@ export default {
       // Devolver la fecha en formato dd-mm-aaaa
       return `${day}-${month}-${year}`;
     }
+    
   },
   methods: {
     handleSubmit() {
@@ -77,6 +91,24 @@ export default {
     handleCancel() {
       // Lógica para regresar
       console.log('Regresar');
+    },
+    getPaisByCodigo(codigo) {
+      const aeropuerto = this.lpaisesDestino.find(paisMundo => paisMundo.codigoOACI === codigo);
+      return aeropuerto ? aeropuerto.nombreCiudad + ' - ' + aeropuerto.pais : 'Desconocido';
+    },
+    async fetchPaisesDestino() {
+      try {
+        const response = await axios.get(urlBase + urlListarAeropuertos);
+        this.lpaisesDestino = response.data.sort((a, b) => {
+          
+          // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
+          if (a.pais < b.pais) return -1;
+          if (a.pais >= b.pais) return 1;
+          return 0;
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
   }
 }
