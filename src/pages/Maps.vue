@@ -25,6 +25,11 @@
         </base-input>
       </div>
       <div class="col-md-4 pr-md-1">
+  <base-input label="Hora Inicio" type="time" format="HH:mm" placeholder="Hora Inicio"
+    v-model="hora_inicio_simulacion" :disabled="isDateInputDisabled" class="custom-input">
+  </base-input>
+</div>
+      <div class="col-md-4 pr-md-1">
         <label class="custom-label">¿Quisieras separar los paquetes?</label>
         <div>
           <input type="radio" id="separarPaquetesSi" value="true" v-model="separarPaquetes"
@@ -121,9 +126,26 @@
   </div>
 </div> 
 
-      <div class="datetime-display">
-        {{ currentDateTime }}
+<div class="datetime-container">
+      <!-- Primera fila: Contadores de la simulación y fecha/hora actual -->
+      <div class="datetime-row">
+        <!-- Tiempo transcurrido desde el inicio de la simulación -->
+        <div class="datetime-display">
+          {{ simulationElapsedTime }}
+        </div>
+        <!-- Fecha/hora actual -->
+        <div class="datetime-display">
+          {{ currentDateTime }}
+        </div>
       </div>
+      
+      <!-- Segunda fila: Reloj en tiempo real -->
+      <div class="datetime-row">
+        <div class="datetime-display">
+          {{ realTimeClock }}
+        </div>
+      </div>
+    </div>
       <div class="vuelos-carga-info">
       <button class="info-toggle" @click="toggleInfo">
         {{ isInfoOpen ? '▲ Cerrar Información General' : '▼ Abrir Información General' }}
@@ -571,6 +593,21 @@ export default {
   },
   data() {
     return {
+      simulationElapsedTime: new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      }),
+      realTimeClock: "0d 00:00:00",
+      simulationStartTime: null,
+      elapsedRealTime: 0, // Almacenar el tiempo real transcurrido
+      isSimulationPaused: false,
+      intervalIds: [], // Para almacenar los IDs de los intervalos
+      hora_inicio_simulacion: new Date().toISOString().substr(11, 5),
       simulacionConColapso: 'false',
       razonFinalizacion: 'SIMULACIÓN TERMINADA FORZADA',
       showFinalizationModalColapso: false,
@@ -907,11 +944,57 @@ watch: {
 
     // Clear the selected airport reference
     this.selectedAirport = null;
+},    updateCurrentDateTime() {
+      setInterval(() => {
+        const now = new Date();
+        const options = { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit', 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          second: '2-digit' 
+        };
+        const dateTimeFormat = new Intl.DateTimeFormat('default', options);
+        this.currentDateTime = `${dateTimeFormat.format(now)} GMT${this.getTimezoneOffset()}`;
+      }, 1000);
+    },
+    updateRealTimeClock() {
+  this.intervalIds.push(setInterval(() => {
+    if (!this.isSimulationPaused && this.simulationStartTime) {
+      const now = new Date();
+      const elapsedRealMilliseconds = now - this.simulationStartTime + this.elapsedRealTime;
+      const elapsedSimulatedMilliseconds = elapsedRealMilliseconds * 240; // 4 minutes * 60 * 1000 milliseconds
+
+      const elapsedSimulatedMinutes = Math.floor(elapsedSimulatedMilliseconds / (1000 * 60)); // Convert to minutes
+
+      const days = Math.floor(elapsedSimulatedMinutes / (60 * 24));
+      const hours = Math.floor((elapsedSimulatedMinutes % (60 * 24)) / 60);
+      const minutes = elapsedSimulatedMinutes % 60;
+
+      this.realTimeClock = `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`; // Fixed seconds to "00"
+    }
+  }, 1000));
 },
-
-
-
-
+    getTimezoneOffset() {
+      const offset = new Date().getTimezoneOffset();
+      const hours = Math.floor(Math.abs(offset) / 60);
+      const sign = offset <= 0 ? '+' : '-';
+      return `${sign}${hours}`;
+    },
+    getLocalTime() {
+      const now = new Date();
+      const options = { 
+        year: 'numeric', 
+        month: '2-digit', 
+        day: '2-digit', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      };
+      const dateTimeFormat = new Intl.DateTimeFormat('default', options);
+      return `${dateTimeFormat.format(now)} GMT${this.getTimezoneOffset()}`;
+    },
 mostrarAeropuertoFlight(aeropuerto) {
 
     
@@ -1247,6 +1330,7 @@ destinationPoint(point, angle, distance) {
       axios.get(urlBase +`/api/simulacion/semanal/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
+          this.aeropuertosResultados = response.data;
           this.geojsonAeropuertos.features = this.aeropuertos.map(a => ({
             type: 'Feature',
             geometry: {
@@ -1611,10 +1695,11 @@ destinationPoint(point, angle, distance) {
         this.planificacionEnEspera = true;
 
         const fechaInicio = this.fecha_inicio_simulacion;
-        const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
+        const fechaInicioHora = this.hora_inicio_simulacion; // Use the selected hour in HH:mm format
+        // const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
         const separarPaquetesCont = this.separarPaquetes === 'true';
         const tamanoGrupoCont = separarPaquetesCont ? this.tamanoGrupo : 0;
-
+       console.log(fechaInicioHora);
         cont = 1;
         const response = await axios.get(urlBase +'/api/simulacion/semanal/iniciarST', {
           params: {
@@ -1699,19 +1784,35 @@ this.progressInterval = setInterval(async () => {
           this.searchEnabled = true;
           const endDate = new Date(this.fecha_inicio_simulacion);
           const endDateAux = new Date(this.fecha_inicio_simulacion);
-          if (this.simulacionConColapso === 'true') {
-    endDate.setDate(endDate.getDate() + 1000);
-    endDateAux.setDate(endDateAux.getDate() + 1002);
-  } else {
-    endDate.setDate(endDate.getDate() + 7);
-  
-    endDateAux.setDate(endDateAux.getDate() + 9);
-  }
+// Asegurarse de que fecha_inicio_simulacion es una instancia de Date
 
-      
+
+const horaInicioSimulacion = this.hora_inicio_simulacion.split(':');
+
+const initialHour = parseInt(horaInicioSimulacion[0], 10);
+
+const initialMinutes = parseInt(horaInicioSimulacion[1], 10);
+
+const initialSeconds = 0;
+
+if (this.simulacionConColapso === 'true') {
+  endDate.setDate(endDate.getDate() + 1000);
+  endDate.setUTCHours(initialHour, initialMinutes, initialSeconds);
+
+  endDateAux.setDate(endDateAux.getDate() + 1002);
+  endDateAux.setUTCHours(initialHour, initialMinutes, initialSeconds);
+} else {
+  endDate.setDate(endDate.getDate() + 7);
+  endDate.setUTCHours(initialHour, initialMinutes, initialSeconds);
+  console.log(endDate);
+  endDateAux.setDate(endDateAux.getDate() + 9);
+  endDateAux.setUTCHours(initialHour, initialMinutes, initialSeconds);
+}
+  this.simulationStartTime = new Date();
+  let lastExecutionTime = this.simulationDateTime.getTime();
       this.simulationInterval = setInterval(async () => {
-
-
+        this.simulationElapsedTime = this.getLocalTime();
+        this.updateRealTimeClock();
           if (!this.isSimulating) {
             await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
             this.isSimulating = true;
@@ -1742,8 +1843,10 @@ this.progressInterval = setInterval(async () => {
            this.actualizarContadoresVuelos();
  
             if (this.simulationDateTime < endDate) {
-
-              if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
+              const currentTime = this.simulationDateTime.getTime();
+           //   if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
+            if (currentTime >= lastExecutionTime + 2 * 60 * 60 * 1000) {
+              lastExecutionTime = currentTime;
                 this.updateAirportData();
               // if (this.simulationDateTime.getMinutes() % 60 === 0) {
                 const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
@@ -1874,7 +1977,7 @@ closeFinalizationModal() {
     async fetchSimulationResults(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-
+        this.resultados = response.data; 
 
         if (response.data.colapso) {
           await this.cancelarSimulacionColapso();
@@ -1945,7 +2048,7 @@ closeFinalizationModal() {
     async fetchSimulationResultsContinuar(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
-
+        this.resultados = response.data; 
 
         
         if (response.data.colapso) {
@@ -2264,6 +2367,8 @@ closeFinalizationModal() {
     detenerSimulacion() {
       this.showDetenerModal = false;
       let vue = this;
+      this.isSimulationPaused = true;
+      this.elapsedRealTime += new Date() - this.simulationStartTime;
       clearInterval(this.simulationInterval);
       this.planificacionEnEsperaDetener = false;
       this.planificacionEnEsperaRenaudar = true;
@@ -2288,6 +2393,8 @@ closeFinalizationModal() {
     reanudarSimulacion() {
       const fechaInicio = this.fecha_inicio_simulacion;
         const fechaInicioHora = "00:00"; // Ensure it is always "00:00"
+        this.isSimulationPaused = false;
+        this.simulationStartTime = new Date();
       this.showReanudarModal = false;
       this.planificacionEnEsperaDetener = true;
       this.planificacionEnEsperaRenaudar = false;
@@ -2306,9 +2413,72 @@ closeFinalizationModal() {
 
       }
 
-    },
+    },   formatPaquete(paquete) {
+    const vuelosContent = paquete.ruta.vuelos.map((vuelo, index) => `
+      <div style="margin-bottom: 10px;">
+         <p>--------------------------------------------------------------------------------</p>
+        <p><strong>Vuelo ${index + 1}:</strong></p>
+        <p>Ciudad de Origen: ${this.getCiudadYPais(vuelo.ciudadOrigen)}</p>
+        <p>Ciudad de Destino: ${this.getCiudadYPais(vuelo.ciudadDestino)}</p>
+        <p>Capacidad de Carga Máxima: ${vuelo.capacidadCargaMaxima}</p>
+        <p>Capacidad de Carga Usado: ${vuelo.capacidadCargaUsado}</p>
+        <p>Tiempo Estimado de Vuelo: ${this.formatDuration(vuelo.tiempoEstimadoVuelo)}</p>
+        <p>Fecha y Hora de Salida: ${this.formatDateTime(vuelo.fechaHoraSalidaGMT0)}</p>
+        <p>Fecha y Hora de Llegada: ${this.formatDateTime(vuelo.fechaHoraLlegadaGMT0)}</p>
+       
+      </div>
+    `).join('');
 
-    downloadWord() {
+    return `
+      <div style="margin-bottom: 20px; padding-bottom: 10px;">
+        <p><strong>ID del Paquete:</strong> ${paquete.id}</p>
+        <p><strong>ID del Envío:</strong> ${paquete.idEnvio}</p>
+        <p>Ciudad de Origen: ${this.getCiudadYPais(paquete.ciudadOrigen)}</p>
+        <p>Ciudad de Destino: ${this.getCiudadYPais(paquete.ciudadDestino)}</p>
+        <p>Cantidad de Paquetes: ${paquete.cantidadPaquetes}</p>
+        <p>Fecha y Hora de Envío: ${this.formatDateTime(paquete.fechaHoraEncioGMT0)}</p>
+        <h3>Ruta del Paquete:</h3>
+        ${vuelosContent}
+        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      </div>
+    `;
+  },
+
+  formatAeropuerto(aeropuerto) {
+    console.log("asdadas");
+    const paquetesContent = aeropuerto.paquetes ? aeropuerto.paquetes.map(paquete => `
+      <div style="margin-bottom: 10px;">
+        <p>--------------------------------------------------------------------------------</p>
+        <p><strong>ID del Paquete:</strong> ${paquete.id}</p>
+        <p>ID del Envío: ${paquete.idEnvio}</p>
+        <p>Cantidad de Paquetes: ${paquete.cantidadPaquetes}</p>
+        
+      </div>
+    `).join('') : '<p>No hay paquetes almacenados</p>';
+
+    return `
+      <div style="margin-bottom: 20px; padding-bottom: 10px;">
+        <p><strong>Nombre de la Ciudad:</strong> ${aeropuerto.nombreCiudad}</p>
+        <p>País: ${aeropuerto.pais}</p>
+        <p>Huso Horario: ${aeropuerto.husoHorario}</p>
+        <p>Capacidad de Almacenamiento Máximo: ${aeropuerto.capacidadAlmacenamientoMaximo}</p>
+        <p>Capacidad de Almacenamiento Usado: ${aeropuerto.capacidadDeAlmacenamientoUsado}</p>
+        <h3>Paquetes Almacenados:</h3>
+        ${paquetesContent}
+        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      </div>
+    `;
+    
+  },
+
+    downloadWord() {    
+      
+
+      const paquetesContent = this.resultados.paquetes.map(paquete => this.formatPaquete(paquete)).join('');
+    const aeropuertosContent = this.aeropuertosResultados.map(aeropuerto => this.formatAeropuerto(aeropuerto)).join('');
+
     const content = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
       <head><meta charset="utf-8"><title>Simulación Reporte</title></head><body>
@@ -2318,7 +2488,16 @@ closeFinalizationModal() {
       <p><strong>Fecha y Hora de Inicio:</strong> ${this.formatDateTime(this.fechaHoraInicio)} UTC</p>
       <p><strong>Fecha y Hora Fin:</strong> ${this.formatDateTimeGMT0(this.currentDateTime)}</p>
       <p><strong>Cantidad de vuelos:</strong> ${this.totalVuelos} vuelos</p>
+      <h2>Paquetes de la Última Planificación</h2>
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      ${paquetesContent}
+      <h2>Aeropuertos de la Última Planificación</h2>
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      ${aeropuertosContent}
       </body></html>`;
+
     const blob = new Blob(['\ufeff', content], {
       type: 'application/msword'
     });
@@ -2342,7 +2521,10 @@ closeFinalizationModal() {
       };
       return dateTime.toLocaleString('es-ES', options).replace(',', ' -');
     },
-
+    clearAllIntervals() {
+    this.intervalIds.forEach(id => clearInterval(id));
+    this.intervalIds = [];
+  },
     async cancelarSimulacion() {
       this.showCancelarModal = false;
       this.planificacionEnEsperaCancelar = false;
@@ -2350,6 +2532,7 @@ closeFinalizationModal() {
       this.planificacionEnEsperaDetener = false;
       this.showFullscreenButton = false;
       let vue = this;
+      this.clearAllIntervals();
       // vue.toggleIniciarDetener = true;
       console.log("SE DETIENE LA SIMULACION");
       await this.finalizarSimulacion();
@@ -2654,6 +2837,9 @@ closeFinalizationModal() {
 
   
   downloadWordColapso() {
+
+    const paquetesContent = this.resultados.paquetes.map(paquete => this.formatPaquete(paquete)).join('');
+    const aeropuertosContent = this.aeropuertosResultados.map(aeropuerto => this.formatAeropuerto(aeropuerto)).join('');
     const content = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
       <head><meta charset="utf-8"><title>Simulación Reporte</title></head><body>
@@ -2674,7 +2860,16 @@ closeFinalizationModal() {
       <p><strong>Aeropuerto de Destino:</strong> ${this.getCiudadYPais(this.paqueteColapso.ciudadDestino)}</p>
       <p><strong>Fecha y Hora de Envío:</strong> ${this.formatDateTime(this.paqueteColapso.fechaHoraEncioGMT0)} UTC</p>
       <p><strong>Cantidad de Paquetes:</strong> ${this.paqueteColapso.cantidadPaquetes}</p>
-      ` : ''}
+      ` : ''
+      
+      
+      }
+      <h2>Paquetes de la Última Planificación</h2>
+      ${paquetesContent}
+      
+      <h2>Aeropuertos de la Última Planificación</h2>
+      ${aeropuertosContent}
+      
       </body></html>`;
       
     const blob = new Blob(['\ufeff', content], {
@@ -2708,23 +2903,32 @@ closeFinalizationModal() {
 }
 </script>
 <style scoped>
-.datetime-display {
+.datetime-container {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1001;
+}
 
+.datetime-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+.datetime-display {
   color: white;
   background-color: rgba(0, 0, 0, 0.7);
   padding: 10px 20px;
   border-radius: 5px;
-  z-index: 1001;
-  /* Asegúrate de que esté visible sobre el mapa */
   font-size: 1.5em;
-  /* Increase font size */
   font-weight: bold;
-  /* Make the text bold */
 }
-
 .map-container {
   position: relative;
   height: calc(100vh - 100px);

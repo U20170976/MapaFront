@@ -164,7 +164,7 @@
           <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(detalle.datos.fechaHoraSalidaGMT0) }}</p>
           <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(detalle.datos.fechaHoraLlegadaGMT0) }}</p>
           <p><strong>Tiempo Estimado de Vuelo:</strong> {{ formatDuration(detalle.datos.tiempoEstimadoVuelo) }}</p>
-      <!--    <div v-if="!detalle.datos.paquetesAlmacenados || detalle.datos.paquetesAlmacenados.length === 0">
+         <div v-if="!detalle.datos.paquetesAlmacenados || detalle.datos.paquetesAlmacenados.length === 0">
             <h3 class="paquetes-title">Paquetes:</h3>
             <p>No hay paquetes</p>
           </div>
@@ -177,7 +177,7 @@
                 <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
               </div>
             </div>
-          </div>-->
+          </div>
           <button class="modal-button-flight" @click="downloadDetails('vuelo')">Descargar</button>
           <button class="modal-button-flight" @click="detalle = null">Cerrar</button>
           
@@ -188,7 +188,7 @@
           <h2>Información del Aeropuerto</h2>
           <p><strong>Ciudad y País</strong> {{ detalle.datos.nombreCiudad }}, {{detalle.datos.pais }}</p>
           <p><strong>Coordenadas:</strong> {{ formatCoordinates(detalle.datos.coordinates) }}</p>
-      <!--    <p v-if="!detalle.datos.paquetes || detalle.datos.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
+       <p v-if="!detalle.datos.paquetes || detalle.datos.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
           <div v-else>
             <h3 class="paquetes-title">Paquetes almacenados:</h3>
             <div class="paquetes-list">
@@ -198,7 +198,7 @@
                 <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
               </div>
             </div>
-          </div>-->
+          </div>
           <button class="modal-button-airport" @click="downloadDetails('aeropuerto')">Descargar</button>
           <button class="modal-button-airport" @click="detalle = null">Cerrar</button>
         </div>
@@ -252,7 +252,7 @@
     <p><strong>Fecha y Hora de Salida:</strong> {{ formatDateTime(modal.data.fechaHoraSalidaGMT0) }}</p>
     <p><strong>Fecha y Hora de Llegada:</strong> {{ formatDateTime(modal.data.fechaHoraLlegadaGMT0) }}</p>
     <p><strong>Tiempo Estimado de Vuelo:</strong> {{ formatDuration(modal.data.tiempoEstimadoVuelo) }}</p>
-   <!--   <div v-if="!modal.data.paquetesAlmacenados || modal.data.paquetesAlmacenados.length === 0">
+   <div v-if="!modal.data.paquetesAlmacenados || modal.data.paquetesAlmacenados.length === 0">
       <h3 class="paquetes-title">Paquetes:</h3>
       <p>No hay paquetes</p>
     </div>
@@ -265,7 +265,7 @@
           <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
         </div>
       </div>
-    </div>-->
+    </div>
     <button class="modal-button-flight" @click="downloadDetailsModal('vuelo', modal.data)">Descargar</button>
     <button class="modal-button-flight" @click="closeFlightModal(modal.id)">Cerrar</button>
   </div>
@@ -279,7 +279,7 @@
     <p><strong>Capacidad de Almacenamiento Máximo:</strong> {{ modal.data.capacidadAlmacenamientoMaximo }}</p>
     <p><strong>Capacidad de Almacenamiento Usado:</strong> {{ modal.data.capacidadDeAlmacenamientoUsado }}</p>
     <p><strong>Coordenadas:</strong> {{ formatCoordinates(modal.data.coordinates) }}</p>
-  <!--   <p v-if="!modal.data.paquetes || modal.data.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
+   <p v-if="!modal.data.paquetes || modal.data.paquetes.length === 0"><strong>Paquetes almacenados:</strong> No hay paquetes</p>
     <div v-else>
       <h3 class="paquetes-title">Paquetes almacenados:</h3>
       <div class="paquetes-list">
@@ -289,7 +289,7 @@
           <p><strong>Cantidad de Paquetes:</strong> {{ paquete.cantidadPaquetes }}</p>
         </div>
       </div>
-    </div>-->
+    </div>
     <button class="modal-button-airport" 
         @click="downloadDetailsModal('aeropuerto', modal.data)" 
        >
