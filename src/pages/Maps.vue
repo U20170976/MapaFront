@@ -131,10 +131,12 @@
       <div class="datetime-row">
         <!-- Tiempo transcurrido desde el inicio de la simulación -->
         <div class="datetime-display">
+          <h5>Hora Actual en GMT-0</h5>
           {{ simulationElapsedTime }}
         </div>
         <!-- Fecha/hora actual -->
         <div class="datetime-display">
+          <h5>Hora en Simulacion en GMT-0</h5>
           {{ currentDateTime }}
         </div>
       </div>
@@ -142,6 +144,7 @@
       <!-- Segunda fila: Reloj en tiempo real -->
       <div class="datetime-row">
         <div class="datetime-display">
+          <h5>Contador de la Simulacion</h5>
           {{ realTimeClock }}
         </div>
       </div>
@@ -960,22 +963,23 @@ watch: {
       }, 1000);
     },
     updateRealTimeClock() {
-  this.intervalIds.push(setInterval(() => {
-    if (!this.isSimulationPaused && this.simulationStartTime) {
-      const now = new Date();
-      const elapsedRealMilliseconds = now - this.simulationStartTime + this.elapsedRealTime;
-      const elapsedSimulatedMilliseconds = elapsedRealMilliseconds * 240; // 4 minutes * 60 * 1000 milliseconds
+  if (this.simulationStartTime) {
+    const now = Date.now();
+    const elapsedRealMilliseconds = now - this.simulationStartTime;
+    const elapsedSimulatedMilliseconds = elapsedRealMilliseconds * 240; // 4 minutos por cada segundo real
 
-      const elapsedSimulatedMinutes = Math.floor(elapsedSimulatedMilliseconds / (1000 * 60)); // Convert to minutes
+    const totalSimulatedSeconds = Math.floor(elapsedSimulatedMilliseconds / 1000);
+    const totalSimulatedMinutes = Math.floor(totalSimulatedSeconds / 60);
+    const totalSimulatedHours = Math.floor(totalSimulatedMinutes / 60);
+    const days = Math.floor(totalSimulatedHours / 24);
 
-      const days = Math.floor(elapsedSimulatedMinutes / (60 * 24));
-      const hours = Math.floor((elapsedSimulatedMinutes % (60 * 24)) / 60);
-      const minutes = elapsedSimulatedMinutes % 60;
+    const hours = totalSimulatedHours % 24;
+    const minutes = totalSimulatedMinutes % 60;
 
-      this.realTimeClock = `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`; // Fixed seconds to "00"
-    }
-  }, 1000));
+    this.realTimeClock = `${days}d ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`; // Sin segundos
+  }
 },
+
     getTimezoneOffset() {
       const offset = new Date().getTimezoneOffset();
       const hours = Math.floor(Math.abs(offset) / 60);
@@ -1479,8 +1483,8 @@ destinationPoint(point, angle, distance) {
         minute: '2-digit',
         timeZoneName: 'short'
       });
-
-
+      this.updateRealTimeClock();
+      this.simulationElapsedTime = this.getLocalTimeInUTC();
     if (this.map) {
       const source = this.map.getSource('aeropuertos');
       if (source && typeof source.setData === 'function') {
@@ -1750,7 +1754,17 @@ this.progressInterval = setInterval(async () => {
         this.isButtonDisabled = false;  // Habilitar el botón si ocurre un error
       }
     },
+    getLocalTimeInUTC() {
+  const now = new Date();
+  const utcYear = now.getUTCFullYear();
+  const utcMonth = (now.getUTCMonth() + 1).toString().padStart(2, '0'); // Los meses en JavaScript son 0-indexed.
+  const utcDay = now.getUTCDate().toString().padStart(2, '0');
+  const utcHours = now.getUTCHours().toString().padStart(2, '0');
+  const utcMinutes = now.getUTCMinutes().toString().padStart(2, '0');
+  const utcSeconds = now.getUTCSeconds().toString().padStart(2, '0');
 
+  return `${utcDay}/${utcMonth}/${utcYear}, ${utcHours}:${utcMinutes}:${utcSeconds} UTC`;
+},
  
     startSimulationLoop(fechaInicio, fechaInicioHora) {
       this.isDownloadVisible = true;
@@ -1809,17 +1823,20 @@ if (this.simulacionConColapso === 'true') {
   endDateAux.setUTCHours(initialHour, initialMinutes, initialSeconds);
 }
   this.simulationStartTime = new Date();
+
+
   let lastExecutionTime = this.simulationDateTime.getTime();
       this.simulationInterval = setInterval(async () => {
-        this.simulationElapsedTime = this.getLocalTime();
-        this.updateRealTimeClock();
+        // Obtener la hora en formato GMT+0
+       // this.simulationElapsedTime = this.getLocalTimeInUTC();
           if (!this.isSimulating) {
             await this.fetchSimulationResults(fechaInicio, fechaInicioHora);
             this.isSimulating = true;
 
-
+          //  this.updateRealTimeClock();
            // this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 360000); // Avanzar 1 hora en tiempo simulado
-          //  this.updateCurrentDateTimeDisplay();
+           this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); 
+            this.updateCurrentDateTimeDisplay();
 
             this.updateAirportData();
 
@@ -1835,7 +1852,7 @@ if (this.simulacionConColapso === 'true') {
       await this.continuarSimulacion(this.currentDate, this.currentHour);
       initialExecution = false; // Asegura que solo se ejecute una vez
     }
-             
+            
             this.simulationDateTime = new Date(this.simulationDateTime.getTime() + 240000); // Avanzar 1 hora en tiempo simulado
             this.updateCurrentDateTimeDisplay(); 
 
@@ -1846,8 +1863,9 @@ if (this.simulacionConColapso === 'true') {
               const currentTime = this.simulationDateTime.getTime();
            //   if (this.simulationDateTime.getUTCHours() % 2 === 0 && this.simulationDateTime.getUTCMinutes() === 0) { 
             if (currentTime >= lastExecutionTime + 2 * 60 * 60 * 1000) {
-              lastExecutionTime = currentTime;
-                this.updateAirportData();
+              //lastExecutionTime = currentTime;
+              lastExecutionTime += 2 * 60 * 60 * 1000;  
+              this.updateAirportData();
               // if (this.simulationDateTime.getMinutes() % 60 === 0) {
                 const statusResponse = await axios.get(urlBase+'/api/simulacion/semanal/estado');
                 this.progresoPlanificacion = statusResponse.data.progreso;
@@ -2031,13 +2049,13 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
         this.filteredVuelos.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-    //     console.log("CUENTA ACTUALIZADOS 1:" + count);
+         console.log("CUENTA ACTUALIZADOS 1:" + count);
     //    this.vuelosOrdenadoGMT0 = this.filteredVuelos;
         // this.filteredVuelos = filteredVuelos; // Actualizar el estado de filteredVuelos aquí
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
       
-    //     console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -2102,8 +2120,8 @@ closeFinalizationModal() {
         // Ordenar los vuelos por fecha y hora de salida
       //  this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
-    //     console.log("CUENTA ACTUALIZADOS:" + count);
-     //    console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+         console.log("CUENTA ACTUALIZADOS:" + count);
+        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
     //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
@@ -2918,6 +2936,7 @@ closeFinalizationModal() {
   flex-direction: row;
   justify-content: space-between;
   width: 100%;
+  margin-bottom: -10px;
   gap: 10px;
 }
 
@@ -2929,6 +2948,10 @@ closeFinalizationModal() {
   font-size: 1.5em;
   font-weight: bold;
 }
+
+.datetime-display h5 {
+    margin-bottom: 0px; /* Ajusta este valor según sea necesario */
+  }
 .map-container {
   position: relative;
   height: calc(100vh - 100px);
@@ -3917,7 +3940,7 @@ margin: 0 auto;
 }
 .vuelos-carga-info {
   position: absolute;
-  top: 70px; /* Ajusta este valor para moverlo más abajo */
+  top: 90px; /* Ajusta este valor para moverlo más abajo */
   right: 10px;
   color: black; /* Cambiar el color de texto a negro */
   background-color: white; /* Fondo blanco */
