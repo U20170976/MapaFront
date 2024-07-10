@@ -1049,7 +1049,7 @@ destinationPoint(point, angle, distance) {
  const fechaHoraGMT0 = new Date(fechaHoraLocal.getTime() + (fechaHoraLocal.getTimezoneOffset() * 60000)); // Convertir a GMT0
  const fecha = fechaHoraGMT0.toISOString().split('T')[0];
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
-  //  console.log(`Buscando data de aeropuertos: ${fechaHoraGMT0}, fecha: ${fecha}, hora: ${hora}`);
+   // console.log(`Buscando data de aeropuertos: ${fechaHoraGMT0}, fecha: ${fecha}, hora: ${hora}`);
       axios.get(urlBase +`/api/diaDia/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
@@ -1754,7 +1754,7 @@ toGMT0Inicio(date) {
 
   let realSecondsElapsed = 0; 
   let startTime = performance.now();
-
+  let airportDataElapsed = 0;
 
   this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
     this.planificacionEnEsperaDetener = true;
@@ -1776,9 +1776,12 @@ toGMT0Inicio(date) {
     this.updateCurrentDateTimeDisplay();
   
     this.actualizarContadoresVuelos();
-
+    airportDataElapsed += elapsedTime;
     realSecondsElapsed += elapsedTime;
-
+    if (airportDataElapsed >= 15) {
+      this.updateAirportData();
+      airportDataElapsed = 0; // Reiniciar el contador de tiempo para updateAirportData
+    }
     if (realSecondsElapsed >= 300) {
       realSecondsElapsed = 0;
       const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
@@ -1788,9 +1791,7 @@ toGMT0Inicio(date) {
     //  console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
       await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
     }
-   if (realSecondsElapsed >= 15) {
-    this.updateAirportData();
-    }
+
     
     this.checkAndAnimateFlights();
    }, 1000); // Ejecutar cada segundo en tiempo real
