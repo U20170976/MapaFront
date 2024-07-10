@@ -1248,7 +1248,7 @@ onAirportMouseEnter(event) {
   //  const fechaInicio = currentDateTimeGMT0.toISOString().split('T')[0];
    // const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
      const fechaInicio = '2024-07-22';  // Fecha fija
-  const fechaInicioHora = '06:00';   // Hora fija en GMT0
+  const fechaInicioHora = '11:00';   // Hora fija en GMT0
 
     console.log('Fecha y hora en GMT 0:', fechaInicio + ' ' + fechaInicioHora);
 
@@ -1327,7 +1327,7 @@ onAirportMouseEnter(event) {
     }
     const fechaHora = new Date();
     //const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
-    const fechaHoraGMT0 = new Date(Date.UTC(2024, 6, 22, 11, 0, 0));
+    const fechaHoraGMT0 = new Date(Date.UTC(2024, 6, 22, 16, 0, 0));
     const currentTime = new Date(new Date().toISOString()); // Ensure current time is in GMT0
   //  console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
   const flightStartTime = new Date(vuelo.fechaHoraSalidaGMT0);
@@ -1519,7 +1519,7 @@ onAirportMouseEnter(event) {
       const response = await axios.get(urlBase +`/api/diaDia/vuelosEnCamino`, {
         params: {
           fecha: fecha,
-          hora: hora
+          hora: hora 
         }
       });
     //  console.log("Vuelos en camino:", response.data);
@@ -1681,7 +1681,7 @@ toGMT0Inicio(date) {
 
   //this.simulationDateTime = this.toGMT0Inicio(new Date());
   
-  this.simulationDateTime = new Date('2024-07-22T06:00:00Z');
+  this.simulationDateTime = new Date('2024-07-22T11:00:00Z');
   this.pendingFlights = [];
   this.allVuelos = [];
   this.updateCurrentDateTimeDisplay();
@@ -1738,7 +1738,7 @@ toGMT0Inicio(date) {
 
  
     async fetchSimulationResults(fecha, hora) {
-      //console.log(fecha + hora);
+      console.log(fecha + hora);
       try {
         const saltoTemporal = 5; // Define el salto temporal según tus necesidades
       const response = await axios.get(`${urlBase}/api/diaDia/resultados`, {
