@@ -16,13 +16,13 @@
   
 
       <div class="datetime-display">
-        {{ currentDateTime }}
+        {{ currentDateTimeReloj }}
       </div>
 
       <div class="vuelos-carga-info">
       <button class="info-toggle" @click="toggleInfo">
         {{ isInfoOpen ? '▲ Cerrar Información General' : '▼ Abrir Información General' }}
-      </button>
+      </button> 
       <div :style="{ display: isInfoOpen ? 'block' : 'none' }">
         <div class="vuelos-movimiento">
           Cantidad de vuelos en movimiento: {{ cantidadVuelosMovimiento }}
@@ -464,6 +464,18 @@ export default {
         minute: '2-digit',
         timeZoneName: 'short'
       }),
+      currentDateTimeReloj: new Date().toLocaleString('es-ES', {
+        timeZone: 'America/Lima',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      }),
+
+
+
       //  toggleIniciarDetener: true,
       toggleReanudar: false,
       accessToken: this.$store.state.map.token, // your access token. Needed if you using Mapbox maps
@@ -549,6 +561,7 @@ export default {
     console.log("Aeropuertos disponibles:", aeropuertos);
     // Inicializar currentDateTime al cargar el mapa
     this.updateCurrentDateTimeDisplay();
+
     this.fetchAeropuertos();
     let vue = this;
     // this.updateTime();
@@ -572,6 +585,20 @@ export default {
     this.resetSimulationData();
   },
   methods: {
+    currentDateTimeGMTMinus5() {
+    const dateGMT0 = this.simulationDateTime;
+    const dateGMTMinus5 = new Date(dateGMT0.getTime() - (5 * 60 * 60 * 1000)); // Convertir a GMT-5
+    return dateGMTMinus5.toLocaleString('es-ES', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+  },
     toggleCheckbox(type) {
     if (type === 'id') {
       this.buscarPorCiudadOrigen = false;
@@ -1016,9 +1043,13 @@ destinationPoint(point, angle, distance) {
 
     updateAirportData() {
       const fechaHora = new Date();
-    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
-    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+ //   const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+  
+ const fechaHoraLocal = this.simulationDateTime;
+ const fechaHoraGMT0 = new Date(fechaHoraLocal.getTime() + (fechaHoraLocal.getTimezoneOffset() * 60000)); // Convertir a GMT0
+ const fecha = fechaHoraGMT0.toISOString().split('T')[0];
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
+  //  console.log(`Buscando data de aeropuertos: ${fechaHoraGMT0}, fecha: ${fecha}, hora: ${hora}`);
       axios.get(urlBase +`/api/diaDia/aeropuertos?fecha=${fecha}&hora=${hora}`)
         .then(response => {
           this.aeropuertos = response.data;
@@ -1164,8 +1195,38 @@ destinationPoint(point, angle, distance) {
         minute: '2-digit',
         timeZoneName: 'short'
       });
+    
+    // Formatear la fecha y hora para mostrar en GMT-5
+    this.currentDateTimeReloj = currentDateTimeGMT0.toLocaleString('es-ES', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+   
     },
 
+
+    updateCurrentDateTimeDisplayReloj() {
+
+      const currentDateTimeGMT0 = this.simulationDateTime;//this.toGMT0(new Date());
+
+      this.currentDateTimeReloj = currentDateTimeGMT0.toLocaleString('es-ES', {
+      timeZone: 'America/Lima',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZoneName: 'short'
+    });
+
+    },
     loadImages(callback) {
   let imagesToLoad = [
     'airport-green',
@@ -1685,6 +1746,7 @@ toGMT0Inicio(date) {
   this.pendingFlights = [];
   this.allVuelos = [];
   this.updateCurrentDateTimeDisplay();
+
   if (this.simulationInterval) {
     clearInterval(this.simulationInterval);
   }
@@ -1712,6 +1774,7 @@ toGMT0Inicio(date) {
     //console.log("Tiempo actual de simulación start loop:", this.simulationDateTime.toISOString());
     //console.log("Segundos", realSecondsElapsed);
     this.updateCurrentDateTimeDisplay();
+  
     this.actualizarContadoresVuelos();
 
     realSecondsElapsed += elapsedTime;
@@ -1998,7 +2061,7 @@ toGMT0Inicio(date) {
       const minutes = parseInt(matches[2] || 0, 10);
       return `${hours} horas y ${minutes} minutos`;
     },
-    formatDateTime(dateTime) {
+  /*  formatDateTime(dateTime) {
       const date = new Date(dateTime);
       const options = {
         day: '2-digit',
@@ -2008,7 +2071,24 @@ toGMT0Inicio(date) {
         minute: '2-digit'
       };
       return date.toLocaleString('es-ES', options).replace(',', ' -');
-    },
+    },*/
+
+    formatDateTime(dateTime) {
+    const date = new Date(dateTime);
+
+    // Crear una nueva fecha ajustada a GMT-5
+    const dateGMTMinus5 = new Date(date.getTime() - (5 * 60 * 60 * 1000));
+    
+    const options = {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+
+    return dateGMTMinus5.toLocaleString('es-ES', options).replace(',', ' -');
+  },
 
 
     async buscarAeropuerto() {
