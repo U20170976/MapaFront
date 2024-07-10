@@ -26,7 +26,7 @@
       <div :style="{ display: isInfoOpen ? 'block' : 'none' }">
         <div class="vuelos-movimiento">
           Cantidad de vuelos en movimiento: {{ cantidadVuelosMovimiento }}
-        </div>
+        </div> 
         <div class="capacidad-carga">
           <div class="carga-bar">
             <div class="carga-bar-inner" :style="{ width: (capacidadCargaUsadoTotal / capacidadCargaMaximaTotal * 100) + '%' }"></div>
@@ -1153,7 +1153,7 @@ destinationPoint(point, angle, distance) {
     },
     updateCurrentDateTimeDisplay() {
       
-      const currentDateTimeGMT0 = this.toGMT0(new Date());
+      const currentDateTimeGMT0 = this.simulationDateTime;//this.toGMT0(new Date());
      // console.log("udpate TIME", currentDateTimeGMT0);
     this.currentDateTime = currentDateTimeGMT0.toLocaleString('es-ES', {
         timeZone: 'UTC',
@@ -1245,8 +1245,11 @@ onAirportMouseEnter(event) {
       });
       this.fetchAeropuertos();
     const currentDateTimeGMT0 = this.toGMT0Inicio(new Date());
-    const fechaInicio = currentDateTimeGMT0.toISOString().split('T')[0];
-    const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
+  //  const fechaInicio = currentDateTimeGMT0.toISOString().split('T')[0];
+   // const fechaInicioHora = currentDateTimeGMT0.toISOString().split('T')[1].substring(0, 5);
+     const fechaInicio = '2024-07-22';  // Fecha fija
+  const fechaInicioHora = '06:00';   // Hora fija en GMT0
+
     console.log('Fecha y hora en GMT 0:', fechaInicio + ' ' + fechaInicioHora);
 
  //console.log("HOLA", currentDateTimeGMT0.toISOString()); 
@@ -1323,9 +1326,10 @@ onAirportMouseEnter(event) {
       this.map.on('click', `avion-${vuelo.id}`, this.onFlightClick);
     }
     const fechaHora = new Date();
-    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    //const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    const fechaHoraGMT0 = new Date(Date.UTC(2024, 6, 22, 11, 0, 0));
     const currentTime = new Date(new Date().toISOString()); // Ensure current time is in GMT0
-   // console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
+  //  console.log("FECHA ACTUALLLLLLLLLLLLLLLLLL GAAAAAAAAAAA", fechaHoraGMT0);
   const flightStartTime = new Date(vuelo.fechaHoraSalidaGMT0);
   const flightEndTime = new Date(vuelo.fechaHoraLlegadaGMT0);
 
@@ -1675,7 +1679,9 @@ toGMT0Inicio(date) {
 
     async startSimulationLoop(fechaInicio, fechaInicioHora) {
 
-  this.simulationDateTime = this.toGMT0Inicio(new Date());
+  //this.simulationDateTime = this.toGMT0Inicio(new Date());
+  
+  this.simulationDateTime = new Date('2024-07-22T06:00:00Z');
   this.pendingFlights = [];
   this.allVuelos = [];
   this.updateCurrentDateTimeDisplay();
@@ -1730,7 +1736,7 @@ toGMT0Inicio(date) {
 
 
 
-
+ 
     async fetchSimulationResults(fecha, hora) {
       //console.log(fecha + hora);
       try {
@@ -2009,12 +2015,16 @@ toGMT0Inicio(date) {
   if (this.busquedaAeropuerto.trim() !== '') {
     const cadena = this.busquedaAeropuerto;
     const fechaHora = new Date();
-    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
-    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+   // const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+   const fechaHoraLocal = this.simulationDateTime;
+   const fechaHoraGMT0 = new Date(fechaHoraLocal.getTime() + (fechaHoraLocal.getTimezoneOffset() * 60000)); // Convertir a GMT0
+
+
+   const fecha = fechaHoraGMT0.toISOString().split('T')[0];
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
     try {
-    //  console.log(`Buscando aeropuertos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+    //  console.log(`Buscando aeropuertos con cadena: ${fechaHoraGMT0}, fecha: ${fecha}, hora: ${hora}`);
       const response = await axios.get(`${urlBase}/api/diaDia/aeropuerto`, {
         params: {
           cadena: cadena,
@@ -2036,12 +2046,15 @@ toGMT0Inicio(date) {
     if (this.busquedaEnvio.trim() !== '') {
       const cadena = this.busquedaEnvio;
       const fechaHora = new Date();
-    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
-    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+ //   const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+   
+ const fechaHoraLocal = this.simulationDateTime;
+ const fechaHoraGMT0 = new Date(fechaHoraLocal.getTime() + (fechaHoraLocal.getTimezoneOffset() * 60000)); // Convertir a GMT0
+ const fecha = fechaHoraGMT0.toISOString().split('T')[0];
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
 
       try {
-        console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
+  //      console.log(`Buscando envios con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
         const response = await axios.get(`${urlBase}/api/diaDia/paquete`, {
           params: {
             cadena: cadena,
@@ -2062,9 +2075,12 @@ toGMT0Inicio(date) {
   async buscarVuelo() {
     if (this.busquedaVuelo.trim() !== '') {
       const cadena = this.busquedaVuelo;
-      const fechaHora = new Date();
-    const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
-    const fecha = fechaHoraGMT0.toISOString().split('T')[0];
+   //   const fechaHora = new Date();
+ //   const fechaHoraGMT0 = new Date(fechaHora.getTime() + fechaHora.getTimezoneOffset() * 60000); // Convertir a GMT0
+    
+ const fechaHoraLocal = this.simulationDateTime;
+ const fechaHoraGMT0 = new Date(fechaHoraLocal.getTime() + (fechaHoraLocal.getTimezoneOffset() * 60000)); // Convertir a GMT0
+ const fecha = fechaHoraGMT0.toISOString().split('T')[0];
     const hora = fechaHoraGMT0.toTimeString().split(' ')[0].substring(0, 5);
     let tipo = '';
       if (this.buscarPorId) {
@@ -2077,6 +2093,7 @@ toGMT0Inicio(date) {
 
       if (tipo) {
         try {
+       //   console.log(`Buscando vuelos con cadena: ${cadena}, fecha: ${fecha}, hora: ${hora}`);
           const response = await axios.get(urlBase + '/api/diaDia/vuelo', {
             params: {
               cadena: cadena,
