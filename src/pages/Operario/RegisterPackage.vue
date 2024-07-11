@@ -253,10 +253,10 @@ export default {
     },
     async obtenerFechaHoraActual() {
       const dateTime = new Date(`${this.paquete.fechaEnvio}T${this.paquete.horaEnvio}`);
-      const husoNumerico = await this.obtenerHusoHorario(this.paquete.ciudadOrigen);
-      if (husoNumerico !== null) {
-        dateTime.setHours(dateTime.getHours() + 5 + husoNumerico);
-      }
+      //const husoNumerico = await this.obtenerHusoHorario(this.paquete.ciudadOrigen);
+      //if (husoNumerico !== null) {
+        //dateTime.setHours(dateTime.getHours() + 5 + husoNumerico);
+      //}
       const year = dateTime.getFullYear();
       const month = String(dateTime.getMonth() + 1).padStart(2, '0');
       const day = String(dateTime.getDate()).padStart(2, '0');
