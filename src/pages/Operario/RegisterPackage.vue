@@ -173,7 +173,7 @@ export default {
       paquete: {
         ciudadOrigen: "",
         ciudadDestino: "",
-        fechaEnvio: "20240721",
+        fechaEnvio: "",
         horaEnvio: "",
         cantidadPaquetes: '',
         estadoEnvio: "En Almacén",
