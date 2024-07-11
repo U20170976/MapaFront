@@ -1783,10 +1783,11 @@ toGMT0Inicio(date) {
       airportDataElapsed = 0; // Reiniciar el contador de tiempo para updateAirportData
     }
     if (realSecondsElapsed >= (secondExecutionDone ? 300 : 240)) {
+      const datePlusOneMinute = new Date(this.simulationDateTime.getTime() + 60000); // Sumar un minuto en milisegundos  
     realSecondsElapsed = 0;
     const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
-    const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
-
+   // const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
+   const fechaInicioHoraAUX = datePlusOneMinute.toISOString().split('T')[1].substring(0, 5);
     await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
 
     if (!secondExecutionDone) {
