@@ -1778,7 +1778,7 @@ toGMT0Inicio(date) {
     this.actualizarContadoresVuelos();
     airportDataElapsed += elapsedTime;
     realSecondsElapsed += elapsedTime;
-    if (airportDataElapsed >= 15) {
+    if (airportDataElapsed >= 60) {
       this.updateAirportData();
       airportDataElapsed = 0; // Reiniciar el contador de tiempo para updateAirportData
     }
