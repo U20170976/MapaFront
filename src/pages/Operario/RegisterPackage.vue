@@ -44,6 +44,22 @@
                 Por favor, seleccione una ciudad y país de destino.
               </div>
             </div>
+            <div class="form-row">
+              <div class="form-group col-md-6 date-time-group">
+                <label>Fecha de Envío</label>
+                <input type="date" class="form-control" v-model="paquete.fechaEnvio" required>
+                <div v-if="!paquete.fechaEnvio && formSubmitted" class="invalid-feedback">
+                  Por favor, seleccione una fecha de envío.
+                </div>
+              </div>
+              <div class="form-group col-md-6 date-time-group">
+                <label>Hora de Envío</label>
+                <input type="time" class="form-control" v-model="paquete.horaEnvio" required>
+                <div v-if="!paquete.horaEnvio && formSubmitted" class="invalid-feedback">
+                  Por favor, seleccione una hora de envío.
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,10 +112,9 @@
           <div class="card-body">
             <div class="form-group">
               <label>DNI / RUC</label>
-              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad" required>  
-              <div v-if="!clienteRecibe.documentoIdentidad && formSubmitted">
-                <div class="invalid-feedback">Por favor, ingrese el DNI o RUC.</div>
-                
+              <input type="text" class="form-control" placeholder="DNI o RUC" v-model="clienteRecibe.documentoIdentidad" required>
+              <div v-if="!clienteRecibe.documentoIdentidad && formSubmitted" class="invalid-feedback">
+                Por favor, ingrese el DNI o RUC.
               </div>
             </div>
             <div class="form-group">
@@ -136,268 +151,173 @@
 </template>
 
 
-
-
 <script>
-  import { BaseTable } from "@/components";
-  import axios from 'axios';
-  //import { useToast } from 'vue-toastification';
-  import NotificationTemplate from '../Notifications/NotificationTemplate';
-  import NotificationTemplatePaqueteSuccess from '../Notifications/NotificationTemplatePaqueteSuccess';
-  import NotificationTemplatePaqueteError from '../Notifications/NotificationTemplatePaqueteError';
-  import { BaseAlert } from '@/components';
-  import listadoPaquetes from "../Operario/listadoPaquetes";
-  import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
-  import config from "../../config";
+import axios from 'axios';
+import config from "../../config";
+import listadoPaquetes from "../Operario/listadoPaquetes";
+import ResumenEnvio from "../Operario/ResumenEnvio"; // Ajusta la ruta según la ubicación del componente
 
-  //Definimos las variables globales
-  let urlBase = config.urlBase,// aquí guardamos la base de la URL
-      //urlRegistrarEnvio = '/api/paquete/register/envio',
-      urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
-      urlListarAeropuertos = '/api/aeropuertos',
-      urlGetHuso = '/api/aeropuertos/getHuso/';
-  export default {
-    components: {
-      BaseTable,
-      listadoPaquetes,
-      ResumenEnvio
-    },
-    data() {
-      return {
-        formSubmitted: false,
-        paquete: {
-          ciudadOrigen: "SPIM",
-          ciudadDestino: "",
-          ciudadActual: "",
-          fechaEnvio: "",
-          horaEnvio: "",
-          cantidadPaquetes: '',
-          estadoEnvio: "En Almacén",
-          coordinates: null,
-          ruta: null
-        },
-        clienteManda:{
-          documentoIdentidad: "",
-          nombres: null,
-          correo:"",
-          telefono:"",
-          tipo:"1"
-        },
-        clienteRecibe:{
-          documentoIdentidad: "",
-          nombres: "",
-          correo:"",
-          telefono:"",
-          tipo:"2"
-        },
-        //descripcionPaquete: "",
-        paisOrigen: "",
-        ciudadOrigen:"",
-        loading: true,
-        errorMessage: "",
-        error: '',
-        selectedSede: "", // Inicializa como cadena vacía
-    
-        lpaisesDestino: [],
-        reg: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/,
+let urlBase = config.urlBase,
+    urlRegistrarEnvio = '/api/paquete/register/envio/monitoreo',
+    urlListarAeropuertos = '/api/aeropuertos',
+    urlGetHuso = '/api/aeropuertos/getHuso/';
 
-        type: ["", "info", "success", "warning", "danger"],
-        notifications: {
-          topCenter: false
-        },
-        codigoSeleccionado:"",
-      };
-      
-    },
-    mounted(){
-      this.fetchPaisesDestino();
-    },
-    computed: {
-      filteredPaisesDestino() {
-        return this.lpaisesDestino.filter(paisDestino => {
-                                                          return `${paisDestino.codigoOACI}` !== this.paquete.ciudadOrigen;
-                                                        });
-      }
-      
-    },
-    methods:{
-      async registrarEnvio() {
-        this.formSubmitted = true;
-        console.log(this.clienteManda.nombres);
-        if (this.paquete.ciudadOrigen && this.paquete.cantidadPaquetes && this.paquete.ciudadDestino &&
-          this.clienteManda.documentoIdentidad && this.clienteManda.nombres && this.clienteManda.correo && this.clienteManda.telefono &&
-          this.clienteRecibe.documentoIdentidad && this.clienteRecibe.nombres && this.clienteRecibe.correo && this.clienteRecibe.telefono) {
-          const dateTime = await this.obtenerFechaHoraActual();
+export default {
+  components: {
+    listadoPaquetes,
+    ResumenEnvio
+  },
+  data() {
+    return {
+      formSubmitted: false,
+      paquete: {
+        ciudadOrigen: "",
+        ciudadDestino: "",
+        fechaEnvio: "20240721",
+        horaEnvio: "",
+        cantidadPaquetes: '',
+        estadoEnvio: "En Almacén",
+      },
+      clienteManda: {
+        documentoIdentidad: "12345678",
+        nombres: "Juan Perez",
+        correo: "juan.perez@example.com",
+        telefono: "123456789",
+        tipo: "1"
+      },
+      clienteRecibe: {
+        documentoIdentidad: "87654321",
+        nombres: "Maria Garcia",
+        correo: "maria.garcia@example.com",
+        telefono: "987654321",
+        tipo: "2"
+      },
+      lpaisesDestino: [],
+      errorMessage: "",
+      error: '',
+      codigoSeleccionado: "",
+    };
+  },
+  mounted() {
+    this.fetchPaisesDestino();
+  },
+  computed: {
+    filteredPaisesDestino() {
+      return this.lpaisesDestino.filter(paisDestino => paisDestino.codigoOACI !== this.paquete.ciudadOrigen);
+    }
+  },
+  methods: {
+    async registrarEnvio() {
+      this.formSubmitted = true;
+      console.log('Datos del paquete antes de enviar:', this.paquete);
+      const dateTime = await this.obtenerFechaHoraActual();
+      if (this.validarCampos()) {
+        try {
           this.paquete.fechaEnvio = dateTime.fechaEnvio;
           this.paquete.horaEnvio = dateTime.horaEnvio;
-          try {
-            const payload = {
-              paquete: this.paquete,
-              clienteManda: this.clienteManda,
-              clienteRecibe: this.clienteRecibe
-            };
-            const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
-            if (response.data.id !== 0) {
-              console.log('Envío registrado exitosamente:', response.data);
-              this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
-            } else {
-              console.error('Error en la respuesta:', response.data);
-              this.errorMessage = 'No se pudo registrar el envío';  // Establece el mensaje de error
-            }
-          } catch (error) {
-            this.errorMessage = 'No se pudo registrar el envío';  // Establece el mensaje de error
-            console.error('Error al registrar el envío: ', error);
+          const payload = {
+            paquete: this.paquete,
+            clienteManda: this.clienteManda,
+            clienteRecibe: this.clienteRecibe
+          };
+          const response = await axios.post(urlBase + urlRegistrarEnvio, payload);
+          if (response.data.id !== 0) {
+            this.$router.push({ name: 'Resumen de Envío', params: { envio: response.data } });
+          } else {
+            this.errorMessage = 'No se pudo registrar el envío';
           }
-        }
-        else{
-          this.errorMessage = 'Por favor, complete todos los campos obligatorios.';  // Establece el mensaje de error
-          console.log("Ingresa los datos por favor");
-        }
-      },
-      async fetchPaisesDestino() {
-        try {
-          //const response = await axios.get('http://localhost/api/aeropuertos');
-          console.log(urlBase + urlListarAeropuertos);
-          const response = await axios.get(urlBase + urlListarAeropuertos);
-      
-
-          this.lpaisesDestino = response.data.sort((a, b) => {
-            // Si a.pais y b.pais son cadenas de texto, se pueden comparar directamente
-            if (a.pais < b.pais) return -1;
-            if (a.pais >= b.pais) return 1;
-            return 0;
-          });
-          
         } catch (error) {
-          this.error = 'Error al cargar los datos';
-          this.errorMessage = 'Error al cargar los países';  // Establece el mensaje de error
-          console.error(error);
+          this.errorMessage = 'No se pudo registrar el envío';
         }
-      },
-      async obtenerHusoHorario(codigo) {
-        console.log("codigo seleccionado: ", codigo);
-        //console.log("url del huso: ", urlBase + urlGetHuso + `${codigo}`);
-        try {
-          const response = await axios.get(urlBase + `/api/aeropuertos/getHuso/${codigo}`);
-          //const response = await axios.get(urlBase + urlGetHuso + `${codigo}`);
-          console.log('Datos recibidos:', response.data);
-          // Aquí asumimos que el servicio devuelve un valor numérico que necesitamos
-          return response.data;
-        } catch (error) {
-          console.error('Hubo un problema con la solicitud:', error);
-          this.errorMessage = 'Error al registrar el envío';  // Establece el mensaje de error
-          return null; // O cualquier valor predeterminado que tenga sentido en tu aplicación
-        }
-      },
-      obtenerUbicacionActual(position){
-        const latitude = position.coords.latitude;
-        const longitude = position.coords.longitude;
-        const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`;
-
-        fetch(url)
-          .then(response => response.json())
-          .then(data => {
-            this.paisOrigen = data.countryName;
-            this.ciudadOrigen = data.city;
-            this.loading = false;
-          })
-          .catch(error => {
-            console.error("Error al obtener la información del país:", error);
-            //this.error = "Error al obtener la información del país.";
-            this.loading = false;
-          });
-      },
-      handleLocationError(error) {
-        switch(error.code) {
-          case error.PERMISSION_DENIED:
-            this.error = "El usuario denegó la solicitud de geolocalización.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            this.error = "La información de ubicación no está disponible.";
-            break;
-          case error.TIMEOUT:
-            this.error = "Se agotó el tiempo de espera al intentar obtener la ubicación.";
-            break;
-          case error.UNKNOWN_ERROR:
-            this.error = "Se produjo un error desconocido al obtener la ubicación.";
-            break;
-        }
-        this.loading = false;
-      },
-      regresarAlListar(){
-        console.log('listadoPaquetes llamado');
-        this.$router.push('listadoPaquetes');
-      },
-
-      async obtenerFechaHoraActual() {
-        const currentDate = new Date();
-        
-        // Obtener el código seleccionado
-        this.codigoSeleccionado = this.paquete.ciudadOrigen;
-        console.log('Código de la ciudad de origen seleccionado:', this.codigoSeleccionado);
-      // Llamar al método obtenerHusoHorario con el código seleccionado
-        const husoNumerico = await this.obtenerHusoHorario(this.codigoSeleccionado);
-        console.log("el huso horaraio es: ", husoNumerico);
-        currentDate.setHours(currentDate.getHours() + 5 + husoNumerico);
-        //currentDate.setHours(currentDate.getHours() + 5 );
-
-        
-        const year = currentDate.getFullYear();
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const day = String(currentDate.getDate()).padStart(2, '0');
-
-        const formattedDate = `${year}${month}${day}`;
-
-        const hours = String(currentDate.getHours()).padStart(2, '0');
-        const minutes = String(currentDate.getMinutes()).padStart(2, '0');
-
-        const formattedTime = `${hours}:${minutes}`;
-
-        return {
-          fechaEnvio: formattedDate,
-          horaEnvio: formattedTime
-        };
-      },
-
-      updateDestinos() {
-      // Limpiar la ciudad destino cuando se actualiza la ciudad origen
-      this.paquete.ciudadDestino = '';
-      // Obtener el código seleccionado
-     
+      } else {
+        this.errorMessage = 'Por favor, complete todos los campos obligatorios.';
       }
+    },
+    async fetchPaisesDestino() {
+      try {
+        const response = await axios.get(urlBase + urlListarAeropuertos);
+        this.lpaisesDestino = response.data.sort((a, b) => (a.pais < b.pais ? -1 : 1));
+      } catch (error) {
+        this.error = 'Error al cargar los datos';
+        this.errorMessage = 'Error al cargar los países';
+      }
+    },
+    async obtenerHusoHorario(codigo) {
+      try {
+        const response = await axios.get(urlBase + `/api/aeropuertos/getHuso/${codigo}`);
+        return response.data;
+      } catch (error) {
+        this.errorMessage = 'Error al obtener el huso horario';
+        return null;
+      }
+    },
+    async obtenerFechaHoraActual() {
+      const dateTime = new Date(`${this.paquete.fechaEnvio}T${this.paquete.horaEnvio}`);
+      const husoNumerico = await this.obtenerHusoHorario(this.paquete.ciudadOrigen);
+      if (husoNumerico !== null) {
+        dateTime.setHours(dateTime.getHours() + 5 + husoNumerico);
+      }
+      const year = dateTime.getFullYear();
+      const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+      const day = String(dateTime.getDate()).padStart(2, '0');
+      const hours = String(dateTime.getHours()).padStart(2, '0');
+      const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+      return {
+        fechaEnvio: `${year}${month}${day}`,
+        horaEnvio: `${hours}:${minutes}`
+      };
+    },
+    updateDestinos() {
+      this.paquete.ciudadDestino = '';
+    },
+    validarCampos() {
+      return (
+        this.paquete.ciudadOrigen &&
+        this.paquete.cantidadPaquetes &&
+        this.paquete.ciudadDestino &&
+        this.clienteManda.documentoIdentidad &&
+        this.clienteManda.nombres &&
+        this.clienteManda.correo &&
+        this.clienteManda.telefono &&
+        this.clienteRecibe.documentoIdentidad &&
+        this.clienteRecibe.nombres &&
+        this.clienteRecibe.correo &&
+        this.clienteRecibe.telefono &&
+        this.paquete.fechaEnvio &&
+        this.paquete.horaEnvio
+      );
+    },
+    regresarAlListar() {
+      this.$router.push('listadoPaquetes');
     }
   }
+};
 </script>
+
+
 <style>
-/*Posiciona el botón a la derecha el button-container y el right-aligned*/
-  .button-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100%; /* Asegura que el contenedor ocupe todo el ancho */
-    padding: 0 10px; /* Opcional: Añade un poco de padding si deseas espacio a los lados */
-    
-  }
-  /* Asegúrate de que el texto dentro de las opciones del select sea negro */
-  .form-control option {
-    color: black
-  }
+.button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 10px;
+}
+.form-control option {
+  color: black;
+}
+.form-control {
+  color: white;
+}
+.invalid-feedback {
+  color: #dc3545;
+  display: block;
+  font-size: 0.875em;
+  margin-top: 0.25em;
+}
 
-  /* Asegúrate de que el texto del select principal sea visible cuando se selecciona */
-  .form-control {
-    color: white;
-  }
+/* Ajustar el alto de los campos de fecha y hora */
+.date-time-group .form-control {
+  height: calc(1.5em + .75rem + 10px);
+}
 
-  .has-success .form-control {
-    border-color: #28a745;
-  }
-  .has-error .form-control {
-    border-color: #dc3545;
-  }
-
-  .invalid-feedback {
-    color: #dc3545;
-    display: block; /* Asegúrate de que los mensajes se muestren como bloque */
-    font-size: 0.875em; /* Ajusta el tamaño de la fuente si es necesario */
-    margin-top: 0.25em; /* Añade margen superior para espaciar los mensajes */
-  }
 </style>
