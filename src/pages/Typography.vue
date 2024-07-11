@@ -1755,7 +1755,7 @@ toGMT0Inicio(date) {
   let realSecondsElapsed = 0; 
   let startTime = performance.now();
   let airportDataElapsed = 0;
-
+  let secondExecutionDone = false;
   this.planificacionEnEsperaCancelar = true; // Mostrar el botón "Cancelar"
     this.planificacionEnEsperaDetener = true;
     this.toggleIniciarDetener = true; // Mostrar el botón de "Iniciar Simulación"
@@ -1782,15 +1782,17 @@ toGMT0Inicio(date) {
       this.updateAirportData();
       airportDataElapsed = 0; // Reiniciar el contador de tiempo para updateAirportData
     }
-    if (realSecondsElapsed >= 300) {
-      realSecondsElapsed = 0;
-      const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
-      const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
-     
+    if (realSecondsElapsed >= (secondExecutionDone ? 300 : 240)) {
+    realSecondsElapsed = 0;
+    const fechaInicioaUX = this.simulationDateTime.toISOString().split('T')[0];
+    const fechaInicioHoraAUX = this.simulationDateTime.toISOString().split('T')[1].substring(0, 5);
 
-    //  console.log("TIEMPO ACTUALIZADO 5 MINUTOS", fechaInicioaUX + fechaInicioHoraAUX);
-      await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
+    await this.fetchSimulationResults(fechaInicioaUX, fechaInicioHoraAUX);
+
+    if (!secondExecutionDone) {
+      secondExecutionDone = true;
     }
+  }
 
     
     this.checkAndAnimateFlights();
