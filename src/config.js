@@ -15,8 +15,8 @@ export default {
   FitnessSimulacionContinuar: 10000, 
   delaySimulacion: 500,
   //urlBase: 'http://localhost'
-  urlBase: 'http://localhost:8080' //con el puerto modificado de Renzo
+  // urlBase: 'http://localhost:8080' //con el puerto modificado de Renzo
   //urlBase: 'http://127.0.0.1:8080'  //con el puerto modificado de Renzo
-   //urlBase: 'https://inf226-982-3c.inf.pucp.edu.pe/tomcat'
+  urlBase: 'https://inf226-982-3c.inf.pucp.edu.pe/tomcat'
   
 }
