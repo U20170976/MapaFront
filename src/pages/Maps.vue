@@ -405,7 +405,7 @@
     <h3>Simulación Finalizada</h3>
 
     <div class="modal-details">
-      <h4 class="subtitle">Detalles Generales:</h4>
+      <h4 class="subtitle">Detalles Generales:</h4> 
       <p><strong>Total de Envíos:</strong> <span>{{ totalEnviosColapso }} envíos</span></p>
       <p><strong>Total de Paquetes:</strong> <span>{{ totalPaquetesColapso }} paquetes</span></p>
       <p><strong>Fecha y Hora de Inicio:</strong> <span class="datetime">{{ formatDateTime(fechaHoraInicioColapso) }} UTC</span></p>
@@ -1463,12 +1463,12 @@ destinationPoint(point, angle, distance) {
      // console.log(`Animando vuelo con ID ${vuelo.id} a las ${new Date(vueloStartTime).toISOString()}`);
       vuelo.isActive = false;
 
-      this.animateFlight(vuelo);
+      this.animateFlight(vuelo); 
     }
   });
       this.pendingFlights = this.pendingFlights.filter(vuelo => !vuelo.animated); // Remover los vuelos animados
 
-      // Call animateVisibleFlights periodically
+      // Call animateVisibleFlights periodically 
 
       this.animateVisibleFlights();
 
@@ -1992,10 +1992,57 @@ closeFinalizationModal() {
       }
     },
 
+
+    
+
+    async cancelarSimulacionColapso() {
+      this.showCancelarModal = false;
+      this.planificacionEnEsperaCancelar = false;
+      this.planificacionEnEsperaRenaudar = false;
+      this.planificacionEnEsperaDetener = false;
+      this.showFullscreenButton = false;
+      let vue = this;
+      this.clearAllIntervals();
+      // vue.toggleIniciarDetener = true;
+      console.log("SE DETIENE LA SIMULACION");
+   //   await this.finalizarSimulacion();
+      clearInterval(this.simulationInterval);
+      this.simulationInterval = null;
+      clearInterval(this.progressInterval);
+      this.progressInterval = null,
+      this.isSimulating = false;
+      Simulation.stopSimulation();
+      console.log(vue.fecha_fin_simulacion);
+      this.validarFechaIniciarPlanificacion = true;
+      this.isDateInputDisabled = false;
+
+      this.filteredVuelos.forEach(vuelo => {
+        const sourceId = `vuelo-${vuelo.id}`;
+        if (this.map.getLayer(`avion-${vuelo.id}`)) {
+          this.map.removeLayer(`avion-${vuelo.id}`);
+        }
+        if (this.map.getSource(sourceId)) {
+          this.map.removeSource(sourceId);
+        }
+      });
+      this.fetchAeropuertos();
+      this.isButtonDisabled = false;  // Habilitar el botón de planificación
+      this.simulationDateTime = null;
+      this.envios = [];
+      this.calendarioVuelos = {};
+      this.pendingFlights = [];
+        // Mostrar la ventana emergente con los datos de finalización
+  this.showFinalizationModal = true;
+
+    
+    },
+
     async fetchSimulationResults(fecha, hora) {
       try {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
         this.resultados = response.data; 
+      
+        console.log("asdasassdaasd",response.data.colapso);
 
         if (response.data.colapso) {
           await this.cancelarSimulacionColapso();
@@ -2055,7 +2102,7 @@ closeFinalizationModal() {
         this.$set(this, 'filteredVuelos', this.filteredVuelos);
     ///    console.log("Vuelos disponibles ACTUALIZADOS:", this.filteredVuelos);
       
-         console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
+     //    console.log("Contenido de allVuelos después de fetchSimulationResults:", this.allVuelos);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
       }
@@ -2068,7 +2115,7 @@ closeFinalizationModal() {
         const response = await axios.get(urlBase + '/api/simulacion/semanal/resultados');
         this.resultados = response.data; 
 
-        
+        console.log("asdasassdaasd",response.data.colapso);
         if (response.data.colapso) {
           await this.cancelarSimulacionColapso();
           try {
@@ -2121,7 +2168,7 @@ closeFinalizationModal() {
       //  this.vuelosOrdenadoGMT0.sort((a, b) => new Date(a.fechaHoraSalidaGMT0) - new Date(b.fechaHoraSalidaGMT0));
 
          console.log("CUENTA ACTUALIZADOS:" + count);
-        console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
+      //  console.log("Contenido de allVuelos después de fetchSimulationResultsContinuar:", this.allVuelos);
     //    console.log("Contenido de pendingFlights después de fetchSimulationResultsContinuar:", this.pendingFlights);
       } catch (error) {
         console.error("Error obteniendo resultados de la simulación:", error);
@@ -2431,10 +2478,13 @@ closeFinalizationModal() {
 
       }
 
-    },   formatPaquete(paquete) {
-    const vuelosContent = paquete.ruta.vuelos.map((vuelo, index) => `
+    },  formatPaquete(paquete) {
+  let vuelosContent = '';
+
+  if (paquete.ruta && paquete.ruta.vuelos && paquete.ruta.vuelos.length > 0) {
+    vuelosContent = paquete.ruta.vuelos.map((vuelo, index) => `
       <div style="margin-bottom: 10px;">
-         <p>--------------------------------------------------------------------------------</p>
+        <p>--------------------------------------------------------------------------------</p>
         <p><strong>Vuelo ${index + 1}:</strong></p>
         <p>Ciudad de Origen: ${this.getCiudadYPais(vuelo.ciudadOrigen)}</p>
         <p>Ciudad de Destino: ${this.getCiudadYPais(vuelo.ciudadDestino)}</p>
@@ -2443,25 +2493,27 @@ closeFinalizationModal() {
         <p>Tiempo Estimado de Vuelo: ${this.formatDuration(vuelo.tiempoEstimadoVuelo)}</p>
         <p>Fecha y Hora de Salida: ${this.formatDateTime(vuelo.fechaHoraSalidaGMT0)}</p>
         <p>Fecha y Hora de Llegada: ${this.formatDateTime(vuelo.fechaHoraLlegadaGMT0)}</p>
-       
       </div>
     `).join('');
+  } else {
+    vuelosContent = '<p>No hay vuelos en la ruta del paquete.</p>';
+  }
 
-    return `
-      <div style="margin-bottom: 20px; padding-bottom: 10px;">
-        <p><strong>ID del Paquete:</strong> ${paquete.id}</p>
-        <p><strong>ID del Envío:</strong> ${paquete.idEnvio}</p>
-        <p>Ciudad de Origen: ${this.getCiudadYPais(paquete.ciudadOrigen)}</p>
-        <p>Ciudad de Destino: ${this.getCiudadYPais(paquete.ciudadDestino)}</p>
-        <p>Cantidad de Paquetes: ${paquete.cantidadPaquetes}</p>
-        <p>Fecha y Hora de Envío: ${this.formatDateTime(paquete.fechaHoraEncioGMT0)}</p>
-        <h3>Ruta del Paquete:</h3>
-        ${vuelosContent}
-        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
-        <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
-      </div>
-    `;
-  },
+  return `
+    <div style="margin-bottom: 20px; padding-bottom: 10px;">
+      <p><strong>ID del Paquete:</strong> ${paquete.id}</p>
+      <p><strong>ID del Envío:</strong> ${paquete.idEnvio}</p>
+      <p>Ciudad de Origen: ${this.getCiudadYPais(paquete.ciudadOrigen)}</p>
+      <p>Ciudad de Destino: ${this.getCiudadYPais(paquete.ciudadDestino)}</p>
+      <p>Cantidad de Paquetes: ${paquete.cantidadPaquetes}</p>
+      <p>Fecha y Hora de Envío: ${this.formatDateTime(paquete.fechaHoraEncioGMT0)}</p>
+      <h3>Ruta del Paquete:</h3>
+      ${vuelosContent}
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+      <p>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||</p>
+    </div>
+  `;
+},
 
   formatAeropuerto(aeropuerto) {
     console.log("asdadas");
@@ -2855,9 +2907,11 @@ closeFinalizationModal() {
 
   
   downloadWordColapso() {
-
+   console.log("Aqui 1");
     const paquetesContent = this.resultados.paquetes.map(paquete => this.formatPaquete(paquete)).join('');
+    console.log("Aqui 2");
     const aeropuertosContent = this.aeropuertosResultados.map(aeropuerto => this.formatAeropuerto(aeropuerto)).join('');
+    console.log("Aqui 3");
     const content = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
       <head><meta charset="utf-8"><title>Simulación Reporte</title></head><body>
@@ -2892,7 +2946,7 @@ closeFinalizationModal() {
       
     const blob = new Blob(['\ufeff', content], {
       type: 'application/msword'
-    });
+    });console.log("Aqui 4");
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
